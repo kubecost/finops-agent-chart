@@ -45,7 +45,6 @@ apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: ClusterRole
 metadata:
   name: {{ printf "%s-cluster-role" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
-  namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
@@ -54,14 +53,25 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 rules:
   - apiGroups: [""]
-    resources: ["namespaces"]
+    resources: ["namespaces", "nodes", "pods", "services", "persistentvolumeclaims", "persistentvolumes", "replicationcontrollers", "nodes/metrics", "nodes/stats"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["policy"]
+    resources: ["poddisruptionbudgets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["storage.k8s.io"]
+    resources: ["storageclasses"]
     verbs: ["get", "list", "watch"]
 ---
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: ClusterRoleBinding
 metadata:
   name: {{ printf "%s-cluster-rolebinding" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
-  namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac

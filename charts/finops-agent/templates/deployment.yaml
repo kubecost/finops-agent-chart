@@ -3,6 +3,10 @@ Copyright IBM, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
+{{- if eq (.Values.clusterId | trim | len) 0}}
+{{- fail "clusterId is required and cannot be empty" }}
+{{- end }}
+
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -117,15 +121,38 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            
+
+            - name: CLUSTER_ID
+              value: {{ .Values.clusterId | quote }}
+
+            {{- if ne (.Values.gcpKey | trim | len) 0 }}
+            - name: CLOUD_PROVIDER_API_KEY
+              value: {{ .Values.gcpKey | quote }}
+            {{- end }}
+
+            {{- if .Values.agent.cloudability.enabled }}
+            - name: CLOUDABILITY_EMITTER_ENABLED
+              value: "true"
+            - name: CLOUDABILITY_SCRATCH_DIR
+              value: {{ .Values.agent.cloudability.localWorkingDir | quote }}
+            - name: CLOUDABILITY_UPLOAD_REGION
+              value: {{ .Values.agent.cloudability.uploadRegion | quote }}
+            {{- end }}
+
+           
+            - name: KUBECOST_EMITTER_ENABLED
+              value:  {{ .Values.agent.kubecost.enabled }}
+            - name: OPENCOST_SOURCE_ENABLED
+              value:  {{ .Values.agent.kubecost.enabled }}
+  
             {{- if or .Values.exportBucket.secret.create (not (empty .Values.exportBucket.secret.existingSecret))}}
-            - name: ETL_BUCKET_CONFIG_FILE
+            - name: EXPORT_BUCKET_CONFIG_FILE
               value: /var/config/federated-store.yaml
             {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}
-          {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret }}
+          {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret .Values.agent.cloudability.enabled}}
           envFrom:
             {{- if .Values.extraEnvVarsCM }}
             - configMapRef:
@@ -134,6 +161,10 @@ spec:
             {{- if .Values.extraEnvVarsSecret }}
             - secretRef:
                 name: {{ .Values.extraEnvVarsSecret }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.enabled }}
+            - secretRef:
+                name: {{ include "cloudability.secret.name" . | trim }}
             {{- end }}
           {{- end }}
           ports:
@@ -148,20 +179,25 @@ spec:
           startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customStartupProbe "context" .) | nindent 12 }}
           {{- else if .Values.startupProbe.enabled }}
           startupProbe: {{- omit .Values.startupProbe "enabled" | toYaml | nindent 12 }}
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: http
           {{- end }}
           {{- if .Values.customLivenessProbe }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customLivenessProbe "context" .) | nindent 12 }}
           {{- else if .Values.livenessProbe.enabled }}
           livenessProbe: {{- omit .Values.livenessProbe "enabled" | toYaml | nindent 12 }}
-            tcpSocket:
+            httpGet:
+              path: /healthz
               port: http
           {{- end }}
           {{- if .Values.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" .) | nindent 12 }}
           {{- else if .Values.readinessProbe.enabled }}
           readinessProbe: {{- omit .Values.readinessProbe "enabled" | toYaml | nindent 12 }}
+            httpGet:
+              path: /healthz
+              port: http
           {{- end }}
           {{- if .Values.resources }}
           resources: {{- toYaml .Values.resources | nindent 12 }}

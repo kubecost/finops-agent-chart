@@ -38,3 +38,14 @@ define the name of the export secret bucket
 {{- define "exportBucket.secret.name" }}
 {{ .Release.Name }}-export-bucket-config
 {{- end }}
+
+{{/*
+define the name of the cloudability secret
+*/}}
+{{- define "cloudability.secret.name" }}
+{{- if .Values.agent.cloudability.secret.create }}
+{{ .Release.Name }}-export-bucket-config
+{{- else }}
+{{.Values.agent.cloudability.secret.existingSecret}}
+{{- end }}
+{{- end }}

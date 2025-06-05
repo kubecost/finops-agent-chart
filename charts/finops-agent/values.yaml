@@ -35,6 +35,9 @@ global:
 
 ## @section Common parameters
 
+## @param clusterId The id of the cluster REQUIRED 
+##
+clusterId: ""
 ## @param kubeVersion Override Kubernetes version
 ##
 kubeVersion: ""
@@ -80,7 +83,7 @@ useHelmHooks: true
 image:
   registry: gcr.io
   repository: guestbook-227502/agent
-  tag: v0.0.9
+  tag: v0.0.15
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -93,6 +96,8 @@ image:
   pullSecrets: []
   debug: false
 
+## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources 
+gcpKey: ""
 
 ## export bucket configuration
 ## @param exportBucket.config The config for the export bucket
@@ -114,15 +119,35 @@ exportBucket:
 ## @param agent.collectorDataSource.retentionResolution10m The retention resolution for the collector data source
 ## @param agent.collectorDataSource.retentionResolution1h The retention resolution for the collector data source
 ## @param agent.collectorDataSource.retentionResolution1d The retention resolution for the collector data source
+## @param agent.cloudability.enabled Enable the cloudability data source
+## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
+## @param agent.cloudability.uploadRegion The upload region for the cloudability data source
+## @param agent.cloudability.secret.existingSecret The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.
+## @param agent.cloudability.secret.create Create a secret for the cloudability data source. cannot be used with existingSecret
+## @param agent.cloudability.secret.cloudabilityAccessKey The cloudability access key for the cloudability data source
+## @param agent.cloudability.secret.cloudabilitySecretKey The cloudability secret key for the cloudability data source
+## @param agent.cloudability.secret.cloudabilityEnvId The cloudability env id for the cloudability data source
 ##
 agent:
   collectorDataSource:
     enabled: true
     scrapeInterval: 10s
-    networkPort: 8181
+    networkPort: 3001
     retentionResolution10m: 10m
     retentionResolution1h: 1h
     retentionResolution1d: 1d
+  kubecost:
+    enabled: true
+  cloudability:
+    enabled: true
+    localWorkingDir: /tmp
+    uploadRegion: staging
+    secret:
+      create: true
+      existingSecret: ""
+      cloudabilityAccessKey: ""
+      cloudabilitySecretKey: ""
+      cloudabilityEnvId: ""
 
 ## @param command Override default container command (useful when using custom images)
 ##
@@ -142,7 +167,7 @@ extraEnvVarsSecret: ""
 ## @param containerPorts.http The FinOps Agent container HTTP port
 ##
 containerPorts:
-  http: 80
+  http: 9003
 ## @param extraContainerPorts Optionally specify extra list of additional ports for the FinOps Agent container
 ## e.g:
 ## extraContainerPorts:
@@ -307,9 +332,7 @@ podAnnotations: {}
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 ##
 podLabels: {}
-## @param automountServiceAccountToken Mount Service Account token in pod
-##
-automountServiceAccountToken: false
+
 ## @param hostAliases FinOps Agent pods host aliases
 ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
 ##
@@ -510,7 +533,7 @@ persistence:
 serviceAccount:
   create: true
   name: ""
-  automountServiceAccountToken: false
+  automountServiceAccountToken: true
   annotations: {}
 ## Role Based Access Control
 ## ref: https://kubernetes.io/docs/admin/authorization/rbac/

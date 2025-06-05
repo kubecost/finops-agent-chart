@@ -94,7 +94,7 @@ image:
   debug: false
 
 
-## AWS S3 configuration (ignored unless `objectStore` is set to `s3`)
+## export bucket configuration
 ## @param exportBucket.config The config for the export bucket
 ##
 exportBucket:
@@ -368,7 +368,7 @@ sidecars: []
 ##
 initContainers: []
 
-## @section Exposing parameters
+## @section Service parameters
 
 ## Service parameters
 ##

@@ -31,3 +31,10 @@ Create the name of the ServiceAccount to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+define the name of the export secret bucket
+*/}}
+{{- define "exportBucket.secret.name" }}
+{{ .Release.Name }}-export-bucket-config
+{{- end }}

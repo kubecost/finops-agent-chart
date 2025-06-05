@@ -111,46 +111,183 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 
 ## Parameters
 
-### Global parameters
+### Global Parameters
 
-| Name                                                  | Description                                                                                                                                                                                                                                                                                                                                                         | Value   |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `global.imageRegistry`                                | Global Docker image registry                                                                                                                                                                                                                                                                                                                                        | `""`    |
-| `global.imagePullSecrets`                             | Global Docker registry secret names as an array                                                                                                                                                                                                                                                                                                                     | `[]`    |
-| `global.defaultStorageClass`                          | Global default StorageClass for Persistent Volume(s)                                                                                                                                                                                                                                                                                                                | `""`    |
-| `global.security.allowInsecureImages`                 | Allows skipping image verification                                                                                                                                                                                                                                                                                                                                  | `false` |
-| `global.compatibility.openshift.adaptSecurityContext` | Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation) | `auto`  |
+| Name | Description | Default |
+|------|-------------|---------|
+| `global.imageRegistry` | Global Docker image registry | `""` |
+| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]` |
+| `global.defaultStorageClass` | Global default StorageClass for Persistent Volume(s) | `""` |
+| `global.security.allowInsecureImages` | Allows skipping image verification | `false` |
 
-### Common parameters
+### Common Parameters
 
-| Name                     | Description                                                                             | Value           |
-| ------------------------ | --------------------------------------------------------------------------------------- | --------------- |
-| `kubeVersion`            | Override Kubernetes version                                                             | `""`            |
-| `apiVersions`            | Override Kubernetes API versions reported by .Capabilities                              | `[]`            |
-| `nameOverride`           | String to partially override common.names.name                                          | `""`            |
-| `fullnameOverride`       | String to fully override common.names.fullname                                          | `""`            |
-| `namespaceOverride`      | String to fully override common.names.namespace                                         | `""`            |
-| `clusterDomain`          | Default Kubernetes cluster domain                                                       | `cluster.local` |
-| `commonAnnotations`      | Annotations to add to all deployed objects                                              | `{}`            |
-| `commonLabels`           | Labels to add to all deployed objects                                                   | `{}`            |
-| `extraDeploy`            | Array of extra objects to deploy with the release                                       | `[]`            |
-| `useHelmHooks`           | Enable use of Helm hooks if needed, e.g. on pre-install jobs                            | `true`          |
-| `usePasswordFiles`       | Mount credentials as files instead of using environment variables                       | `true`          |
-| `diagnosticMode.enabled` | Enable diagnostic mode (all probes will be disabled and the command will be overridden) | `false`         |
-| `diagnosticMode.command` | Command to override all containers in the chart release                                 | `["sleep"]`     |
-| `diagnosticMode.args`    | Args to override all containers in the chart release                                    | `["infinity"]`  |
+| Name | Description | Default |
+|------|-------------|---------|
+| `kubeVersion` | Override Kubernetes version | `""` |
+| `apiVersions` | Override Kubernetes API versions reported by .Capabilities | `[]` |
+| `nameOverride` | String to partially override common.names.name | `""` |
+| `fullnameOverride` | String to fully override common.names.fullname | `""` |
+| `namespaceOverride` | String to fully override common.names.namespace | `""` |
+| `clusterDomain` | Default Kubernetes cluster domain | `cluster.local` |
+| `commonAnnotations` | Annotations to add to all deployed objects | `{}` |
+| `commonLabels` | Labels to add to all deployed objects | `{}` |
+| `extraDeploy` | Array of extra objects to deploy with the release | `[]` |
+| `useHelmHooks` | Enable use of Helm hooks if needed, e.g. on pre-install jobs | `true` |
 
-TODO other parameters 
+### IBM FinOps Agent Core Parameters
 
+| Name | Description | Default |
+|------|-------------|---------|
+| `image.registry` | IBM FinOps Agent image registry | `gcr.io` |
+| `image.repository` | IBM FinOps Agent image repository | `guestbook-227502/agent` |
+| `image.tag` | IBM FinOps Agent image tag (immutable tags are recommended) | `v0.0.9` |
+| `image.digest` | IBM FinOps Agent image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""` |
+| `image.pullPolicy` | IBM FinOps Agent image pull policy | `IfNotPresent` |
+| `image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |
+| `image.debug` | Specify if debug logs should be enabled | `false` |
 
-## Troubleshooting
+### Export Bucket Configuration
 
+| Name | Description | Default |
+|------|-------------|---------|
+| `exportBucket.secret.create` | Create a secret for the export bucket | `true` |
+| `exportBucket.secret.config` | The config for the export bucket | `""` |
+| `exportBucket.secret.existingSecret` | The name of an existing secret to use for the export bucket. Note, you cannot set both `create` and `existingSecret` | `""` |
 
-## Upgrading
+### Agent Configuration
 
+| Name | Description | Default |
+|------|-------------|---------|
+| `agent.collectorDataSource.enabled` | Enable the collector data source | `true` |
+| `agent.collectorDataSource.scrapeInterval` | The scrape interval for the collector data source | `10s` |
+| `agent.collectorDataSource.networkPort` | The network port for the collector data source | `8181` |
+| `agent.collectorDataSource.retentionResolution10m` | The retention resolution for the collector data source | `10m` |
+| `agent.collectorDataSource.retentionResolution1h` | The retention resolution for the collector data source | `1h` |
+| `agent.collectorDataSource.retentionResolution1d` | The retention resolution for the collector data source | `1d` |
 
+### Other Parameters
 
-#### Useful links
+| Name | Description | Default |
+|------|-------------|---------|
+| `command` | Override default container command (useful when using custom images) | `[]` |
+| `args` | Override default container args (useful when using custom images) | `[]` |
+| `extraEnvVars` | Array with extra environment variables to add to the FinOps Agent container | `[]` |
+| `extraEnvVarsCM` | Name of existing ConfigMap containing extra env vars for the FinOps Agent container | `""` |
+| `extraEnvVarsSecret` | Name of existing Secret containing extra env vars for the FinOps Agent container | `""` |
+| `containerPorts.http` | The FinOps Agent container HTTP port | `80` |
+| `extraContainerPorts` | Optionally specify extra list of additional ports for the FinOps Agent container | `[]` |
+| `resourcesPreset` | Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set. | `small` |
+| `resources` | Set container requests and limits for different resources like CPU or memory, if the presents won't work | `{}` |
+| `podSecurityContext.enabled` | Enable the FinOps Agent pod's Security Context | `true` |
+| `podSecurityContext.fsGroupChangePolicy` | Set filesystem group change policy | `Always` |
+| `podSecurityContext.sysctls` | Set kernel settings using the sysctl interface | `[]` |
+| `podSecurityContext.supplementalGroups` | Set filesystem extra groups | `[]` |
+| `podSecurityContext.fsGroup` | Set the FinOps Agent pod's Security Context fsGroup | `1001` |
+| `containerSecurityContext.enabled` | Enable container Security Context | `true` |
+| `containerSecurityContext.seLinuxOptions` | Set SELinux options in container | `{}` |
+| `containerSecurityContext.runAsUser` | Set containers' Security Context runAsUser | `1001` |
+| `containerSecurityContext.runAsGroup` | Set containers' Security Context runAsGroup | `1001` |
+| `containerSecurityContext.runAsNonRoot` | Set container's Security Context runAsNonRoot | `true` |
+| `containerSecurityContext.privileged` | Set container's Security Context privileged | `false` |
+| `containerSecurityContext.readOnlyRootFilesystem` | Set container's Security Context readOnlyRootFilesystem | `true` |
+| `containerSecurityContext.allowPrivilegeEscalation` | Set container's Security Context allowPrivilegeEscalation | `false` |
+| `containerSecurityContext.capabilities.drop` | List of capabilities to be dropped | `["ALL"]` |
+| `containerSecurityContext.seccompProfile.type` | Set container's Security Context seccomp profile | `RuntimeDefault` |
+| `startupProbe.enabled` | Enable startupProbe on the container | `false` |
+| `startupProbe.initialDelaySeconds` | Initial delay seconds for startupProbe | `10` |
+| `startupProbe.periodSeconds` | Period seconds for startupProbe | `10` |
+| `startupProbe.timeoutSeconds` | Timeout seconds for startupProbe | `1` |
+| `startupProbe.failureThreshold` | Failure threshold for startupProbe | `3` |
+| `startupProbe.successThreshold` | Success threshold for startupProbe | `1` |
+| `livenessProbe.enabled` | Enable livenessProbe on FinOps Agent container | `true` |
+| `livenessProbe.initialDelaySeconds` | Initial delay seconds for livenessProbe | `10` |
+| `livenessProbe.periodSeconds` | Period seconds for livenessProbe | `10` |
+| `livenessProbe.timeoutSeconds` | Timeout seconds for livenessProbe | `1` |
+| `livenessProbe.failureThreshold` | Failure threshold for livenessProbe | `3` |
+| `livenessProbe.successThreshold` | Success threshold for livenessProbe | `1` |
+| `readinessProbe.enabled` | Enable readinessProbe on FinOps Agent container | `true` |
+| `readinessProbe.initialDelaySeconds` | Initial delay seconds for readinessProbe | `10` |
+| `readinessProbe.periodSeconds` | Period seconds for readinessProbe | `10` |
+| `readinessProbe.timeoutSeconds` | Timeout seconds for readinessProbe | `1` |
+| `readinessProbe.failureThreshold` | Failure threshold for readinessProbe | `3` |
+| `readinessProbe.successThreshold` | Success threshold for readinessProbe | `1` |
+| `customStartupProbe` | Override default startup probe | `{}` |
+| `customLivenessProbe` | Override default liveness probe | `{}` |
+| `customReadinessProbe` | Override default readiness probe | `{}` |
+| `podAffinityPreset` | FinOps Agent Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard` | `""` |
+| `podAntiAffinityPreset` | FinOps Agent Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard` | `soft` |
+| `nodeAffinityPreset.type` | FinOps Agent Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard` | `""` |
+| `nodeAffinityPreset.key` | FinOps Agent Node label key to match Ignored if `affinity` is set. | `""` |
+| `nodeAffinityPreset.values` | FinOps Agent Node label values to match. Ignored if `affinity` is set. | `[]` |
+| `affinity` | FinOps Agent Affinity for pod assignment | `{}` |
+| `nodeSelector` | FinOps Agent Node labels for pod assignment | `{}` |
+| `tolerations` | FinOps Agent Tolerations for pod assignment | `[]` |
+| `podAnnotations` | Annotations for FinOps Agent pod | `{}` |
+| `podLabels` | Extra labels for FinOps Agent pod | `{}` |
+| `automountServiceAccountToken` | Mount Service Account token in pod | `false` |
+| `hostAliases` | FinOps Agent pods host aliases | `[]` |
+| `updateStrategy.type` | FinOps Agent deployment strategy type | `RollingUpdate` |
+| `priorityClassName` | FinOps Agent pods' priorityClassName | `""` |
+| `revisionHistoryLimit` | FinOps Agent deployment revision history limit | `10` |
+| `schedulerName` | Name of the k8s scheduler (other than default) | `""` |
+| `topologySpreadConstraints` | Topology Spread Constraints for pod assignment | `[]` |
+| `lifecycleHooks` | Lifecycle hooks for the FinOps Agent container(s) to automate configuration before or after startup | `{}` |
+| `extraVolumeMounts` | Optionally specify extra list of additional volumeMounts for the FinOps Agent pods | `[]` |
+| `extraVolumes` | Optionally specify extra list of additional volumes for the FinOps Agent pods | `[]` |
+| `sidecars` | Add additional sidecar containers to the FinOps Agent pod(s) | `[]` |
+| `initContainers` | Add additional init-containers to the FinOps Agent pod(s) | `[]` |
+
+### Service Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
+| `service.enabled` | Enable a clusterIP service for the FinOps Agent | `true` |
+| `service.type` | Kubernetes service type | `ClusterIP` |
+| `service.ports.http` | The FinOps Agent HTTP port | `80` |
+| `service.clusterIP` | The FinOps Agent service Cluster IP | `""` |
+| `service.extraPorts` | Extra port to expose on the FinOps Agent service | `[]` |
+| `service.annotations` | Additional custom annotations for the FinOps Agent service | `{}` |
+
+### Metrics Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
+| `metrics.enabled` | Enable the export of Prometheus metrics | `false` |
+| `metrics.serviceMonitor.enabled` | if `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`) | `false` |
+| `metrics.serviceMonitor.namespace` | Namespace in which Prometheus is running | `""` |
+| `metrics.serviceMonitor.labels` | Additional labels that can be used so ServiceMonitor will be discovered by Prometheus | `{}` |
+| `metrics.serviceMonitor.interval` | Interval at which metrics should be scraped. | `""` |
+| `metrics.serviceMonitor.scrapeTimeout` | Timeout after which the scrape is ended | `""` |
+| `metrics.serviceMonitor.relabelings` | RelabelConfigs to apply to samples before scraping | `[]` |
+| `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion | `[]` |
+| `metrics.serviceMonitor.selector` | Prometheus instance selector labels | `{}` |
+| `metrics.serviceMonitor.honorLabels` | honorLabels chooses the metric's labels on collisions with target labels | `false` |
+
+### Persistence Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
+| `persistence.enabled` | Enable FinOps Agent data persistence for WAL and other local data | `true` |
+| `persistence.existingClaim` | A manually managed Persistent Volume and Claim | `""` |
+| `persistence.storageClass` | PVC Storage Class for the FinOps Agent data volume | `""` |
+| `persistence.accessModes` | Persistent Volume Access Modes | `["ReadWriteOnce"]` |
+| `persistence.size` | PVC Storage Request for the FinOps Agent data volume | `8Gi` |
+| `persistence.dataSource` | Custom PVC data source | `{}` |
+| `persistence.annotations` | Additional custom annotations for the PVC | `{}` |
+| `persistence.selector` | Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it | `{}` |
+| `persistence.mountPath` | Mount path of the IBM FinOps Agent data volume | `/opt/finops-agent` |
+
+### Other Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
+| `serviceAccount.create` | Enable creation of ServiceAccount for IBM FinOps Agent pods | `true` |
+| `serviceAccount.name` | Name of the service account to use. If not set and `create` is `true`, a name is generated | `""` |
+| `serviceAccount.automountServiceAccountToken` | Allows auto mount of ServiceAccountToken on the serviceAccount created | `false` |
+| `serviceAccount.annotations` | Additional custom annotations for the ServiceAccount | `{}` |
+| `rbac.create` | Whether to create & use RBAC resources or not | `true` |
+| `rbac.clusterRole.create` | Whether to create & use ClusterRole resources or not | `true` |
 
 
 ## License

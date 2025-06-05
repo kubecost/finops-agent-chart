@@ -140,7 +140,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `diagnosticMode.command` | Command to override all containers in the chart release                                 | `["sleep"]`     |
 | `diagnosticMode.args`    | Args to override all containers in the chart release                                    | `["infinity"]`  |
 
-                                    | `true`  |
+TODO other parameters 
 
 
 ## Troubleshooting

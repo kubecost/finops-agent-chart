@@ -28,6 +28,13 @@ jobs:
         with:
           version: v3.12.0
 
+      - name: Update chart version
+        run: |
+          # Extract version from tag (remove 'v' prefix)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          # Update Chart.yaml
+          sed -i "s/^version: .*/version: $VERSION/" charts/finops-agent/Chart.yaml
+
       - name: Create packages directory
         run: |
           mkdir -p .cr-release-packages
@@ -37,29 +44,43 @@ jobs:
           cd charts/finops-agent
           helm package . --dependency-update -d ../../.cr-release-packages/
 
-      - name: Generate index
-        run: |
-          helm repo index .cr-release-packages --url https://github.com/kubecost/finops-agent-chart/releases/download/${{ github.ref_name }}
-
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
+
       - name: Configure Git
         run: |
-            cd gh-pages
-            git config --local user.email "github-actions[bot]@noreply.example.com"
-            git config --local user.name "github-actions[bot]"
+          cd gh-pages
+          git config --local user.email "github-actions[bot]@noreply.example.com"
+          git config --local user.name "github-actions[bot]"
 
-      - name: Copy packages and index
+      - name: Update index
         run: |
-          cp -r .cr-release-packages/* gh-pages/
+          # Copy existing index if it exists
+          if [ -f gh-pages/index.yaml ]; then
+            cp gh-pages/index.yaml .cr-release-packages/
+          fi
+          # Merge new chart into index
+          helm repo index .cr-release-packages --url https://github.com/kubecost/finops-agent-chart/releases/download/${{ github.ref_name }} --merge .cr-release-packages/index.yaml
+
+      - name: Copy index
+        run: |
+          cp .cr-release-packages/index.yaml gh-pages/
 
       - name: Commit and push
         run: |
           cd gh-pages
-          git add .
-          git commit -m "Update chart packages and index for ${{ github.ref_name }}"
+          git add index.yaml
+          git commit -m "Update chart index for ${{ github.ref_name }}"
           git push origin gh-pages
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: .cr-release-packages/*.tgz
+          generate_release_notes: true
+          draft: false
+          prerelease: false
       

@@ -44,6 +44,12 @@ jobs:
           cd charts/finops-agent
           helm package . --dependency-update -d ../../.cr-release-packages/
 
+      - name: Commit updated files
+        run: |
+          git add charts/finops-agent/Chart.yaml charts/finops-agent/Chart.lock
+          git commit -m "Update chart version to ${{ github.ref_name }}"
+          git push origin main
+
       - name: Checkout gh-pages
         uses: actions/checkout@v4
         with:

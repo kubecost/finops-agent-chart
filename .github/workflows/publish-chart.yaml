@@ -39,6 +39,10 @@ jobs:
           cd charts/finops-agent
           helm package . --dependency-update -d ../../.cr-release-packages/
 
+      - name: Generate index
+        run: |
+          helm repo index .cr-release-packages --url https://github.com/kubecost/finops-agent-chart/releases/download/${{ github.ref_name }}
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:

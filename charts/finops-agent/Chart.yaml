@@ -3,12 +3,9 @@
 
 annotations:
   category: FinOps
-  images: |
-    - name: finops-agent
-      image: gcr.io/guestbook-227502/agent:v0.0.9
   licenses: Apache-2.0
 apiVersion: v2
-appVersion: v0.0.9
+appVersion: v0.0.15
 dependencies:
 - name: common
   repository: oci://registry-1.docker.io/bitnamicharts

@@ -52,6 +52,17 @@ jobs:
           config: .github/resources/cr.yaml
           skip_packaging: true
           skip_upload: false
-          packages_with_index: true
+          packages_with_index: false
           pages_branch: gh-pages
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .cr-release-packages
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
       

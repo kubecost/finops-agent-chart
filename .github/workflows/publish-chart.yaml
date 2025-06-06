@@ -31,12 +31,16 @@ jobs:
           version: v3.12.0
 
       - name: Create packages directory
-        run: mkdir -p .cr-release-packages
+        run: |
+            mkdir -p .cr-release-packages
+            mkdir -p .cr-index
 
       - name: Package Helm chart
         run: |
           cd charts/finops-agent
           helm package . --dependency-update -d ../../.cr-release-packages/
+          helm repo index ../../.cr-index --url https://github.com/kubecost/finops-agent-chart
+    
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0

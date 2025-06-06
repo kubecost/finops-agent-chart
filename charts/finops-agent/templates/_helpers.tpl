@@ -44,7 +44,7 @@ define the name of the cloudability secret
 */}}
 {{- define "cloudability.secret.name" }}
 {{- if .Values.agent.cloudability.secret.create }}
-{{ .Release.Name }}-export-bucket-config
+{{ .Release.Name }}-cloudability-secrets
 {{- else }}
 {{.Values.agent.cloudability.secret.existingSecret}}
 {{- end }}

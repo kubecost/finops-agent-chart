@@ -2,12 +2,13 @@
 
 # Helm Chart for the IBM FinOps Agent&trade; Core
 
-TODO
+This helm chart deploys the IBM FinOps Agent, which supports both Cloudability and Kubecost.
 
 ## TL;DR
 
 ```console
-helm install my-release oci://TODO
+helm repo add ibm-finops https://kubecost.github.io/finops-agent-chart
+helm install my-release ibm-finops/finops-agent-chart --set clusterId='my-cluster-id'
 ```
 
 ## Introduction
@@ -25,10 +26,9 @@ This chart bootstraps an IBM FinOps Agent deployment on a [Kubernetes](https://k
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://REGISTRY_NAME/REPOSITORY_NAME/finops-agent
+helm repo add ibm-finops https://kubecost.github.io/finops-agent-chart
+helm install my-release ibm-finops/finops-agent-chart --set clusterId='my-cluster-id'
 ```
-
-> Note: You need to substitute the placeholders `REGISTRY_NAME` and `REPOSITORY_NAME` with a reference to your Helm chart registry and repository.
 
 These commands deploy the FinOps Agent on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
 

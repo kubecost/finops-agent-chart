@@ -47,6 +47,6 @@ jobs:
           config: .github/workflows/cr.yaml
           skip_packaging: true
           skip_upload: false
-          packages_with_index: true
+          packages_with_index: false
           pages_branch: gh-pages
       

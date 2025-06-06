@@ -44,7 +44,7 @@ jobs:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           charts_dir: charts/finops-agent
-          config: .github/workflows/cr.yaml
+          config: .github/resources/cr.yaml
           skip_packaging: true
           skip_upload: false
           packages_with_index: false

@@ -1,4 +1,5 @@
 owner: kubecost
 git-repo: finops-agent-chart
 pages-branch: gh-pages
+
 charts-repo: https://github.com/kubecost/finops-agent-chart 

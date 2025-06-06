@@ -43,18 +43,6 @@ jobs:
         run: |
           helm repo index .cr-release-packages --url https://github.com/kubecost/finops-agent-chart/releases/download/${{ github.ref_name }}
 
-      - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.7.0
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-          charts_dir: charts/finops-agent
-          config: .github/resources/cr.yaml
-          skip_packaging: true
-          skip_upload: false
-          packages_with_index: false
-          pages_branch: gh-pages
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

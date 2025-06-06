@@ -119,11 +119,13 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]` |
 | `global.defaultStorageClass` | Global default StorageClass for Persistent Volume(s) | `""` |
 | `global.security.allowInsecureImages` | Allows skipping image verification | `false` |
+| `global.compatibility.openshift.adaptSecurityContext` | Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC | `auto` |
 
 ### Common Parameters
 
 | Name | Description | Default |
 |------|-------------|---------|
+| `clusterId` | The id of the cluster REQUIRED | `""` |
 | `kubeVersion` | Override Kubernetes version | `""` |
 | `apiVersions` | Override Kubernetes API versions reported by .Capabilities | `[]` |
 | `nameOverride` | String to partially override common.names.name | `""` |
@@ -141,11 +143,13 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 |------|-------------|---------|
 | `image.registry` | IBM FinOps Agent image registry | `gcr.io` |
 | `image.repository` | IBM FinOps Agent image repository | `guestbook-227502/agent` |
-| `image.tag` | IBM FinOps Agent image tag (immutable tags are recommended) | `v0.0.9` |
+| `image.tag` | IBM FinOps Agent image tag (immutable tags are recommended) | `v0.0.15` |
 | `image.digest` | IBM FinOps Agent image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""` |
 | `image.pullPolicy` | IBM FinOps Agent image pull policy | `IfNotPresent` |
 | `image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |
 | `image.debug` | Specify if debug logs should be enabled | `false` |
+| `gcpKey` | GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources | `""` |
+| `logLevel` | The log level for the finops agent | `info` |
 
 ### Export Bucket Configuration
 
@@ -161,12 +165,21 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 |------|-------------|---------|
 | `agent.collectorDataSource.enabled` | Enable the collector data source | `true` |
 | `agent.collectorDataSource.scrapeInterval` | The scrape interval for the collector data source | `10s` |
-| `agent.collectorDataSource.networkPort` | The network port for the collector data source | `8181` |
+| `agent.collectorDataSource.networkPort` | The network port for the collector data source | `3001` |
 | `agent.collectorDataSource.retentionResolution10m` | The retention resolution for the collector data source | `10m` |
 | `agent.collectorDataSource.retentionResolution1h` | The retention resolution for the collector data source | `1h` |
 | `agent.collectorDataSource.retentionResolution1d` | The retention resolution for the collector data source | `1d` |
+| `agent.kubecost.enabled` | Enable the kubecost data source | `true` |
+| `agent.cloudability.enabled` | Enable the cloudability data source | `true` |
+| `agent.cloudability.localWorkingDir` | The local working directory for the cloudability data source | `/tmp` |
+| `agent.cloudability.uploadRegion` | The upload region for the cloudability data source | `staging` |
+| `agent.cloudability.secret.create` | Create a secret for the cloudability data source | `true` |
+| `agent.cloudability.secret.existingSecret` | The name of an existing secret to use for the cloudability data source | `""` |
+| `agent.cloudability.secret.cloudabilityAccessKey` | The cloudability access key for the cloudability data source | `""` |
+| `agent.cloudability.secret.cloudabilitySecretKey` | The cloudability secret key for the cloudability data source | `""` |
+| `agent.cloudability.secret.cloudabilityEnvId` | The cloudability env id for the cloudability data source | `""` |
 
-### Other Parameters
+### Deployment Parameters
 
 | Name | Description | Default |
 |------|-------------|---------|
@@ -175,10 +188,15 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `extraEnvVars` | Array with extra environment variables to add to the FinOps Agent container | `[]` |
 | `extraEnvVarsCM` | Name of existing ConfigMap containing extra env vars for the FinOps Agent container | `""` |
 | `extraEnvVarsSecret` | Name of existing Secret containing extra env vars for the FinOps Agent container | `""` |
-| `containerPorts.http` | The FinOps Agent container HTTP port | `80` |
+| `containerPorts.http` | The FinOps Agent container HTTP port | `9003` |
 | `extraContainerPorts` | Optionally specify extra list of additional ports for the FinOps Agent container | `[]` |
 | `resourcesPreset` | Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set. | `small` |
-| `resources` | Set container requests and limits for different resources like CPU or memory, if the presents won't work | `{}` |
+| `resources` | Set container requests and limits for different resources like CPU or memory | `{}` |
+
+### Security Context Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
 | `podSecurityContext.enabled` | Enable the FinOps Agent pod's Security Context | `true` |
 | `podSecurityContext.fsGroupChangePolicy` | Set filesystem group change policy | `Always` |
 | `podSecurityContext.sysctls` | Set kernel settings using the sysctl interface | `[]` |
@@ -194,6 +212,11 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `containerSecurityContext.allowPrivilegeEscalation` | Set container's Security Context allowPrivilegeEscalation | `false` |
 | `containerSecurityContext.capabilities.drop` | List of capabilities to be dropped | `["ALL"]` |
 | `containerSecurityContext.seccompProfile.type` | Set container's Security Context seccomp profile | `RuntimeDefault` |
+
+### Probes Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
 | `startupProbe.enabled` | Enable startupProbe on the container | `false` |
 | `startupProbe.initialDelaySeconds` | Initial delay seconds for startupProbe | `10` |
 | `startupProbe.periodSeconds` | Period seconds for startupProbe | `10` |
@@ -215,6 +238,11 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `customStartupProbe` | Override default startup probe | `{}` |
 | `customLivenessProbe` | Override default liveness probe | `{}` |
 | `customReadinessProbe` | Override default readiness probe | `{}` |
+
+### Pod Affinity Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
 | `podAffinityPreset` | FinOps Agent Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard` | `""` |
 | `podAntiAffinityPreset` | FinOps Agent Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard` | `soft` |
 | `nodeAffinityPreset.type` | FinOps Agent Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard` | `""` |
@@ -223,9 +251,13 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `affinity` | FinOps Agent Affinity for pod assignment | `{}` |
 | `nodeSelector` | FinOps Agent Node labels for pod assignment | `{}` |
 | `tolerations` | FinOps Agent Tolerations for pod assignment | `[]` |
+
+### Pod Configuration Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
 | `podAnnotations` | Annotations for FinOps Agent pod | `{}` |
 | `podLabels` | Extra labels for FinOps Agent pod | `{}` |
-| `automountServiceAccountToken` | Mount Service Account token in pod | `false` |
 | `hostAliases` | FinOps Agent pods host aliases | `[]` |
 | `updateStrategy.type` | FinOps Agent deployment strategy type | `RollingUpdate` |
 | `priorityClassName` | FinOps Agent pods' priorityClassName | `""` |
@@ -257,7 +289,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `metrics.serviceMonitor.enabled` | if `true`, creates a Prometheus Operator ServiceMonitor (also requires `metrics.enabled` to be `true`) | `false` |
 | `metrics.serviceMonitor.namespace` | Namespace in which Prometheus is running | `""` |
 | `metrics.serviceMonitor.labels` | Additional labels that can be used so ServiceMonitor will be discovered by Prometheus | `{}` |
-| `metrics.serviceMonitor.interval` | Interval at which metrics should be scraped. | `""` |
+| `metrics.serviceMonitor.interval` | Interval at which metrics should be scraped | `""` |
 | `metrics.serviceMonitor.scrapeTimeout` | Timeout after which the scrape is ended | `""` |
 | `metrics.serviceMonitor.relabelings` | RelabelConfigs to apply to samples before scraping | `[]` |
 | `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion | `[]` |
@@ -275,17 +307,22 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `persistence.size` | PVC Storage Request for the FinOps Agent data volume | `8Gi` |
 | `persistence.dataSource` | Custom PVC data source | `{}` |
 | `persistence.annotations` | Additional custom annotations for the PVC | `{}` |
-| `persistence.selector` | Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it | `{}` |
+| `persistence.selector` | Selector to match an existing Persistent Volume for the FinOps Agent data PVC | `{}` |
 | `persistence.mountPath` | Mount path of the IBM FinOps Agent data volume | `/opt/finops-agent` |
 
-### Other Parameters
+### Service Account Parameters
 
 | Name | Description | Default |
 |------|-------------|---------|
 | `serviceAccount.create` | Enable creation of ServiceAccount for IBM FinOps Agent pods | `true` |
 | `serviceAccount.name` | Name of the service account to use. If not set and `create` is `true`, a name is generated | `""` |
-| `serviceAccount.automountServiceAccountToken` | Allows auto mount of ServiceAccountToken on the serviceAccount created | `false` |
+| `serviceAccount.automountServiceAccountToken` | Allows auto mount of ServiceAccountToken on the serviceAccount created | `true` |
 | `serviceAccount.annotations` | Additional custom annotations for the ServiceAccount | `{}` |
+
+### RBAC Parameters
+
+| Name | Description | Default |
+|------|-------------|---------|
 | `rbac.create` | Whether to create & use RBAC resources or not | `true` |
 | `rbac.clusterRole.create` | Whether to create & use ClusterRole resources or not | `true` |
 

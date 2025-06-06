@@ -124,6 +124,8 @@ spec:
 
             - name: CLUSTER_ID
               value: {{ .Values.clusterId | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
 
             {{- if ne (.Values.gcpKey | trim | len) 0 }}
             - name: CLOUD_PROVIDER_API_KEY
@@ -141,9 +143,9 @@ spec:
 
            
             - name: KUBECOST_EMITTER_ENABLED
-              value:  {{ .Values.agent.kubecost.enabled }}
+              value:  {{ .Values.agent.kubecost.enabled | quote }}
             - name: OPENCOST_SOURCE_ENABLED
-              value:  {{ .Values.agent.kubecost.enabled }}
+              value:  {{ .Values.agent.kubecost.enabled | quote }}
   
             {{- if or .Values.exportBucket.secret.create (not (empty .Values.exportBucket.secret.existingSecret))}}
             - name: EXPORT_BUCKET_CONFIG_FILE

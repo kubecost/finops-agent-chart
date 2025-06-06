@@ -99,6 +99,9 @@ image:
 ## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources 
 gcpKey: ""
 
+## @param logLevel The log level for the finops agent
+logLevel: "info"
+
 ## export bucket configuration
 ## @param exportBucket.config The config for the export bucket
 ##
@@ -120,6 +123,7 @@ exportBucket:
 ## @param agent.collectorDataSource.retentionResolution1h The retention resolution for the collector data source
 ## @param agent.collectorDataSource.retentionResolution1d The retention resolution for the collector data source
 ## @param agent.cloudability.enabled Enable the cloudability data source
+## @param agent.kubecost.enabled Enable the kubecost data source
 ## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
 ## @param agent.cloudability.uploadRegion The upload region for the cloudability data source
 ## @param agent.cloudability.secret.existingSecret The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.
@@ -257,7 +261,7 @@ startupProbe:
 ##
 livenessProbe:
   enabled: true
-  initialDelaySeconds: 10
+  initialDelaySeconds: 1500
   periodSeconds: 10
   timeoutSeconds: 1
   failureThreshold: 3

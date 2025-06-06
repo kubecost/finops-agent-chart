@@ -7,13 +7,9 @@ on:
 
 jobs:
   publish:
-    environment:
-      name: github-pages
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout
@@ -45,14 +41,20 @@ jobs:
         run: |
           helm repo index .cr-release-packages --url https://github.com/kubecost/finops-agent-chart/releases/download/${{ github.ref_name }}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Checkout gh-pages
+        uses: actions/checkout@v4
         with:
-          path: .cr-release-packages
+          ref: gh-pages
+          path: gh-pages
 
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+      - name: Copy packages and index
+        run: |
+          cp -r .cr-release-packages/* gh-pages/
+
+      - name: Commit and push
+        run: |
+          cd gh-pages
+          git add .
+          git commit -m "Update chart packages and index for ${{ github.ref_name }}"
+          git push origin gh-pages
       

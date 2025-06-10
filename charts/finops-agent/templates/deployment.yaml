@@ -140,7 +140,6 @@ spec:
             - name: CLOUDABILITY_UPLOAD_REGION
               value: {{ .Values.agent.cloudability.uploadRegion | quote }}
             {{- end }}
-            # extra custom cldy configs
             {{- if .Values.agent.cloudability.httpsClientTimeout }}
             - name: CLOUDABILITY_HTTPS_CLIENT_TIMEOUT
               value: {{ .Values.agent.cloudability.httpsClientTimeout }}

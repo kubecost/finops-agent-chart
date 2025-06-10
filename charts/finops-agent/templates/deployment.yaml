@@ -140,8 +140,56 @@ spec:
             - name: CLOUDABILITY_UPLOAD_REGION
               value: {{ .Values.agent.cloudability.uploadRegion | quote }}
             {{- end }}
+            # extra custom cldy configs
+            {{- if .Values.agent.cloudability.httpsClientTimeout }}
+            - name: CLOUDABILITY_HTTPS_CLIENT_TIMEOUT
+              value: {{ .Values.agent.cloudability.httpsClientTimeout }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.uploadRetryCount }}
+            - name: CLOUDABILITY_UPLOAD_RETRY_COUNT
+              value: {{ .Values.agent.cloudability.uploadRetryCount }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.outboundProxyInsecure }}
+            - name: CLOUDABILITY_OUTBOUND_PROXY_INSECURE
+              value: {{ .Values.agent.cloudability.outboundProxyInsecure | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.parseMetricsData }}
+            - name: CLOUDABILITY_PARSE_METRIC_DATA
+              value: {{ .Values.agent.cloudability.parseMetricsData | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.outboundProxy }}
+            - name: CLOUDABILITY_OUTBOUND_PROXY
+              value: {{ .Values.agent.cloudability.outboundProxy | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.outboundProxyAuth }}
+            - name: CLOUDABILITY_OUTBOUND_PROXY_AUTH
+              value: {{ .Values.agent.cloudability.outboundProxyAuth | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.customS3UploadBucket }}
+            - name: CLOUDABILITY_CUSTOM_S3_UPLOAD_BUCKET
+              value: {{ .Values.agent.cloudability.customS3UploadBucket | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.customS3UploadRegion }}
+            - name: CLOUDABILITY_CUSTOM_S3_UPLOAD_REGION
+              value: {{ .Values.agent.cloudability.customS3UploadRegion | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.customAzureBlobContainerName }}
+            - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CONTAINER_NAME
+              value: {{ .Values.agent.cloudability.customAzureBlobContainerName | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.customAzureBlobURL }}
+            - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_URL
+              value: {{ .Values.agent.cloudability.customAzureBlobURL | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.customAzureTenantID }}
+            - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_TENANT_ID
+              value: {{ .Values.agent.cloudability.customAzureTenantID | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.customAzureClientID }}
+            - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_ID
+              value: {{ .Values.agent.cloudability.customAzureClientID | quote }}
+            {{- end }}
 
-           
             - name: KUBECOST_EMITTER_ENABLED
               value:  {{ .Values.agent.kubecost.enabled | quote }}
             - name: OPENCOST_SOURCE_ENABLED

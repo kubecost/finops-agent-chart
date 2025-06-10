@@ -145,13 +145,27 @@ agent:
   cloudability:
     enabled: true
     localWorkingDir: /tmp
-    uploadRegion: staging
+    uploadRegion: us
+    httpsClientTimeout: 60
+    uploadRetryCount: 5
+    outboundProxyInsecure: false
+    parseMetricsData: false
+    outboundProxy: ""
+    outboundProxyAuth: ""
+    customS3UploadBucket: ""
+    customS3UploadRegion: ""
+    customAzureBlobContainerName: ""
+    customAzureBlobURL: ""
+    customAzureTenantID: ""
+    customAzureClientID: ""
+
     secret:
       create: true
       existingSecret: ""
       cloudabilityAccessKey: ""
       cloudabilitySecretKey: ""
       cloudabilityEnvId: ""
+      customAzureClientSecret: ""
 
 ## @param command Override default container command (useful when using custom images)
 ##

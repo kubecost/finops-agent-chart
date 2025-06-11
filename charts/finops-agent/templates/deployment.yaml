@@ -142,11 +142,11 @@ spec:
             {{- end }}
             {{- if .Values.agent.cloudability.httpsClientTimeout }}
             - name: CLOUDABILITY_HTTPS_CLIENT_TIMEOUT
-              value: {{ .Values.agent.cloudability.httpsClientTimeout }}
+              value: {{ .Values.agent.cloudability.httpsClientTimeout | quote}}
             {{- end }}
             {{- if .Values.agent.cloudability.uploadRetryCount }}
             - name: CLOUDABILITY_UPLOAD_RETRY_COUNT
-              value: {{ .Values.agent.cloudability.uploadRetryCount }}
+              value: {{ .Values.agent.cloudability.uploadRetryCount | quote }}
             {{- end }}
             {{- if .Values.agent.cloudability.outboundProxyInsecure }}
             - name: CLOUDABILITY_OUTBOUND_PROXY_INSECURE

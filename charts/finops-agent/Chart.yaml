@@ -27,4 +27,4 @@ maintainers:
 name: finops-agent
 sources:
 - https://github.com/kubecost/finops-agent-chart
-version: 0.1.4
+version: 0.1.5

@@ -133,6 +133,8 @@ spec:
             {{- end }}
 
             {{- if .Values.agent.cloudability.enabled }}
+            - name: CLOUDABILITY_CLUSTER_NAME
+              value: {{ .Values.clusterId | quote }}
             - name: CLOUDABILITY_EMITTER_ENABLED
               value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR

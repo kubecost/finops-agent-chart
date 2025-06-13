@@ -130,7 +130,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `apiVersions` | Override Kubernetes API versions reported by .Capabilities | `[]` |
 | `nameOverride` | String to partially override common.names.name | `""` |
 | `fullnameOverride` | String to fully override common.names.fullname | `""` |
-| `namespaceOverride` | String to fully override common.names.namespace | `""` |
+| `namespaceOverride` | String to fully override common.names.namespace. This would be used to deploy the finops-agent resources to a different namespace than the release itself | `""` |
 | `clusterDomain` | Default Kubernetes cluster domain | `cluster.local` |
 | `commonAnnotations` | Annotations to add to all deployed objects | `{}` |
 | `commonLabels` | Labels to add to all deployed objects | `{}` |

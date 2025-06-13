@@ -50,7 +50,7 @@ nameOverride: ""
 ## @param fullnameOverride String to fully override common.names.fullname
 ##
 fullnameOverride: ""
-## @param namespaceOverride String to fully override common.names.namespace
+## @param namespaceOverride String to fully override common.names.namespace. This would be used to deploy the finops-agent resources to a different namespace than the release itself
 ##
 namespaceOverride: ""
 ## @param clusterDomain Default Kubernetes cluster domain

@@ -35,7 +35,7 @@ global:
 
 ## @section Common parameters
 
-## @param clusterId The id of the cluster REQUIRED 
+## @param clusterId The id of the cluster REQUIRED
 ##
 clusterId: ""
 ## @param kubeVersion Override Kubernetes version
@@ -96,7 +96,7 @@ image:
   pullSecrets: []
   debug: false
 
-## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources 
+## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
 gcpKey: ""
 
 ## @param logLevel The log level for the finops agent
@@ -115,7 +115,7 @@ exportBucket:
     config: ""
     existingSecret: ""
 
-# Agent configuration 
+# Agent configuration
 ## @param agent.collectorDataSource.enabled Enable the collector data source
 ## @param agent.collectorDataSource.scrapeInterval The scrape interval for the collector data source
 ## @param agent.collectorDataSource.networkPort The network port for the collector data source
@@ -149,9 +149,9 @@ agent:
     enabled: true
     scrapeInterval: 10s
     networkPort: 3001
-    retentionResolution10m: 10m
-    retentionResolution1h: 1h
-    retentionResolution1d: 1d
+    retentionResolution10m: 6
+    retentionResolution1h: 3
+    retentionResolution1d: 2
   kubecost:
     enabled: true
   cloudability:
@@ -549,8 +549,6 @@ persistence:
   ##
   mountPath: /opt/finops-agent
 
-
-
 ## @section Other Parameters
 
 ## Service Account for IBM FinOps Agent
@@ -574,4 +572,3 @@ rbac:
   create: true
   clusterRole:
     create: true
-

@@ -12,8 +12,7 @@ metadata:
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
-  {{- $defaultAnnotations := ternary (dict "helm.sh/hook" "pre-install" "helm.sh/hook-delete-policy" "before-hook-creation") (dict) .Values.useHelmHooks }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations $defaultAnnotations) "context" .) }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations) "context" .) }}
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 rules:
   - apiGroups: [""]
@@ -28,8 +27,7 @@ metadata:
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
-  {{- $defaultAnnotations := ternary (dict "helm.sh/hook" "pre-install" "helm.sh/hook-delete-policy" "before-hook-creation") (dict) .Values.useHelmHooks }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations $defaultAnnotations) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations) "context" . ) }}
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 roleRef:
   kind: Role
@@ -48,8 +46,7 @@ metadata:
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
-  {{- $defaultAnnotations := ternary (dict "helm.sh/hook" "pre-install" "helm.sh/hook-delete-policy" "before-hook-creation") (dict) .Values.useHelmHooks }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations $defaultAnnotations) "context" .) }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations) "context" .) }}
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 rules:
   - apiGroups: [""]
@@ -75,8 +72,7 @@ metadata:
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
-  {{- $defaultAnnotations := ternary (dict "helm.sh/hook" "pre-install" "helm.sh/hook-delete-policy" "before-hook-creation") (dict) .Values.useHelmHooks }}
-  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations $defaultAnnotations) "context" . ) }}
+  {{- $annotations := include "common.tplvalues.merge" (dict "values" (list .Values.commonAnnotations) "context" . ) }}
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 roleRef:
     kind: ClusterRole

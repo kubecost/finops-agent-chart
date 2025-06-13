@@ -108,7 +108,7 @@ spec:
               value: {{ .networkPort | quote }}
             {{- end }}
             {{- if .retentionResolution10m }}
-            - name: COLLECTOR_10m_RESOLUTION_RETENTION
+            - name: COLLECTOR_10M_RESOLUTION_RETENTION
               value: {{ .retentionResolution10m | quote }}
             {{- end }}
             {{- if .retentionResolution1h }}

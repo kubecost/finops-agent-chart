@@ -116,12 +116,14 @@ exportBucket:
     existingSecret: ""
 
 # Agent configuration
+# For the collector data source, note that all retention settings may directly impact the memory usage of the agent. The default values safely capture the required retention to operate
+# the agent at minimal memory usage. Based cluster size, higher retained samples can have significant impact on memory usage.
 ## @param agent.collectorDataSource.enabled Enable the collector data source
 ## @param agent.collectorDataSource.scrapeInterval The scrape interval for the collector data source
 ## @param agent.collectorDataSource.networkPort The network port for the collector data source
-## @param agent.collectorDataSource.retentionResolution10m The retention resolution for the collector data source
-## @param agent.collectorDataSource.retentionResolution1h The retention resolution for the collector data source
-## @param agent.collectorDataSource.retentionResolution1d The retention resolution for the collector data source
+## @param agent.collectorDataSource.retentionResolution10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
+## @param agent.collectorDataSource.retentionResolution1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
+## @param agent.collectorDataSource.retentionResolution1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.kubecost.enabled Enable the kubecost data source
 ## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
@@ -147,7 +149,7 @@ exportBucket:
 agent:
   collectorDataSource:
     enabled: true
-    scrapeInterval: 10s
+    scrapeInterval: 30s
     networkPort: 3001
     retentionResolution10m: 6
     retentionResolution1h: 3

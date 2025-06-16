@@ -1,6 +1,6 @@
 <!--- app-name: IBM FinOps Agent&trade; IBM FinOps Agent&trade; -->
 
-# Helm Chart for the IBM FinOps Agent&trade; Core
+# Helm Chart for the IBM FinOps Agent
 
 This helm chart deploys the IBM FinOps Agent, which supports both Cloudability and Kubecost.
 

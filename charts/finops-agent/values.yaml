@@ -124,6 +124,7 @@ exportBucket:
 ## @param agent.collectorDataSource.retentionResolution10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retentionResolution1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retentionResolution1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
+## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.kubecost.enabled Enable the kubecost data source
 ## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
@@ -154,6 +155,8 @@ agent:
     retentionResolution10m: 6
     retentionResolution1h: 3
     retentionResolution1d: 2
+  exporter:
+    emissionInterval: 1m
   kubecost:
     enabled: true
   cloudability:

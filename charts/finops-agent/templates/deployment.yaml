@@ -132,6 +132,11 @@ spec:
               value: {{ .Values.gcpKey | quote }}
             {{- end }}
 
+            {{- if .Values.agent.exporter.emissionInterval }}
+            - name: EXPORTER_EMISSION_INTERVAL
+              value: {{ .Values.agent.exporter.emissionInterval | quote }}
+            {{- end }}
+
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME
               value: {{ .Values.clusterId | quote }}

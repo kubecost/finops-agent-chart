@@ -83,7 +83,7 @@ useHelmHooks: true
 image:
   registry: gcr.io
   repository: guestbook-227502/agent
-  tag: v0.0.21
+  tag: v0.0.22
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.

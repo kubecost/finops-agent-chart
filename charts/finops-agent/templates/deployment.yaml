@@ -163,6 +163,10 @@ spec:
             - name: CLOUDABILITY_PARSE_METRIC_DATA
               value: {{ .Values.agent.cloudability.parseMetricsData | quote }}
             {{- end }}
+            {{- if .Values.agent.cloudability.emissionInterval }}
+            - name: CLOUDABILITY_EMISSION_INTERVAL
+              value: {{ .Values.agent.cloudability.emissionInterval | quote }}
+            {{- end }}
             {{- if .Values.agent.cloudability.outboundProxy }}
             - name: CLOUDABILITY_OUTBOUND_PROXY
               value: {{ .Values.agent.cloudability.outboundProxy | quote }}

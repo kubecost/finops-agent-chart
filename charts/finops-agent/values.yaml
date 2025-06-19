@@ -83,7 +83,7 @@ useHelmHooks: true
 image:
   registry: gcr.io
   repository: guestbook-227502/agent
-  tag: v0.0.22
+  tag: v0.0.23
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -176,6 +176,7 @@ agent:
     customAzureBlobURL: ""
     customAzureTenantID: ""
     customAzureClientID: ""
+    emissionInterval: 3m
 
     secret:
       create: true

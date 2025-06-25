@@ -266,7 +266,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `podAnnotations` | Annotations for FinOps Agent pod | `{}` |
 | `podLabels` | Extra labels for FinOps Agent pod | `{}` |
 | `hostAliases` | FinOps Agent pods host aliases | `[]` |
-| `updateStrategy.type` | FinOps Agent deployment strategy type | `RollingUpdate` |
+| `updateStrategy.type` | FinOps Agent deployment strategy type | `Recreate` |
 | `priorityClassName` | FinOps Agent pods' priorityClassName | `""` |
 | `revisionHistoryLimit` | FinOps Agent deployment revision history limit | `10` |
 | `schedulerName` | Name of the k8s scheduler (other than default) | `""` |

@@ -167,7 +167,7 @@ agent:
     enabled: true
   cloudability:
     enabled: true
-    pathToCloudabilitySecrets: "/etc/secrets"
+    pathToCloudabilitySecrets: "/opt/cloudability"
     keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
     keySecretFile: "CLOUDABILITY_KEY_SECRET"
     envIDFile: "CLOUDABILITY_ENV_ID"

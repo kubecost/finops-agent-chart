@@ -199,6 +199,22 @@ spec:
             - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_ID
               value: {{ .Values.agent.cloudability.customAzureClientID | quote }}
             {{- end }}
+            {{- if .Values.agent.cloudability.keyAccessFile }}
+            - name: CLOUDABILITY_KEY_ACCESS_FILEPATH
+              value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.keyAccessFile }}"
+            {{- end }}
+            {{- if .Values.agent.cloudability.keySecretFile }}
+            - name: CLOUDABILITY_KEY_SECRET_FILEPATH
+              value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.keySecretFile }}"
+            {{- end }}
+            {{- if .Values.agent.cloudability.envIDFile }}
+            - name: CLOUDABILITY_ENV_ID_FILEPATH
+              value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.envIDFile }}"
+            {{- end }}
+            {{- if .Values.agent.cloudability.customAzureBlobClientSecretFile }}
+            - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET_FILEPATH
+              value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
+            {{- end }}
 
             - name: KUBECOST_EMITTER_ENABLED
               value:  {{ .Values.agent.kubecost.enabled | quote }}
@@ -212,7 +228,7 @@ spec:
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}
-          {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret .Values.agent.cloudability.enabled}}
+          {{- if or .Values.extraEnvVarsCM .Values.extraEnvVarsSecret }}
           envFrom:
             {{- if .Values.extraEnvVarsCM }}
             - configMapRef:
@@ -221,10 +237,6 @@ spec:
             {{- if .Values.extraEnvVarsSecret }}
             - secretRef:
                 name: {{ .Values.extraEnvVarsSecret }}
-            {{- end }}
-            {{- if .Values.agent.cloudability.enabled }}
-            - secretRef:
-                name: {{ include "cloudability.secret.name" . | trim }}
             {{- end }}
           {{- end }}
           ports:
@@ -275,6 +287,10 @@ spec:
               subPath: federated-store.yaml
               readOnly: true
             {{- end }}
+            {{- if .Values.agent.cloudability.enabled }}
+            - name: cloudability-secret-store
+              mountPath: {{ .Values.agent.cloudability.pathToCloudabilitySecrets}}
+            {{- end }}
      
            
             {{- if .Values.persistence.enabled }}
@@ -302,7 +318,18 @@ spec:
             secretName: {{ .Values.exportBucket.secret.existingSecret }}
             defaultMode: 256
         {{- end }}
-        
+        {{ if .Values.agent.cloudability.secret.create}}
+        - name: cloudability-secret-store
+          secret:
+            secretName: {{ include "cloudability.secret.name" . | trim }}
+            defaultMode: 256
+        {{- else if (not (empty .Values.agent.cloudability.secret.existingSecret))}}
+        - name: cloudability-secret-store
+          secret:
+            secretName: {{ .Values.agent.cloudability.secret.existingSecret }}
+            defaultMode: 256
+        {{- end }}
+
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}
         {{- end }}

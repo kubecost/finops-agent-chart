@@ -83,7 +83,7 @@ useHelmHooks: true
 image:
   registry: gcr.io
   repository: guestbook-227502/agent
-  tag: v0.0.23
+  tag: v0.0.24
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -127,6 +127,10 @@ exportBucket:
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.kubecost.enabled Enable the kubecost data source
+## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
+## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
+## @param agent.cloudability.keySecretFile the name of the keySecretFile
+## @param agent.cloudability.envIDFile the name of the envIDFile
 ## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
 ## @param agent.cloudability.uploadRegion The upload region for the cloudability data source
 ## @param agent.cloudability.httpsClientTimeout Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.
@@ -142,6 +146,7 @@ exportBucket:
 ## @param agent.cloudability.customAzureBlobURL Azure blob url for custom uploading agent
 ## @param agent.cloudability.customAzureTenantID Azure tenantID for custom uploading agent
 ## @param agent.cloudability.customAzureClientID Azure clientID for custom uploading agent
+## @param agent.cloudability.customAzureBlobClientSecretFile the name of the customAzureBlobClientSecretFile
 ## @param agent.cloudability.secret.existingSecret The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.
 ## @param agent.cloudability.secret.create Create a secret for the cloudability data source. cannot be used with existingSecret
 ## @param agent.cloudability.secret.cloudabilityAccessKey The cloudability access key for the cloudability data source
@@ -162,6 +167,10 @@ agent:
     enabled: true
   cloudability:
     enabled: true
+    pathToCloudabilitySecrets: "/opt/cloudability"
+    keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
+    keySecretFile: "CLOUDABILITY_KEY_SECRET"
+    envIDFile: "CLOUDABILITY_ENV_ID"
     localWorkingDir: /tmp
     uploadRegion: us
     httpsClientTimeout: 60
@@ -176,6 +185,7 @@ agent:
     customAzureBlobURL: ""
     customAzureTenantID: ""
     customAzureClientID: ""
+    customAzureBlobClientSecretFile: "CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET"
     emissionInterval: 3m
 
     secret:

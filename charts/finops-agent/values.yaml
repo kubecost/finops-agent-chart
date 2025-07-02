@@ -152,6 +152,7 @@ exportBucket:
 ## @param agent.cloudability.secret.cloudabilityAccessKey The cloudability access key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilitySecretKey The cloudability secret key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilityEnvId The cloudability env id for the cloudability data source
+## @param agent.cloudability.secret.customAzureClientSecret The cloudability client secret for azure blob upload
 ##
 agent:
   collectorDataSource:

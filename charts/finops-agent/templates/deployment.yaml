@@ -159,9 +159,9 @@ spec:
             - name: CLOUDABILITY_OUTBOUND_PROXY_INSECURE
               value: {{ .Values.agent.cloudability.outboundProxyInsecure | quote }}
             {{- end }}
-            {{- if .Values.agent.cloudability.parseMetricsData }}
+            {{- if .Values.agent.cloudability.parseMetricData }}
             - name: CLOUDABILITY_PARSE_METRIC_DATA
-              value: {{ .Values.agent.cloudability.parseMetricsData | quote }}
+              value: {{ .Values.agent.cloudability.parseMetricData | quote }}
             {{- end }}
             {{- if .Values.agent.cloudability.emissionInterval }}
             - name: CLOUDABILITY_EMISSION_INTERVAL

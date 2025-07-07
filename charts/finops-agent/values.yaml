@@ -81,8 +81,8 @@ useHelmHooks: true
 ## @param image.debug Specify if debug logs should be enabled
 ##
 image:
-  registry: gcr.io
-  repository: guestbook-227502/agent
+  registry: icr.io
+  repository: ibm-finops/agent
   tag: v0.0.24
   digest: ""
   pullPolicy: IfNotPresent

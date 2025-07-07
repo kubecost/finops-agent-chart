@@ -72,8 +72,8 @@ useHelmHooks: true
 ## @section IBM FinOps Agent Core parameters
 
 ## IBM FinOps Agent Core image
-## @param image.registry [default: gcr.io] IBM FinOps Agent image registry
-## @param image.repository [default: guestbook-227502/agent] IBM FinOps Agent image repository
+## @param image.registry [default: icr.io] IBM FinOps Agent image registry
+## @param image.repository [default: ibm-finops/agent] IBM FinOps Agent image repository
 ## @skip image.tag IBM FinOps Agent image tag (immutable tags are recommended)
 ## @param image.digest IBM FinOps Agent image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
 ## @param image.pullPolicy IBM FinOps Agent image pull policy

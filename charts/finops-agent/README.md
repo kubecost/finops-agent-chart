@@ -139,11 +139,13 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 
 ### IBM FinOps Agent Core Parameters
 
+> **Note**: The default image registry has been changed to `icr.io`. IBM Container Registry will be used for image distribution going forward.
+
 | Name | Description | Default |
 |------|-------------|---------|
-| `image.registry` | IBM FinOps Agent image registry | `gcr.io` |
-| `image.repository` | IBM FinOps Agent image repository | `guestbook-227502/agent` |
-| `image.tag` | IBM FinOps Agent image tag (immutable tags are recommended) | `v0.0.15` |
+| `image.registry` | IBM FinOps Agent image registry | `icr.io` |
+| `image.repository` | IBM FinOps Agent image repository | `ibm-finops/agent` |
+| `image.tag` | IBM FinOps Agent image tag (immutable tags are recommended) | `v0.0.25` |
 | `image.digest` | IBM FinOps Agent image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""` |
 | `image.pullPolicy` | IBM FinOps Agent image pull policy | `IfNotPresent` |
 | `image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |

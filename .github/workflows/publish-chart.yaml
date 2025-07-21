@@ -100,4 +100,15 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
-      
+
+      - name: Notify Release
+        uses: slackapi/slack-github-action@2.1.1
+        with:
+          webhook-type: webhook-trigger
+          payload: |
+            {
+              "workflow": "${{github.workflow}}",
+              "version": "${{ github.ref_name }}",
+              "message": "Released version ${{ github.ref_name }} of the finops-agent-chart"
+            }
+          webhook: ${{ secrets.SLACK_WEBHOOK_FINOPS_CHART_RELEASE }}

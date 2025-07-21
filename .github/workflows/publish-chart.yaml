@@ -109,6 +109,6 @@ jobs:
             {
               "workflow": "${{github.workflow}}",
               "version": "${{ github.ref_name }}",
-              "message": "Release version ${{ github.ref_name }} of the finops-agent-chart"
+              "message": "Released version ${{ github.ref_name }} of the finops-agent-chart"
             }
           webhook: ${{ secrets.SLACK_WEBHOOK_FINOPS_CHART_RELEASE }}

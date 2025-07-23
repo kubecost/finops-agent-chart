@@ -3,7 +3,7 @@ Copyright IBM, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if eq (.Values.clusterId | trim | len) 0}}
+{{- if eq ((include "finops-agent.clusterId" .) | trim | len) 0}}
 {{- fail "clusterId is required and cannot be empty" }}
 {{- end }}
 
@@ -33,8 +33,8 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if .Values.exportBucket.secret.create }}
-        checksum/export-bucket-secret: {{ include (print .Template.BasePath "/export-bucket-secret.yaml") . | sha256sum }}
+        {{- if .Values.federatedStorage.secret.config }}
+        checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
@@ -123,7 +123,7 @@ spec:
             {{- end }}
 
             - name: CLUSTER_ID
-              value: {{ .Values.clusterId | quote }}
+              value: {{ (include "finops-agent.clusterId" .) | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
 
@@ -139,7 +139,7 @@ spec:
 
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME
-              value: {{ .Values.clusterId | quote }}
+              value: {{ (include "finops-agent.clusterId" .) | quote }}
             - name: CLOUDABILITY_EMITTER_ENABLED
               value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR
@@ -215,16 +215,10 @@ spec:
             - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET_FILEPATH
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
             {{- end }}
-
             - name: KUBECOST_EMITTER_ENABLED
               value:  {{ .Values.agent.kubecost.enabled | quote }}
             - name: OPENCOST_SOURCE_ENABLED
               value:  {{ .Values.agent.kubecost.enabled | quote }}
-  
-            {{- if or .Values.exportBucket.secret.create (not (empty .Values.exportBucket.secret.existingSecret))}}
-            - name: EXPORT_BUCKET_CONFIG_FILE
-              value: /var/config/federated-store.yaml
-            {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}
@@ -280,19 +274,16 @@ spec:
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
-
-            {{- if or .Values.exportBucket.secret.create (not (empty .Values.exportBucket.secret.existingSecret))}}
-            - name: store-secret
-              mountPath: /var/config/federated-store.yaml
-              subPath: federated-store.yaml
+            {{- if or ((.Values.agent).kubecost).enabled }}
+            - name: federated-storage-config
+              mountPath: /var/configs/federated-store.yaml
+              subPath: {{ include "finops-agent.federatedStorage.fileName" . | trim }}
               readOnly: true
             {{- end }}
             {{- if .Values.agent.cloudability.enabled }}
             - name: cloudability-secret-store
               mountPath: {{ .Values.agent.cloudability.pathToCloudabilitySecrets}}
             {{- end }}
-     
-           
             {{- if .Values.persistence.enabled }}
             - mountPath: {{ .Values.persistence.mountPath }}              
               name: data
@@ -306,17 +297,11 @@ spec:
       volumes:
         - name: empty-dir
           emptyDir: {}
-
-        {{- if .Values.exportBucket.secret.create}}
-        - name: store-secret
+        {{- if ((.Values.agent).kubecost).enabled}}
+        - name: federated-storage-config
           secret:
-            secretName: {{ include "exportBucket.secret.name" . | trim }}
-            defaultMode: 256
-        {{- else if  (not (empty .Values.exportBucket.secret.existingSecret))}}
-        - name: store-secret
-          secret:
-            secretName: {{ .Values.exportBucket.secret.existingSecret }}
-            defaultMode: 256
+            defaultMode: 420
+            secretName: {{ include "finops-agent.federatedStorage.secretName" . | trim }}
         {{- end }}
         {{ if .Values.agent.cloudability.secret.create}}
         - name: cloudability-secret-store
@@ -329,7 +314,6 @@ spec:
             secretName: {{ .Values.agent.cloudability.secret.existingSecret }}
             defaultMode: 256
         {{- end }}
-
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}
         {{- end }}

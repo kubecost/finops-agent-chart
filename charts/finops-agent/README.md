@@ -55,13 +55,13 @@ This chart installs a deployment with the following configuration:
 
 The service is used primarily to provide diagnostics information and a scrape target. The FinOps Agent itself does not provide data querying, that is supported by the suite of IBM products that utilize the agent data. 
 
-### Configure the Export Bucket
+### Configure the Federated Storage
 
-The IBM FinOps Agent can collect and store limited data on its local storage. To be viewed and used for FinOps activities, however, the data must be uploaded to an object store so that it can be consumed by products in the IBM FinOps suite like Cloudability and Kubecost. 
+The IBM FinOps Agent can collect and store limited data on its local storage. To be viewed and used for FinOps activities, however, the data must be uploaded to an federated object store so that it can be consumed by products in the IBM FinOps suite like Cloudability and Kubecost. 
 
 The bucket secret syntax itself is specified further in TODO - INSERT LINK 
 
-To provide a secret, see the `exportBucket` settings in the parameters section. The chart allows the user to provide an already installed secret via the `existingSecret` parameter. Alternatively, the `create` setting can be set to true, which will allow the chart to create a secret using the contents of the `config` setting. 
+To provide a secret, see the `federatedStorage` settings in the parameters section. The chart allows the user to provide an already installed secret via the `.Values.global.federatedStorage.existingSecret` parameter. Alternatively setting `.Values.federatedStorage.config` will create a secret with the provided config value in it. 
 
 ### Resource requests and limits
 
@@ -153,13 +153,11 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `gcpKey` | GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources | `""` |
 | `logLevel` | The log level for the finops agent | `info` |
 
-### Export Bucket Configuration
+### Federated Storage Configuration
 
-| Name | Description | Default |
-|------|-------------|---------|
-| `exportBucket.secret.create` | Create a secret for the export bucket | `true` |
-| `exportBucket.secret.config` | The config for the export bucket | `""` |
-| `exportBucket.secret.existingSecret` | The name of an existing secret to use for the export bucket. Note, you cannot set both `create` and `existingSecret` | `""` |
+| Name                                | Description                                                                                                              | Default |
+|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------|---------|
+| `federatedStorage.config`     | The config for the federated storage                                                                                     | `""` |
 
 ### Agent Configuration
 

@@ -33,7 +33,7 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if .Values.federatedStorage.secret.config }}
+        {{- if ((.Values.federatedStorage).secret).config }}
         checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.podAnnotations }}

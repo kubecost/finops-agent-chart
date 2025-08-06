@@ -38,15 +38,11 @@ Create the name of the ServiceAccount to use
 {{/*
 Return true if the finops agent should create a secret for the federated storage config
 */}}
-{{- define "finops-agent.federatedStorage.secret.create" -}}
+{{- define "finops-agent.federatedStorage.secret.create" }}
 {{- if and (or (not (empty (.Values.global.federatedStorage).existingSecret)) (not (empty (.Values.federatedStorage).existingSecret))) (.Values.federatedStorage).config }}
 {{ fail "Cannot set both .Values.global.federatedStorage.existingSecret and .Values.federatedStorage.config" }}
 {{- end }}
-{{- if .Values.federatedStorage.config }}
-true
-{{- else }}
-false
-{{- end }}
+{{- not (empty (.Values.federatedStorage).config) | ternary "true" "" }}
 {{- end }}
 
 {{/*
@@ -58,7 +54,7 @@ define the name of the secret with the federated bucket config
 {{- else if (.Values.global.federatedStorage).existingSecret }}
 {{- .Values.global.federatedStorage.existingSecret }}
 {{- else }}
-{{ .Release.Name }}-federated-storage-config
+{{- .Release.Name }}-federated-storage-config
 {{- end }}
 {{- end }}
 

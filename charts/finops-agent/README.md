@@ -155,9 +155,10 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 
 ### Federated Storage Configuration
 
-| Name                                | Description                                                                                                              | Default |
-|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------|---------|
-| `federatedStorage.config`     | The config for the federated storage                                                                                     | `""` |
+| Name                               | Description                                                                                                                     | Default |
+|------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|---------|
+| `federatedStorage.config`     | The config for the federated storage                                                                                            | `""` |
+| `federatedStorage.existingSecret` | The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret` | `""` |
 
 ### Agent Configuration
 

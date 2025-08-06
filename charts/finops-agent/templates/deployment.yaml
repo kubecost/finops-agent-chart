@@ -303,7 +303,7 @@ spec:
             defaultMode: 420
             secretName: {{ include "finops-agent.federatedStorage.secretName" . | trim }}
         {{- end }}
-        {{ if .Values.agent.cloudability.secret.create}}
+        {{- if .Values.agent.cloudability.secret.create}}
         - name: cloudability-secret-store
           secret:
             secretName: {{ include "cloudability.secret.name" . | trim }}

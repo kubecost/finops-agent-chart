@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 {{/* vim: set filetype=mustache: */}}
 
 {{- define "finops-agent.clusterId" -}}
-{{ default .Values.clusterId .Values.global.clusterId }}
+{{ default .Values.global.clusterId .Values.clusterId }}
 {{- end -}}
 
 {{/*
@@ -39,7 +39,7 @@ Create the name of the ServiceAccount to use
 Return true if the finops agent should create a secret for the federated storage config
 */}}
 {{- define "finops-agent.federatedStorage.secret.create" -}}
-{{- if and (not (empty (.Values.global.federatedStorage).existingSecret)) (.Values.federatedStorage).config }}
+{{- if and (or (not (empty (.Values.global.federatedStorage).existingSecret)) (not (empty (.Values.federatedStorage).existingSecret))) (.Values.federatedStorage).config }}
 {{ fail "Cannot set both .Values.global.federatedStorage.existingSecret and .Values.federatedStorage.config" }}
 {{- end }}
 {{- if .Values.federatedStorage.config }}
@@ -50,11 +50,13 @@ false
 {{- end }}
 
 {{/*
-define the name of the export secret bucket
+define the name of the secret with the federated bucket config
 */}}
 {{- define "finops-agent.federatedStorage.secretName" }}
-{{- if (.Values.global.federatedStorage).existingSecret }}
-.Values.global.federatedStorage.existingSecret
+{{- if (.Values.federatedStorage).existingSecret }}
+{{- .Values.federatedStorage.existingSecret }}
+{{- else if (.Values.global.federatedStorage).existingSecret }}
+{{- .Values.global.federatedStorage.existingSecret }}
 {{- else }}
 {{ .Release.Name }}-federated-storage-config
 {{- end }}

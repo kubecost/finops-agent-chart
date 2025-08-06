@@ -107,8 +107,10 @@ logLevel: "info"
 ##
 federatedStorage:
   ## @param federatedStorage.config The config for the federated storage.
+  ## @param federatedStorage.existingSecret The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret`.
   ##
   config: ""
+  existingSecret: ""
 
 # Agent configuration
 # For the collector data source, note that all retention settings may directly impact the memory usage of the agent. The default values safely capture the required retention to operate

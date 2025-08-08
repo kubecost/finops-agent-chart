@@ -110,6 +110,8 @@ spec:
             {{- if .retentionResolution10m }}
             - name: COLLECTOR_10M_RESOLUTION_RETENTION
               value: {{ .retentionResolution10m | quote }}
+            - name: MINUTE_METRICS_ENABLED
+              value: "true"
             {{- end }}
             {{- if .retentionResolution1h }}
             - name: COLLECTOR_1H_RESOLUTION_RETENTION

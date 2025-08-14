@@ -5,14 +5,20 @@ SPDX-License-Identifier: APACHE-2.0
 
 {{/* vim: set filetype=mustache: */}}
 
-{{/*
-Return the proper FinOps Agent&trade; Core image name
-*/}}
-{{- define "finops-agent.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
+{{- define "finops-agent.clusterId" -}}
+{{ default .Values.global.clusterId .Values.clusterId }}
 {{- end -}}
 
-
+{{/*
+Return the proper FinOps Agent Core image name
+*/}}
+{{- define "finops-agent.image" -}}
+{{- if .Values.fullImageName -}}
+{{ .Values.fullImageName }}
+{{- else -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
+{{- end -}}
+{{- end -}}
 
 {{/*
 Return the proper Docker Image Registry Secret Names
@@ -32,11 +38,32 @@ Create the name of the ServiceAccount to use
 {{- end -}}
 {{- end -}}
 
+
 {{/*
-define the name of the export secret bucket
+Return true if the finops agent should create a secret for the federated storage config
 */}}
-{{- define "exportBucket.secret.name" }}
-{{ .Release.Name }}-export-bucket-config
+{{- define "finops-agent.federatedStorage.secret.create" }}
+{{- if and (or (not (empty (.Values.global.federatedStorage).existingSecret)) (not (empty (.Values.federatedStorage).existingSecret))) (.Values.federatedStorage).config }}
+{{ fail "Cannot set both .Values.global.federatedStorage.existingSecret and .Values.federatedStorage.config" }}
+{{- end }}
+{{- not (empty (.Values.federatedStorage).config) | ternary "true" "" }}
+{{- end }}
+
+{{/*
+define the name of the secret with the federated bucket config
+*/}}
+{{- define "finops-agent.federatedStorage.secretName" }}
+{{- if (.Values.federatedStorage).existingSecret }}
+{{- .Values.federatedStorage.existingSecret }}
+{{- else if (.Values.global.federatedStorage).existingSecret }}
+{{- .Values.global.federatedStorage.existingSecret }}
+{{- else }}
+{{- .Release.Name }}-federated-storage-config
+{{- end }}
+{{- end }}
+
+{{- define "finops-agent.federatedStorage.fileName" }}
+{{ default "federated-store.yaml" (.Values.global.federatedStorage).fileName }}
 {{- end }}
 
 {{/*
@@ -47,5 +74,14 @@ define the name of the cloudability secret
 {{ .Release.Name }}-cloudability-secrets
 {{- else }}
 {{.Values.agent.cloudability.secret.existingSecret}}
+{{- end }}
+{{- end }}
+
+{{- define "finops-agent.exportBucket-legacy-check" }}
+{{- if (((.Values.exportBucket).secret).config) }}
+{{- fail "\n\nexportBucket.secret.config has changed. Please use federatedStorage.config instead" }}
+{{- end }}
+{{- if (((.Values.exportBucket).secret).existingSecret) }}
+{{- fail "\n\nexportBucket.secret.existingSecret has changed. Please use federatedStorage.existingSecret instead" }}
 {{- end }}
 {{- end }}

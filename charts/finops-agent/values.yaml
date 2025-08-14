@@ -95,25 +95,23 @@ image:
   ##
   pullSecrets: []
   debug: false
-
+## If set, this will override the image name and tag.
+fullImageName: ""
 ## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
 gcpKey: ""
 
 ## @param logLevel The log level for the finops agent
 logLevel: "info"
 
-## export bucket configuration
-## @param exportBucket.config The config for the export bucket
+## federated storage configuration
+## @param federatedStorage.config The config for the federated storage
 ##
-exportBucket:
-  ## @param exportBucket.secret.create Create a secret for the export bucket
-  ## @param exportBucket.secret.config The config for the export bucket.
-  ## @param exportBucket.secret.existingSecret The name of an existing secret to use for the export bucket. Note, you cannot set both `create` and `existingSecret`.
+federatedStorage:
+  ## @param federatedStorage.config The config for the federated storage.
+  ## @param federatedStorage.existingSecret The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret`.
   ##
-  secret:
-    create: true
-    config: ""
-    existingSecret: ""
+  config: ""
+  existingSecret: ""
 
 # Agent configuration
 # For the collector data source, note that all retention settings may directly impact the memory usage of the agent. The default values safely capture the required retention to operate

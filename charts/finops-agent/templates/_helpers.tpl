@@ -79,6 +79,9 @@ define the name of the cloudability secret
 
 {{- define "finops-agent.exportBucket-legacy-check" }}
 {{- if (((.Values.exportBucket).secret).config) }}
-{{- fail "\n\nexportBucket.secret.config is deprecated. Use federatedStorage.config.yaml instead" }}
+{{- fail "\n\nexportBucket.secret.config has changed. Please use federatedStorage.config instead" }}
+{{- end }}
+{{- if (((.Values.exportBucket).secret).existingSecret) }}
+{{- fail "\n\nexportBucket.secret.existingSecret has changed. Please use federatedStorage.existingSecret instead" }}
 {{- end }}
 {{- end }}

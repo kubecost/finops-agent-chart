@@ -10,10 +10,14 @@ SPDX-License-Identifier: APACHE-2.0
 {{- end -}}
 
 {{/*
-Return the proper FinOps Agent&trade; Core image name
+Return the proper FinOps Agent Core image name
 */}}
 {{- define "finops-agent.image" -}}
+{{- if .Values.fullImageName -}}
+{{ .Values.fullImageName }}
+{{- else -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
+{{- end -}}
 {{- end -}}
 
 {{/*
@@ -70,5 +74,11 @@ define the name of the cloudability secret
 {{ .Release.Name }}-cloudability-secrets
 {{- else }}
 {{.Values.agent.cloudability.secret.existingSecret}}
+{{- end }}
+{{- end }}
+
+{{- define "finops-agent.exportBucket-legacy-check" }}
+{{- if (((.Values.exportBucket).secret).config) }}
+{{- fail "\n\nexportBucket.secret.config is deprecated. Use federatedStorage.config.yaml instead" }}
 {{- end }}
 {{- end }}

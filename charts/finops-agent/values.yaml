@@ -95,7 +95,8 @@ image:
   ##
   pullSecrets: []
   debug: false
-
+## If set, this will override the image name and tag.
+fullImageName: ""
 ## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
 gcpKey: ""
 

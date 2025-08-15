@@ -83,7 +83,7 @@ spec:
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.containerSecurityContext "context" .) | nindent 12 }}
           {{- end }}
-        
+
           {{- if .Values.command }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" .) | nindent 12 }}
           {{- end }}
@@ -94,7 +94,7 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
           {{- end }}
           env:
-            # TODO 
+            # TODO
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED
@@ -295,7 +295,7 @@ spec:
               readOnly: true
             {{- end }}
             {{- if .Values.persistence.enabled }}
-            - mountPath: {{ .Values.persistence.mountPath }}              
+            - mountPath: {{ .Values.persistence.mountPath }}
               name: data
             {{- end }}
           {{- if .Values.extraVolumeMounts }}

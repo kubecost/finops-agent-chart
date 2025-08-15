@@ -129,9 +129,12 @@ spec:
             - name: LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
 
-            {{- if ne (.Values.gcpKey | trim | len) 0 }}
+            {{- if .Values.cspPricingApiKey.apiKey }}
             - name: CLOUD_PROVIDER_API_KEY
-              value: {{ .Values.gcpKey | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cspPricingApiKey.secretName | trim }}
+                  key: CSP_PRICING_API_KEY
             {{- end }}
 
             {{- if .Values.agent.exporter.emissionInterval }}
@@ -286,6 +289,11 @@ spec:
             - name: cloudability-secret-store
               mountPath: {{ .Values.agent.cloudability.pathToCloudabilitySecrets}}
             {{- end }}
+            {{- if or .Values.cspPricingApiKey.create (not (empty .Values.cspPricingApiKey.existingSecret)) }}
+            - name: csp-pricing-api-key-secret
+              mountPath: /opt/gcp
+              readOnly: true
+            {{- end }}
             {{- if .Values.persistence.enabled }}
             - mountPath: {{ .Values.persistence.mountPath }}              
               name: data
@@ -314,6 +322,12 @@ spec:
         - name: cloudability-secret-store
           secret:
             secretName: {{ .Values.agent.cloudability.secret.existingSecret }}
+            defaultMode: 256
+        {{- end }}
+        {{- if .Values.cspPricingApiKey.create}}
+        - name: csp-pricing-api-key-secret
+          secret:
+            secretName: {{ .Values.cspPricingApiKey.secretName | trim }}
             defaultMode: 256
         {{- end }}
         {{- if .Values.extraVolumes }}

@@ -150,8 +150,13 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `image.pullPolicy` | IBM FinOps Agent image pull policy | `IfNotPresent` |
 | `image.pullSecrets` | Specify docker-registry secret names as an array | `[]` |
 | `image.debug` | Specify if debug logs should be enabled | `false` |
-| `gcpKey` | GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources | `""` |
+| `cspPricingApiKey.create` | Note: only used for GCP at this time. Create a secret for the GCP API key. Cannot be used with `existingSecret` | `false` |
+| `cspPricingApiKey.existingSecret` | The name of an existing secret to use for the GCP API key. Note, you cannot set both `create` and `existingSecret` | `""` |
+| `cspPricingApiKey.apiKey` | The GCP API key value. Only used when `create` is true | `""` |
+| `cspPricingApiKey.secretName` | The name of the secret to use for the GCP API key. Only used when `create` is true | `""` |
 | `logLevel` | The log level for the finops agent | `info` |
+
+**Note:** When using an existing/self-managed cspPricingApiKey secret, it must contain a key named `CSP_PRICING_API_KEY`.
 
 ### Federated Storage Configuration
 

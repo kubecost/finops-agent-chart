@@ -39,6 +39,9 @@ spec:
         {{- if .Values.cspPricingApiKey.apiKey }}
         checksum/csp-pricing-api-key-secret: {{ include (print .Template.BasePath "/csp-api-key-secret.yaml") . | sha256sum }}
         {{- end }}
+        {{- if .Values.agent.cloudability.secret.create }}
+        checksum/cloudability-secret: {{ include (print .Template.BasePath "/cloudability-secret.yaml") . | sha256sum }}
+        {{- end }}
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
         {{- end }}

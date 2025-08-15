@@ -97,8 +97,18 @@ image:
   debug: false
 ## If set, this will override the image name and tag.
 fullImageName: ""
-## @param gcpKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
-gcpKey: ""
+## gcpKey is for the old key, use cspPricingApiKey instead.
+gcpKey: ""  # TODO: remove for GA release
+## @param cspPricingApiKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
+## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. Note, you cannot set both `create` and `existingSecret`.
+## @param cspPricingApiKey.create Create a secret for the GCP API key. Cannot be used with existingSecret
+## @param cspPricingApiKey.value The GCP API key value. Only used when `create` is true.
+## This is currently only used for GCP.
+cspPricingApiKey:
+  provider: "gcp"
+  secretName: "csp-pricing-api-key"
+  create: true
+  apiKey: ""
 
 ## @param logLevel The log level for the finops agent
 logLevel: "info"

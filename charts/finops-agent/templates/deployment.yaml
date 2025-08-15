@@ -33,8 +33,14 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if ((.Values.federatedStorage).secret).config }}
+        {{- if .Values.federatedStorage.config }}
         checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.cspPricingApiKey.apiKey }}
+        checksum/csp-pricing-api-key-secret: {{ include (print .Template.BasePath "/csp-api-key-secret.yaml") . | sha256sum }}
+        {{- end }}
+        {{- if .Values.agent.cloudability.secret.create }}
+        checksum/cloudability-secret: {{ include (print .Template.BasePath "/cloudability-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
@@ -83,7 +89,7 @@ spec:
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.containerSecurityContext "context" .) | nindent 12 }}
           {{- end }}
-        
+
           {{- if .Values.command }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.command "context" .) | nindent 12 }}
           {{- end }}
@@ -94,7 +100,7 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
           {{- end }}
           env:
-            # TODO 
+            # TODO
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED
@@ -129,9 +135,12 @@ spec:
             - name: LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
 
-            {{- if ne (.Values.gcpKey | trim | len) 0 }}
+            {{- if .Values.cspPricingApiKey.apiKey }}
             - name: CLOUD_PROVIDER_API_KEY
-              value: {{ .Values.gcpKey | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cspPricingApiKey.secretName | trim }}
+                  key: CSP_PRICING_API_KEY
             {{- end }}
 
             {{- if .Values.agent.exporter.emissionInterval }}
@@ -286,8 +295,13 @@ spec:
             - name: cloudability-secret-store
               mountPath: {{ .Values.agent.cloudability.pathToCloudabilitySecrets}}
             {{- end }}
+            {{- if or .Values.cspPricingApiKey.create (not (empty .Values.cspPricingApiKey.existingSecret)) }}
+            - name: csp-pricing-api-key-secret
+              mountPath: /opt/gcp
+              readOnly: true
+            {{- end }}
             {{- if .Values.persistence.enabled }}
-            - mountPath: {{ .Values.persistence.mountPath }}              
+            - mountPath: {{ .Values.persistence.mountPath }}
               name: data
             {{- end }}
           {{- if .Values.extraVolumeMounts }}
@@ -314,6 +328,12 @@ spec:
         - name: cloudability-secret-store
           secret:
             secretName: {{ .Values.agent.cloudability.secret.existingSecret }}
+            defaultMode: 256
+        {{- end }}
+        {{- if .Values.cspPricingApiKey.create}}
+        - name: csp-pricing-api-key-secret
+          secret:
+            secretName: {{ .Values.cspPricingApiKey.secretName | trim }}
             defaultMode: 256
         {{- end }}
         {{- if .Values.extraVolumes }}

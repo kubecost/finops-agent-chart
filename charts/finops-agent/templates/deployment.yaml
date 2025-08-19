@@ -29,10 +29,10 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if .Values.agent.kubecost.enabled }}
+        {{- if include "finops-agent.kubecostEnabled" . }}
         checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
         {{- end }}
-        {{- if .Values.cspPricingApiKey.apiKey }}
+        {{- if .Values.global.cspPricingApiKey.apiKey }}
         checksum/csp-pricing-api-key-secret: {{ include (print .Template.BasePath "/csp-api-key-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.agent.cloudability.enabled }}
@@ -74,10 +74,10 @@ spec:
       securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" .) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ template "finops-agent.serviceAccountName" . }}
+      {{- if .Values.initContainers }}
       initContainers:
-        {{- if .Values.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" .) | nindent 8 }}
-        {{- end }}
+      {{- end }}
       containers:
         - name: finops-agent
           image: {{ include "finops-agent.image" . }}
@@ -223,9 +223,25 @@ spec:
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
             {{- end }}
             - name: KUBECOST_EMITTER_ENABLED
-              value:  {{ .Values.agent.kubecost.enabled | quote }}
+            {{- if ((.Values.support).kubecostEmitterEnabled) }}
+              {{- if eq .Values.support.kubecostEmitterEnabled "disabled" -}}
+              value: "false"
+              {{- else }}
+              value: "true"
+              {{- end }}
+            {{- else }}
+              value: {{ include "finops-agent.kubecostEnabled" . | quote }}
+            {{- end }}
             - name: OPENCOST_SOURCE_ENABLED
-              value:  {{ .Values.agent.kubecost.enabled | quote }}
+            {{- if ((.Values.support).opencostSourceEnabled) }}
+              {{- if eq .Values.support.opencostSourceEnabled "disabled" }}
+              value: "false"
+              {{- else }}
+              value: "true"
+              {{- end }}
+            {{- else }}
+              value: {{ include "finops-agent.kubecostEnabled" . | quote }}
+            {{- end }}
             - name: LOCAL_STORE_ENABLED
               value: {{ .Values.localStoreEnabled | quote }}
             {{- if .Values.extraEnvVars }}
@@ -283,7 +299,7 @@ spec:
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
-            {{- if .Values.agent.kubecost.enabled }}
+            {{- if include "finops-agent.kubecostEnabled" . }}
             - name: federated-storage-config
               mountPath: /var/configs/federated-store.yaml
               subPath: {{ include "finops-agent.federatedStorageFileName" . | trim }}
@@ -311,7 +327,7 @@ spec:
       volumes:
         - name: empty-dir
           emptyDir: {}
-        {{- if .Values.agent.kubecost.enabled }}
+        {{- if include "finops-agent.kubecostEnabled" . }}
         - name: federated-storage-config
           secret:
             defaultMode: 420

@@ -100,14 +100,6 @@ define the name of the csp pricing api key secret
 {{- end }}
 {{- end }}
 
-{{- define "finops-agent.localStoreEnabled" }}
-{{- if .Values.global.localStoreEnabled }}
-{{- true }}
-{{- else }}
-{{- false }}
-{{- end }}
-{{- end }}
-
 {{/*
 check if the finops agent is configured to send data to the cloudability platform or kubecost.
 We may want for this to be a failure if the agent cannot send historical data that was collected prior to being correctly configured.

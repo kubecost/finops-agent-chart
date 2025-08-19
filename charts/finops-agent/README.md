@@ -153,7 +153,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `cspPricingApiKey.create` | Note: only used for GCP at this time. Create a secret for the GCP API key. Cannot be used with `existingSecret` | `false` |
 | `cspPricingApiKey.existingSecret` | The name of an existing secret to use for the GCP API key. Note, you cannot set both `create` and `existingSecret` | `""` |
 | `cspPricingApiKey.apiKey` | The GCP API key value. Only used when `create` is true | `""` |
-| `cspPricingApiKey.secretName` | The name of the secret to use for the GCP API key. Only used when `create` is true | `""` |
+| `finops-agent.cspPricingApiKeySecretName` | The name of the secret to use for the GCP API key. Only used when `create` is true | `""` |
 | `logLevel` | The log level for the finops agent | `info` |
 
 **Note:** When using an existing/self-managed cspPricingApiKey secret, it must contain a key named `CSP_PRICING_API_KEY`.

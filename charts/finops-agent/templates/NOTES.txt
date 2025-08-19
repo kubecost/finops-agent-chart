@@ -1,6 +1,10 @@
-{{- include "finops-agent.exportBucket-legacy-check" . }}
+{{- include "finops-agent.exportBucketLegacyCheck" . }}
+
 CHART NAME: {{ .Chart.Name }}
 CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}
 
-You have successfully installed the IBM FinOps agent! 
+Kubecost Agent Enabled: {{ include "finops-agent.kubecostEnabled" . }}
+Cloudability Agent Enabled: {{ .Values.agent.cloudability.enabled }}
+
+{{- include "finops-agent.configCheck" . }}

@@ -11,6 +11,39 @@
 ## @param global.defaultStorageClass Global default StorageClass for Persistent Volume(s)
 ##
 global:
+  ## @param clusterId The id of the cluster REQUIRED
+  ##
+  clusterId: ""
+  ## @param global.federatedStorage.config The config for the federated storage
+  ## @param global.federatedStorage.existingSecret The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret`.
+  ##
+  federatedStorage:
+    config: ""
+    # A federated storage config can be provided via an existingSecretName or via a string in helm values.
+    # If both are provided, the string in helm values take precedence.
+    # Example:
+    #   config: |-
+    #     type: S3
+    #     config:
+    #       bucket: ibm-kubecost-unified-agent-demo-data
+    #       endpoint: s3.amazonaws.com
+    #       region: us-west-2
+    #       access_key: xxx
+    #       secret_key: xxx
+    existingSecretName: ""
+    # If you want to use a different file name for the federated storage config, you can set the fileName value.
+    fileName: federated-store.yaml  # set this value to change what the file name for the yaml config is
+    ## @param cspPricingApiKey.existingSecretName The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
+    ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
+    ## This is currently only used for GCP.
+  cspPricingApiKey:
+    existingSecretName: ""
+    apiKey: ""
+  ## @param global.imageRegistry The image registry to use for the finops agent
+  ## @param global.imagePullSecrets The image pull secrets to use for the finops agent
+  ## @param global.defaultStorageClass The default storage class to use for the finops agent
+  ## @param global.security.allowInsecureImages Allows skipping image verification
+  ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
   imageRegistry: ""
   ## E.g.
   ## imagePullSecrets:
@@ -32,12 +65,9 @@ global:
       ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
       ##
       adaptSecurityContext: auto
-
+  chartName: finops-agent
 ## @section Common parameters
 
-## @param clusterId The id of the cluster REQUIRED
-##
-clusterId: ""
 ## @param kubeVersion Override Kubernetes version
 ##
 kubeVersion: ""
@@ -95,33 +125,14 @@ image:
   ##
   pullSecrets: []
   debug: false
-## If set, this will override the image name and tag.
+## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
-## gcpKey is for the old key, use cspPricingApiKey instead.
+## @param gcpKey gcpKey is for the old key, use global.cspPricingApiKey instead. TODO: remove for GA release
 gcpKey: ""  # TODO: remove for GA release
-## @param cspPricingApiKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
-## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. Note, you cannot set both `create` and `existingSecret`.
-## @param cspPricingApiKey.create Create a secret for the GCP API key. Cannot be used with existingSecret
-## @param cspPricingApiKey.value The GCP API key value. Only used when `create` is true.
-## This is currently only used for GCP.
-cspPricingApiKey:
-  provider: "gcp"
-  secretName: "csp-pricing-api-key"
-  create: true
-  apiKey: ""
 
 ## @param logLevel The log level for the finops agent
 logLevel: "info"
 
-## federated storage configuration
-## @param federatedStorage.config The config for the federated storage
-##
-federatedStorage:
-  ## @param federatedStorage.config The config for the federated storage.
-  ## @param federatedStorage.existingSecret The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret`.
-  ##
-  config: ""
-  existingSecret: ""
 
 # Agent configuration
 # For the collector data source, note that all retention settings may directly impact the memory usage of the agent. The default values safely capture the required retention to operate
@@ -134,7 +145,6 @@ federatedStorage:
 ## @param agent.collectorDataSource.retentionResolution1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
-## @param agent.kubecost.enabled Enable the kubecost data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
 ## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
 ## @param agent.cloudability.keySecretFile the name of the keySecretFile
@@ -172,10 +182,9 @@ agent:
     retentionResolution1d: 2
   exporter:
     emissionInterval: 1m
-  kubecost:
-    enabled: true
   cloudability:
-    enabled: true
+    ## Cloudability requires an API key to send data to the cloudability platform
+    enabled: false
     pathToCloudabilitySecrets: "/opt/cloudability"
     keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
     keySecretFile: "CLOUDABILITY_KEY_SECRET"
@@ -562,9 +571,10 @@ persistence:
   ## @param persistence.dataSource Custom PVC data source
   ##
   dataSource: {}
-  ## @param persistence.annotations Additional custom annotations for the PVC
+  ## @param persistence.annotations.helm.sh/resource-policy The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method.
   ##
-  annotations: {}
+  annotations:
+    helm.sh/resource-policy: keep
   ## @param persistence.selector Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it
   ## selector:
   ##   matchLabels:

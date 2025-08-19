@@ -1,3 +1,4 @@
 temp/
 .kubeconfig
 *.tgz
+README-how-to-update-README.md

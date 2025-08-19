@@ -3,10 +3,6 @@ Copyright IBM, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if eq ((include "finops-agent.clusterId" .) | trim | len) 0}}
-{{- fail "clusterId is required and cannot be empty" }}
-{{- end }}
-
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
@@ -33,13 +29,13 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if .Values.federatedStorage.config }}
+        {{- if include "finops-agent.kubecostEnabled" . }}
         checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
         {{- end }}
-        {{- if .Values.cspPricingApiKey.apiKey }}
+        {{- if .Values.global.cspPricingApiKey.apiKey }}
         checksum/csp-pricing-api-key-secret: {{ include (print .Template.BasePath "/csp-api-key-secret.yaml") . | sha256sum }}
         {{- end }}
-        {{- if .Values.agent.cloudability.secret.create }}
+        {{- if .Values.agent.cloudability.enabled }}
         checksum/cloudability-secret: {{ include (print .Template.BasePath "/cloudability-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.podAnnotations }}
@@ -78,10 +74,10 @@ spec:
       securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" .) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ template "finops-agent.serviceAccountName" . }}
+      {{- if .Values.initContainers }}
       initContainers:
-        {{- if .Values.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" .) | nindent 8 }}
-        {{- end }}
+      {{- end }}
       containers:
         - name: finops-agent
           image: {{ include "finops-agent.image" . }}
@@ -135,11 +131,11 @@ spec:
             - name: LOG_LEVEL
               value: {{ .Values.logLevel | quote }}
 
-            {{- if .Values.cspPricingApiKey.apiKey }}
+            {{- if ne (include "finops-agent.cspPricingApiKeySecretName" .) "disabled" }}
             - name: CLOUD_PROVIDER_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.cspPricingApiKey.secretName | trim }}
+                  name: {{ include "finops-agent.cspPricingApiKeySecretName" . | trim }}
                   key: CSP_PRICING_API_KEY
             {{- end }}
 
@@ -227,9 +223,25 @@ spec:
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
             {{- end }}
             - name: KUBECOST_EMITTER_ENABLED
-              value:  {{ .Values.agent.kubecost.enabled | quote }}
+            {{- if ((.Values.support).kubecostEmitterEnabled) }}
+              {{- if eq .Values.support.kubecostEmitterEnabled "disabled" -}}
+              value: "false"
+              {{- else }}
+              value: "true"
+              {{- end }}
+            {{- else }}
+              value: {{ include "finops-agent.kubecostEnabled" . | quote }}
+            {{- end }}
             - name: OPENCOST_SOURCE_ENABLED
-              value:  {{ .Values.agent.kubecost.enabled | quote }}
+            {{- if ((.Values.support).opencostSourceEnabled) }}
+              {{- if eq .Values.support.opencostSourceEnabled "disabled" }}
+              value: "false"
+              {{- else }}
+              value: "true"
+              {{- end }}
+            {{- else }}
+              value: {{ include "finops-agent.kubecostEnabled" . | quote }}
+            {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}
@@ -285,17 +297,17 @@ spec:
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
-            {{- if or ((.Values.agent).kubecost).enabled }}
+            {{- if include "finops-agent.kubecostEnabled" . }}
             - name: federated-storage-config
               mountPath: /var/configs/federated-store.yaml
-              subPath: {{ include "finops-agent.federatedStorage.fileName" . | trim }}
+              subPath: {{ include "finops-agent.federatedStorageFileName" . | trim }}
               readOnly: true
             {{- end }}
-            {{- if .Values.agent.cloudability.enabled }}
+            {{- if and .Values.agent.cloudability.enabled (include "cloudability.secret.name" .) (ne (include "cloudability.secret.name" . | trim) "") }}
             - name: cloudability-secret-store
               mountPath: {{ .Values.agent.cloudability.pathToCloudabilitySecrets}}
             {{- end }}
-            {{- if or .Values.cspPricingApiKey.create (not (empty .Values.cspPricingApiKey.existingSecret)) }}
+            {{- if ne (include "finops-agent.cspPricingApiKeySecretName" .) "disabled" }}
             - name: csp-pricing-api-key-secret
               mountPath: /opt/gcp
               readOnly: true
@@ -313,27 +325,22 @@ spec:
       volumes:
         - name: empty-dir
           emptyDir: {}
-        {{- if ((.Values.agent).kubecost).enabled}}
+        {{- if include "finops-agent.kubecostEnabled" . }}
         - name: federated-storage-config
           secret:
             defaultMode: 420
-            secretName: {{ include "finops-agent.federatedStorage.secretName" . }}
+            secretName: {{ include "finops-agent.federatedStorageSecretName" . }}
         {{- end }}
-        {{- if .Values.agent.cloudability.secret.create}}
+        {{- if and (include "cloudability.secret.name" .) (ne (include "cloudability.secret.name" . | trim) "") }}
         - name: cloudability-secret-store
           secret:
             secretName: {{ include "cloudability.secret.name" . | trim }}
             defaultMode: 256
-        {{- else if (not (empty .Values.agent.cloudability.secret.existingSecret))}}
-        - name: cloudability-secret-store
-          secret:
-            secretName: {{ .Values.agent.cloudability.secret.existingSecret }}
-            defaultMode: 256
         {{- end }}
-        {{- if .Values.cspPricingApiKey.create}}
+        {{- if ne (include "finops-agent.cspPricingApiKeySecretName" .) "disabled" }}
         - name: csp-pricing-api-key-secret
           secret:
-            secretName: {{ .Values.cspPricingApiKey.secretName | trim }}
+            secretName: {{ include "finops-agent.cspPricingApiKeySecretName" . | trim }}
             defaultMode: 256
         {{- end }}
         {{- if .Values.extraVolumes }}

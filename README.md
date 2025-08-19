@@ -4,7 +4,7 @@ This repository contains the Helm chart for the IBM FinOps Agent.
 
 ## Using the FinOps Agent
 
-The unified FinOps Agent is a single agent that can be used to collect data from multiple sources and send it to multiple destinations.
+The unified FinOps Agent is a single agent that can be used to collect Kubernetes metrics and send it to multiple destinations.
 
 ### Supported Destinations
 
@@ -13,7 +13,7 @@ The unified FinOps Agent is a single agent that can be used to collect data from
 
 ### Considerations when using with Kubecost
 
-The FinOps Agent is can be installed independently of the Kubecost Primary. This allows for globally consistent agent configuration across all clusters.
+The FinOps Agent can be installed independently of the Kubecost Primary. This allows for globally consistent agent configuration across all clusters.
 
 There are two methods to install the FinOps Agent with Kubecost:
 

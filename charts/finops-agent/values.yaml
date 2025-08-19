@@ -67,6 +67,7 @@ global:
       ## @param global.compatibility.openshift.adaptSecurityContext Adapt the securityContext sections of the deployment to make them compatible with Openshift restricted-v2 SCC: remove runAsUser, runAsGroup and fsGroup and let the platform use their allowed default IDs. Possible values: auto (apply if the detected running cluster is Openshift), force (perform the adaptation always), disabled (do not perform adaptation)
       ##
       adaptSecurityContext: auto
+  chartName: finops-agent
 ## @section Common parameters
 
 ## @param kubeVersion Override Kubernetes version
@@ -146,7 +147,6 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retentionResolution1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
-## @param agent.kubecost.enabled Enable the kubecost data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
 ## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
 ## @param agent.cloudability.keySecretFile the name of the keySecretFile
@@ -184,9 +184,6 @@ agent:
     retentionResolution1d: 2
   exporter:
     emissionInterval: 1m
-  kubecost:
-    ## Kubecost requires a federated storage config or existing secret to be set
-    enabled: false
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false
@@ -613,5 +610,3 @@ rbac:
   create: true
   clusterRole:
     create: true
-## @param localStoreEnabled this values is only used by the Kubecost main chart, it must be set to false for the FinOps Agent to work when deployed by the FinOps Agent chart
-localStoreEnabled: false

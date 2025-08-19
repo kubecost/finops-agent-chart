@@ -103,7 +103,7 @@ define the name of the csp pricing api key secret
 {{- end }}
 
 {{- define "finops-agent.localStoreEnabled" }}
-{{- if .Values.localStoreEnabled }}
+{{- if .Values.global.localStoreEnabled }}
 {{- true }}
 {{- else }}
 {{- false }}
@@ -118,14 +118,21 @@ We may want for this to be a failure if the agent cannot send historical data th
 {{- if not (or (.Values.global.federatedStorage.existingSecretName) (.Values.global.federatedStorage.config) (.Values.agent.cloudability.enabled)) }}
 {{ printf "\nWARNING: The finops agent requires configuration.\nFor Kubecost, please provide a federated storage config\nFor Cloudability, set agent.cloudability.enabled to true\n" }}
 {{- else }}
-{{- printf "\n\nYou have successfully installed the IBM FinOps agent!\n" }}
+{{ printf "You have successfully installed the IBM FinOps agent!" }}
 {{- end }}
 {{- end }}
 
 {{- define "finops-agent.kubecostEnabled" }}
-{{- if or (.Values.global.federatedStorage.existingSecretName) (.Values.global.federatedStorage.config) (.Values.localStoreEnabled) }}
+{{- if or (.Values.global.federatedStorage.existingSecretName) (.Values.global.federatedStorage.config) (eq .Values.global.chartName "kubecost") }}
 {{- true }}
 {{- else }}
 {{- false }}
 {{- end }}
 {{- end }}
+
+{{- define "finops-agent.globalChecksum" -}}
+{{- /* Add global values to the checksum */ -}}
+{{- $globalChecksum := toYaml $.Values.global | sha256sum -}}
+{{- $checksum = printf "%s%s" $checksum $globalChecksum | sha256sum -}}
+{{- $checksum | sha256sum -}}
+{{- end -}}

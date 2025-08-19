@@ -39,8 +39,6 @@ global:
   cspPricingApiKey:
     existingSecretName: ""
     apiKey: ""
-  ## @param global.fullImageName If set, this will override the image name and tag.
-  finopsAgentFullImageName: ""
   ## @param global.imageRegistry The image registry to use for the finops agent
   ## @param global.imagePullSecrets The image pull secrets to use for the finops agent
   ## @param global.defaultStorageClass The default storage class to use for the finops agent

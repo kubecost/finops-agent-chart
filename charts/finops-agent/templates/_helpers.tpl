@@ -21,8 +21,6 @@ Return the proper FinOps Agent Core image name
 {{- define "finops-agent.image" -}}
 {{- if .Values.fullImageName -}}
 {{ .Values.fullImageName }}
-{{- else if .Values.global.finopsAgentFullImageName -}}
-{{ .Values.global.finopsAgentFullImageName }}
 {{- else -}}
 {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
 {{- end -}}

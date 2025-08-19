@@ -1,6 +1,11 @@
-{{- include "finops-agent.exportBucket-legacy-check" . }}
+{{- include "finops-agent.federatedStorageSecretCheck" . }}
+{{- include "finops-agent.exportBucketLegacyCheck" . }}
+{{- include "finops-agent.kubecostConfigCheck" . }}
 CHART NAME: {{ .Chart.Name }}
 CHART VERSION: {{ .Chart.Version }}
 APP VERSION: {{ .Chart.AppVersion }}
 
-You have successfully installed the IBM FinOps agent! 
+Kubecost Agent Enabled: {{ .Values.agent.kubecost.enabled }}
+Cloudability Agent Enabled: {{ .Values.agent.cloudability.enabled }}
+
+{{- include "finops-agent.configCheck" . }}

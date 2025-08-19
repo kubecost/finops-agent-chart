@@ -101,11 +101,10 @@ image:
   ##
   pullSecrets: []
   debug: false
-## If set, this will override the image name and tag.
+## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
-## gcpKey is for the old key, use cspPricingApiKey instead.
+## @param gcpKey gcpKey is for the old key, use cspPricingApiKey instead. TODO: remove for GA release
 gcpKey: ""  # TODO: remove for GA release
-## @param cspPricingApiKey GCP API key if deploying to GCP. This can be read only permissions, this is used to fetch current pricing of resources
 ## @param cspPricingApiKey.existingSecretName The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
 ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
 ## This is currently only used for GCP.
@@ -120,7 +119,6 @@ logLevel: "info"
 ## @param federatedStorage.config The config for the federated storage
 ##
 federatedStorage:
-  ## @param federatedStorage.config The config for the federated storage.
   ## @param federatedStorage.existingSecret The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret`.
   ##
   config: ""
@@ -567,10 +565,9 @@ persistence:
   ## @param persistence.dataSource Custom PVC data source
   ##
   dataSource: {}
-  ## @param persistence.annotations Additional custom annotations for the PVC
+  ## @param persistence.annotations.helm.sh/resource-policy The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method.
   ##
   annotations:
-    ## The "helm.sh/resource-policy: keep" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method.
     helm.sh/resource-policy: keep
   ## @param persistence.selector Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it
   ## selector:
@@ -605,5 +602,5 @@ rbac:
   create: true
   clusterRole:
     create: true
-## this values is only used by the Kubecost main chart, it must be set to false for the FinOps Agent to work when deployed by the FinOps Agent chart
+## @param localStoreEnabled this values is only used by the Kubecost main chart, it must be set to false for the FinOps Agent to work when deployed by the FinOps Agent chart
 localStoreEnabled: false

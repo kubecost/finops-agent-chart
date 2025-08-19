@@ -325,4 +325,4 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 
 ## License
 
-[Apache License 2.0](LICENSE)
+[Apache License 2.0](../../LICENSE)

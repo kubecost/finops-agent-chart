@@ -96,6 +96,8 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" .) | nindent 12 }}
           {{- end }}
           env:
+            - name: APP_NAME
+            - value: finops-agent
             # TODO
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}

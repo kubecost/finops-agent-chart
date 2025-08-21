@@ -109,19 +109,19 @@ spec:
             - name: NETWORK_PORT
               value: {{ .networkPort | quote }}
             {{- end }}
-            {{- if .retentionResolution10m }}
-            - name: COLLECTOR_10M_RESOLUTION_RETENTION
-              value: {{ .retentionResolution10m | quote }}
+            {{- if .retention10m }}
+            - name: COLLECTOR_RESOLUTION_10m_RETENTION
+              value: {{ .retention10m | quote }}
             - name: MINUTE_METRICS_ENABLED
               value: "true"
             {{- end }}
-            {{- if .retentionResolution1h }}
-            - name: COLLECTOR_1H_RESOLUTION_RETENTION
-              value: {{ .retentionResolution1h | quote }}
+            {{- if .retention1h }}
+            - name: COLLECTOR_RESOLUTION_1H_RETENTION
+              value: {{ .retention1h | quote }}
             {{- end }}
-            {{- if .retentionResolution1d }}
-            - name: COLLECTOR_1D_RESOLUTION_RETENTION
-              value: {{ .retentionResolution1d | quote }}
+            {{- if .retention1d }}
+            - name: COLLECTOR_RESOLUTION_1D_RETENTION
+              value: {{ .retention1d | quote }}
             {{- end }}
             {{- end }}
             {{- end }}

@@ -146,8 +146,6 @@ spec:
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME
               value: {{ (include "finops-agent.clusterId" .) | quote }}
-            - name: CLOUDY_EMITTER_ENABLED
-              value: "true"
             - name: CLOUDABILITY_EMITTER_ENABLED
               value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR
@@ -227,8 +225,6 @@ spec:
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
             {{- end }}
             {{- else }}
-            - name: CLOUDY_EMITTER_ENABLED
-              value: "false"
             - name: CLOUDABILITY_EMITTER_ENABLED
               value: "false"
             {{- end }}

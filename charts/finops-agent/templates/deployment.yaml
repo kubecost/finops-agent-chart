@@ -147,13 +147,12 @@ spec:
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME
               value: {{ (include "finops-agent.clusterId" .) | quote }}
-            - name: CLOUDABILITY_EMITTER_ENABLED
+            - name: CLOUDY_EMITTER_ENABLED
               value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR
               value: {{ .Values.agent.cloudability.localWorkingDir | quote }}
             - name: CLOUDABILITY_UPLOAD_REGION
               value: {{ .Values.agent.cloudability.uploadRegion | quote }}
-            {{- end }}
             {{- if .Values.agent.cloudability.httpsClientTimeout }}
             - name: CLOUDABILITY_HTTPS_CLIENT_TIMEOUT
               value: {{ .Values.agent.cloudability.httpsClientTimeout | quote}}
@@ -226,6 +225,10 @@ spec:
             - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET_FILEPATH
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
             {{- end }}
+            {{- else }}
+            - name: CLOUDABILITY_EMITTER_ENABLED
+              value: "false"
+            {{- end }}            
             - name: KUBECOST_EMITTER_ENABLED
             {{- if ((.Values.support).kubecostEmitterEnabled) }}
               {{- if eq .Values.support.kubecostEmitterEnabled "disabled" -}}
@@ -301,9 +304,11 @@ spec:
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
+              readOnly: false
             - name: empty-dir
               mountPath: /var/configs
               subPath: configs-dir
+              readOnly: false
             {{- if include "finops-agent.kubecostEnabled" . }}
             - name: federated-storage-config
               mountPath: /var/configs/federated-store.yaml
@@ -313,6 +318,7 @@ spec:
             {{- if and .Values.agent.cloudability.enabled (include "cloudability.secret.name" .) (ne (include "cloudability.secret.name" . | trim) "") }}
             - name: cloudability-secret-store
               mountPath: {{ .Values.agent.cloudability.pathToCloudabilitySecrets}}
+              readOnly: true
             {{- end }}
             {{- if ne (include "finops-agent.cspPricingApiKeySecretName" .) "disabled" }}
             - name: csp-pricing-api-key-secret
@@ -322,6 +328,7 @@ spec:
             {{- if .Values.persistence.enabled }}
             - mountPath: {{ .Values.persistence.mountPath }}
               name: data
+              readOnly: false
             {{- end }}
           {{- if .Values.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
@@ -337,20 +344,17 @@ spec:
         {{- if include "finops-agent.kubecostEnabled" . }}
         - name: federated-storage-config
           secret:
-            defaultMode: 420
             secretName: {{ include "finops-agent.federatedStorageSecretName" . }}
         {{- end }}
         {{- if and (include "cloudability.secret.name" .) (ne (include "cloudability.secret.name" . | trim) "") }}
         - name: cloudability-secret-store
           secret:
             secretName: {{ include "cloudability.secret.name" . | trim }}
-            defaultMode: 256
         {{- end }}
         {{- if ne (include "finops-agent.cspPricingApiKeySecretName" .) "disabled" }}
         - name: csp-pricing-api-key-secret
           secret:
             secretName: {{ include "finops-agent.cspPricingApiKeySecretName" . | trim }}
-            defaultMode: 256
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}

@@ -44,6 +44,26 @@ Create the name of the ServiceAccount to use
 {{- end -}}
 {{- end -}}
 
+{{/*
+Check if the cluster is running on GCP and provide appropriate warnings
+*/}}
+{{- define "finops-agent.gcpCheck" -}}
+{{- /* Check for GCP-specific node labels to auto-detect GCP clusters */ -}}
+{{- $isGCP := false -}}
+{{- range $node := (lookup "v1" "Node" "" "").items -}}
+  {{- range $key, $value := $node.metadata.labels -}}
+    {{- if contains "google" $key -}}
+      {{- $isGCP = true -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $isGCP -}}
+{{- if not (or (.Values.global.cspPricingApiKey.apiKey) (.Values.global.cspPricingApiKey.existingSecret) (.Values.global.ignoreGcpPricingCheck)) }}
+{{ printf "\nCONFIGURATION ERROR: GCP detected. For GCP clusters, an API key is required to access on-demand pricing data." }}
+{{ fail "\nTo install, please set one of the following values:\n\nglobal.cspPricingApiKey.apiKey\nglobal.cspPricingApiKey.existingSecret\nglobal.ignoreGcpPricingCheck\n" }}
+{{- end }}
+{{- end }}
+{{- end }}
 
 
 {{/*
@@ -98,6 +118,13 @@ define the name of the csp pricing api key secret
 {{- if (((.Values.exportBucket).secret).existingSecret) }}
 {{- fail "\n\nexportBucket.secret.existingSecret has changed. Please use global.federatedStorage.existingSecret instead" }}
 {{- end }}
+{{- if ((.Values.federatedStorage).config) }}
+{{- fail "\n\nfederatedStorage.config has changed. Please use global.federatedStorage.config instead" }}
+{{- end }}
+{{- if ((.Values.federatedStorage).existingSecret) }}
+{{- fail "\n\nfederatedStorage.existingSecret has changed. Please use global.federatedStorage.existingSecret instead" }}
+{{- end }}
+
 {{- end }}
 
 {{/*
@@ -106,7 +133,7 @@ We may want for this to be a failure if the agent cannot send historical data th
 */}}
 {{- define "finops-agent.configCheck" }}
 {{- if not (or (.Values.global.federatedStorage.existingSecret) (.Values.global.federatedStorage.config) (.Values.agent.cloudability.enabled)) }}
-{{ printf "\nWARNING: The finops agent requires configuration.\nFor Kubecost, please provide a federated storage config\nFor Cloudability, set agent.cloudability.enabled to true\n" }}
+{{ printf "\nCONFIGURATION WARNING: The finops agent requires configuration.\nFor Kubecost, please provide a federated storage config\nFor Cloudability, set agent.cloudability.enabled to true\n" }}
 {{- else }}
 {{ printf "You have successfully installed the IBM FinOps agent!" }}
 {{- end }}
@@ -126,3 +153,4 @@ We may want for this to be a failure if the agent cannot send historical data th
 {{- $checksum = printf "%s%s" $checksum $globalChecksum | sha256sum -}}
 {{- $checksum | sha256sum -}}
 {{- end -}}
+

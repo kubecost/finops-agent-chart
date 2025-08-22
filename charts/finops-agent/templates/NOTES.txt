@@ -1,3 +1,4 @@
+{{ include "finops-agent.gcpCheck" . }}
 {{- include "finops-agent.exportBucketLegacyCheck" . }}
 
 CHART NAME: {{ .Chart.Name }}

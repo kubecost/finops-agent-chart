@@ -182,6 +182,10 @@ spec:
             - name: CLOUDABILITY_OUTBOUND_PROXY_AUTH
               value: {{ .Values.agent.cloudability.outboundProxyAuth | quote }}
             {{- end }}
+            {{- if .Values.agent.cloudability.useProxyForGettingUploadURLonly }}
+            - name: CLOUDABILITY_USE_PROXY_FOR_GETTING_UPLOAD_URL_ONLY
+              value: {{ .Values.agent.cloudability.useProxyForGettingUploadURLonly | quote }}
+            {{- end }}
             {{- if .Values.agent.cloudability.customS3UploadBucket }}
             - name: CLOUDABILITY_CUSTOM_S3_UPLOAD_BUCKET
               value: {{ .Values.agent.cloudability.customS3UploadBucket | quote }}

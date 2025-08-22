@@ -148,6 +148,8 @@ spec:
               value: {{ (include "finops-agent.clusterId" .) | quote }}
             - name: CLOUDY_EMITTER_ENABLED
               value: "true"
+            - name: CLOUDABILITY_EMITTER_ENABLED
+              value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR
               value: {{ .Values.agent.cloudability.localWorkingDir | quote }}
             - name: CLOUDABILITY_UPLOAD_REGION
@@ -226,6 +228,8 @@ spec:
             {{- end }}
             {{- else }}
             - name: CLOUDY_EMITTER_ENABLED
+              value: "false"
+            - name: CLOUDABILITY_EMITTER_ENABLED
               value: "false"
             {{- end }}
             - name: KUBECOST_EMITTER_ENABLED

@@ -110,7 +110,7 @@ spec:
               value: {{ .networkPort | quote }}
             {{- end }}
             {{- if .retention10m }}
-            - name: COLLECTOR_RESOLUTION_10m_RETENTION
+            - name: COLLECTOR_RESOLUTION_10M_RETENTION
               value: {{ .retention10m | quote }}
             - name: MINUTE_METRICS_ENABLED
               value: "true"

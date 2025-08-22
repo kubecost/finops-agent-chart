@@ -33,9 +33,9 @@ global:
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
     fileName: federated-store.yaml  # set this value to change what the file name for the yaml config is
-    ## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
-    ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
-    ## This is currently only used for GCP.
+  ## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
+  ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
+  ## When using GCP, an API key to access on-demand pricing is required.
   cspPricingApiKey:
     existingSecret: ""
     apiKey: ""
@@ -111,9 +111,9 @@ useHelmHooks: true
 ## @param image.debug Specify if debug logs should be enabled
 ##
 image:
-  registry: icr.io
-  repository: ibm-finops/agent
-  tag: v0.0.26
+  registry: gcr.io
+  repository: kubecost1/ibm-finops-agent
+  tag: 0.0.0-beta.2
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.

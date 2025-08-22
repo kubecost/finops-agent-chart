@@ -2,3 +2,4 @@ temp/
 .kubeconfig
 *.tgz
 README-how-to-update-README.md
+gke_gcloud_auth_plugin_cache

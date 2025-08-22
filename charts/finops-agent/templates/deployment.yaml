@@ -225,9 +225,9 @@ spec:
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
             {{- end }}
             {{- else }}
-            - name: CLOUDABILITY_EMITTER_ENABLED
+            - name: CLOUDY_EMITTER_ENABLED
               value: "false"
-            {{- end }}            
+            {{- end }}
             - name: KUBECOST_EMITTER_ENABLED
             {{- if ((.Values.support).kubecostEmitterEnabled) }}
               {{- if eq .Values.support.kubecostEmitterEnabled "disabled" -}}

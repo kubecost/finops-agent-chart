@@ -98,7 +98,6 @@ spec:
           env:
             - name: APP_NAME
             - value: finops-agent
-            # TODO
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED
@@ -149,13 +148,14 @@ spec:
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME
               value: {{ (include "finops-agent.clusterId" .) | quote }}
+            - name: CLOUDY_EMITTER_ENABLED
+              value: "true"
             - name: CLOUDABILITY_EMITTER_ENABLED
               value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR
               value: {{ .Values.agent.cloudability.localWorkingDir | quote }}
             - name: CLOUDABILITY_UPLOAD_REGION
               value: {{ .Values.agent.cloudability.uploadRegion | quote }}
-            {{- end }}
             {{- if .Values.agent.cloudability.httpsClientTimeout }}
             - name: CLOUDABILITY_HTTPS_CLIENT_TIMEOUT
               value: {{ .Values.agent.cloudability.httpsClientTimeout | quote}}
@@ -183,6 +183,10 @@ spec:
             {{- if .Values.agent.cloudability.outboundProxyAuth }}
             - name: CLOUDABILITY_OUTBOUND_PROXY_AUTH
               value: {{ .Values.agent.cloudability.outboundProxyAuth | quote }}
+            {{- end }}
+            {{- if .Values.agent.cloudability.useProxyForGettingUploadURLonly }}
+            - name: CLOUDABILITY_USE_PROXY_FOR_GETTING_UPLOAD_URL_ONLY
+              value: {{ .Values.agent.cloudability.useProxyForGettingUploadURLonly | quote }}
             {{- end }}
             {{- if .Values.agent.cloudability.customS3UploadBucket }}
             - name: CLOUDABILITY_CUSTOM_S3_UPLOAD_BUCKET
@@ -223,6 +227,12 @@ spec:
             {{- if .Values.agent.cloudability.customAzureBlobClientSecretFile }}
             - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET_FILEPATH
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.customAzureBlobClientSecretFile }}"
+            {{- end }}
+            {{- else }}
+            - name: CLOUDY_EMITTER_ENABLED
+              value: "false"
+            - name: CLOUDABILITY_EMITTER_ENABLED
+              value: "false"
             {{- end }}
             - name: KUBECOST_EMITTER_ENABLED
             {{- if ((.Values.support).kubecostEmitterEnabled) }}
@@ -299,6 +309,9 @@ spec:
             - name: empty-dir
               mountPath: /tmp
               subPath: tmp-dir
+            - name: empty-dir
+              mountPath: /var/configs
+              subPath: configs-dir
             {{- if include "finops-agent.kubecostEnabled" . }}
             - name: federated-storage-config
               mountPath: /var/configs/federated-store.yaml
@@ -326,6 +339,8 @@ spec:
         {{- end }}
       volumes:
         - name: empty-dir
+          emptyDir: {}
+        - name: var-configs-empty-dir
           emptyDir: {}
         {{- if include "finops-agent.kubecostEnabled" . }}
         - name: federated-storage-config

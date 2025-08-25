@@ -11,6 +11,7 @@ global:
       config:
         bucket: kubecost-federated-storage
   cspPricingApiKey:
+    ## When using GCP, an API key to access on-demand pricing is required.
     ## use the apiKey OR the secret.
     ## A secret is recommended- though the apiKey is can be a read only service account exclusively for downloading public pricing data.
     apiKey: ""

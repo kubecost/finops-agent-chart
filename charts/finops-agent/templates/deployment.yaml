@@ -97,7 +97,7 @@ spec:
           {{- end }}
           env:
             - name: APP_NAME
-            - value: finops-agent
+              value: finops-agent
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED

@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true  # cancel if new commits are pushed to the same branch
 
 jobs:
-  lint-test:
+  chart-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

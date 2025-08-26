@@ -1,0 +1,102 @@
+---
+name: PR Validation
+
+on:
+  pull_request
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+
+      - name: Run chart-testing (lint)
+        run: >-
+          ct lint
+          --target-branch ${{ github.event.repository.default_branch }}
+          --charts charts/finops-agent
+
+      - name: Run helm lint
+        run: helm lint charts/finops-agent/
+
+      - name: Run helm template validation
+        run: |
+          helm template charts/finops-agent/ > /dev/null
+          if [ $? -ne 0 ]; then
+            echo "Helm template validation failed"
+            exit 1
+          fi
+
+  yaml-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML files
+        run: |
+          yamllint -c .github/linters/yamllint-config.yaml -f colored charts/
+
+  markdown-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint Markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v13
+        with:
+          globs: 'charts/**/*.md README.md'
+          config: '.github/linters/markdownlint.yaml'
+
+  whitespace-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for trailing whitespace and newlines
+        run: |
+          # Find files with trailing whitespace
+          echo "Checking for trailing whitespace..."
+          if grep -r --include="*.yaml" --include="*.md" --include="*.tpl" \
+             "[[:blank:]]$" charts/; then
+            echo "Error: Found trailing whitespace in the above files"
+            exit 1
+          fi
+
+          # Check for files not ending with newline
+          echo "Checking for files not ending with newline..."
+          for file in $(find charts/ -type f -name "*.yaml" -o -name "*.md" \
+                        -o -name "*.tpl"); do
+            if [ -s "$file" ] && [ "$(tail -c 1 "$file" | wc -l)" -eq 0 ]; then
+              echo "Error: $file does not end with a newline"
+              exit 1
+            fi
+          done
+
+# Made with Bob

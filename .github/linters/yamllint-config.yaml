@@ -1,0 +1,39 @@
+---
+extends: default
+
+rules:
+  # 80 chars should be enough, but don't fail if a line is longer
+  line-length:
+    max: 120
+    level: warning
+
+  # Accept both Unix-style and Windows-style line endings
+  new-line-at-end-of-file: enable
+  
+  # Enforce document start with ---
+  document-start:
+    present: true
+
+  # Spaces, not tabs
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+
+  # No trailing spaces
+  trailing-spaces: enable
+
+  # Ensure consistent empty lines
+  empty-lines:
+    max: 2
+    max-start: 0
+    max-end: 0
+
+  # Enforce key ordering
+  key-ordering: disable
+
+  # Quotes are not required for all strings in YAML
+  quoted-strings:
+    quote-type: any
+    required: only-when-needed
+
+# Made with Bob

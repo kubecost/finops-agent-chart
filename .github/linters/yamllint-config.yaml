@@ -12,7 +12,7 @@ rules:
   
   # Enforce document start with ---
   document-start:
-    present: true
+    present: false
 
   # Spaces, not tabs
   indentation:

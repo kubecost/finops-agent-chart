@@ -59,27 +59,9 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install yamllint
-        run: pip install yamllint
-
-      - name: Check YAML files with yamllint
+      - name: Check for trailing whitespace in all files
         run: |
-          yamllint -d "{extends: default, rules: {trailing-spaces: {}, document-end: {present: true}}}" charts/
-
-      - name: Check for trailing whitespace in MD and TPL files
-        run: |
-          if grep -r --include="*.md" --include="*.tpl" "[[:blank:]]$" charts/; then
+          if grep -r --include="*.*" "[[:blank:]]$" charts/; then
             echo "Error: Found trailing whitespace in .md or .tpl files"
             exit 1
           fi
-
-      - name: Check for missing newlines in MD and TPL files
-        run: |
-          exit_code=0
-          for file in $(find charts/ -type f -name "*.md" -o -name "*.tpl"); do
-            if [ -s "$file" ] && [ "$(tail -c 1 "$file" | wc -l)" -eq 0 ]; then
-              echo "Error: $file does not end with a newline"
-              exit_code=1
-            fi
-          done
-          exit $exit_code

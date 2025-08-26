@@ -111,9 +111,9 @@ useHelmHooks: true
 ## @param image.debug Specify if debug logs should be enabled
 ##
 image:
-  registry: public.ecr.aws
-  repository: kubecost/agent
-  tag: 3.0.0-test.0
+  registry: icr.io
+  repository: ibm-finops/agent
+  tag: v1.0.0-test.0
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.

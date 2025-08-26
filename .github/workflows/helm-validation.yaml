@@ -54,7 +54,7 @@ jobs:
             --namespace finops-agent-chart-test --create-namespace \
             --wait --wait-for-jobs --timeout 300s \
             ./charts/finops-agent \
-            -f .github/configs/helmValues-helm-validation.yaml
+            -f .github/configs/helmValues-helm-validation-kubecost.yaml
 
       - name: Wait for ready 
         if: steps.list-changed.outputs.changed == 'true'

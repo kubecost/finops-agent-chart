@@ -4,7 +4,7 @@ global:
     config:  |-
       type: cluster
       config:
-        host: kubecost-local-store.kubecost.svc.cluster.local
+        host: kubecost-local-store.finops-agent-chart-test
         port: 9006
         http_config:
           tls_config:

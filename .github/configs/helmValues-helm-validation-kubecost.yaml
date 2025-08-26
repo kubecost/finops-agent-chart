@@ -1,0 +1,65 @@
+global:
+  clusterId: chart-testing
+  federatedStorage:
+    config:  |-
+      type: cluster
+      config:
+        host: kubecost-local-store.kubecost.svc.cluster.local
+        port: 9006
+        http_config:
+          tls_config:
+            insecure_skip_verify: true
+persistence:
+  enabled: false
+extraObjects:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: kubecost-local-store
+    name: kubecost-local-store
+    namespace: finops-agent-chart-test
+  spec:
+    selector:
+      matchLabels:
+        app: kubecost-local-store
+    template:
+      metadata:
+        labels:
+          app: kubecost-local-store
+      spec:
+        containers:
+        - name: local-object-store
+          args:
+          - cluster-storage
+          env:
+          - name: CONFIG_PATH
+            value: /var/configs/
+          - name: RESOLUTION_10M_RETENTION
+            value: "1"
+          - name: RESOLUTION_1H_RETENTION
+            value: "1"
+          - name: RESOLUTION_1D_RETENTION
+            value: "1"
+          image: gcr.io/kubecost1/cost-model-nightly:latest
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 9006
+            name: tcp-api
+            protocol: TCP
+          readinessProbe:
+            failureThreshold: 200
+            httpGet:
+              path: /healthz
+              port: 9006
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          volumeMounts:
+          - mountPath: /var/configs
+            name: file-storage
+        volumes:
+        - name: file-storage
+          emptyDir: {}

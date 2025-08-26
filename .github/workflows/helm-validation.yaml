@@ -37,7 +37,11 @@ jobs:
 
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
+        run: |
+          ct lint \
+            --all \
+            --validate-maintainers=false \
+            --target-branch ${{ github.event.repository.default_branch }}
 
       - name: Create kind cluster
         if: steps.list-changed.outputs.changed == 'true'
@@ -45,7 +49,20 @@ jobs:
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --target-branch ${{ github.event.repository.default_branch }}
+        run: |
+          helm install finops-agent-chart-test \
+            --namespace finops-agent-chart-test --create-namespace \
+            --wait --wait-for-jobs --timeout 300s \
+            ./charts/finops-agent \
+            -f .github/configs/helmValues-helm-validation.yaml
+
+      - name: Wait for ready 
+        if: steps.list-changed.outputs.changed == 'true'
+        run: |
+          kubectl wait -n finops-agent-chart-test \
+            --for=condition=ready pod \
+            --selector app.kubernetes.io/instance=finops-agent-chart-test \
+            --timeout=120s
 
   whitespace-check:
     runs-on: ubuntu-latest

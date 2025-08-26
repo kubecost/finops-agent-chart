@@ -32,7 +32,7 @@ global:
     #       secret_key: xxx
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
-    fileName: federated-store.yaml  # set this value to change what the file name for the yaml config is
+    fileName: federated-store.yaml # set this value to change what the file name for the yaml config is
   ## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
   ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
   ## When using GCP, an API key to access on-demand pricing is required.
@@ -128,11 +128,10 @@ image:
 ## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
 ## @param gcpKey gcpKey is for the old key, use global.cspPricingApiKey instead. TODO: remove for GA release
-gcpKey: ""  # TODO: remove for GA release
+gcpKey: "" # TODO: remove for GA release
 
 ## @param logLevel The log level for the finops agent
 logLevel: "info"
-
 
 # Agent configuration
 # For the collector data source, note that all retention settings may directly impact the memory usage of the agent. The default values safely capture the required retention to operate

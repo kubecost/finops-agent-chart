@@ -58,9 +58,9 @@ Check if the cluster is running on GCP and provide appropriate warnings
   {{- end -}}
 {{- end -}}
 {{- if $isGCP -}}
-{{- if not (or (.Values.global.cspPricingApiKey.apiKey) (.Values.global.cspPricingApiKey.existingSecret) (.Values.global.ignoreGcpPricingCheck)) }}
+{{- if not (or (.Values.global.cspPricingApiKey.apiKey) (.Values.global.cspPricingApiKey.existingSecret)) }}
 {{ printf "\nCONFIGURATION ERROR: GCP detected. For GCP clusters, an API key is required to access on-demand pricing data." }}
-{{ fail "\nTo install, please set one of the following values:\n\nglobal.cspPricingApiKey.apiKey\nglobal.cspPricingApiKey.existingSecret\nglobal.ignoreGcpPricingCheck\n" }}
+{{ fail "\nTo install, please set one of the following values:\n\nglobal.cspPricingApiKey.apiKey\nglobal.cspPricingApiKey.existingSecret\n" }}
 {{- end }}
 {{- end }}
 {{- end }}

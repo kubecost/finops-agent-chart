@@ -8,15 +8,16 @@ This helm chart deploys the IBM FinOps Agent, which supports both Cloudability a
 
 ```sh
 helm repo add ibm-finops https://kubecost.github.io/finops-agent-chart
-helm install ibm-finops-agent ibm-finops/finops-agent-chart --set clusterId="globally-unique-cluster-id"
+helm install ibm-finops-agent ibm-finops/finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
 ```
 
 Or a one-liner:
 
 ```sh
 helm install ibm-finops-agent \
-  --repo https://kubecost.github.io/ finops-agent-chart \
-  --set clusterId="globally-unique-cluster-id"
+  --repo https://kubecost.github.io/finops-agent-chart finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
 ```
 
 ## Introduction
@@ -42,7 +43,8 @@ To install the chart with the release name `ibm-finops-agent`:
 
 ```sh
 helm repo add ibm-finops https://kubecost.github.io/finops-agent-chart
-helm install ibm-finops-agent ibm-finops/finops-agent-chart --set clusterId="globally-unique-cluster-id"
+helm install ibm-finops-agent ibm-finops/finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
 ```
 
 These commands deploy the FinOps Agent on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.

@@ -18,11 +18,9 @@ The FinOps Agent can be installed independently of the Kubecost Primary. This al
 There are two methods to install the FinOps Agent with Kubecost:
 
 1. Install the FinOps Agent as a standalone agent using this Helm chart.
-2. Install the FinOps Agent as with the Kubecost Helm chart <https://github.com/kubecost/kubecost/>.
+2. Install the FinOps Agent with the Kubecost Helm chart <https://github.com/kubecost/kubecost/>.
 
 Both methods will deploy the same underlying container.
-
-TODO: Add details on the differences between the two methods.
 
 ## Installing the FinOps Agent
 

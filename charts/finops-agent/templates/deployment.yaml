@@ -32,7 +32,7 @@ spec:
         {{- if include "finops-agent.kubecostEnabled" . }}
         checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
         {{- end }}
-        {{- if .Values.global.cspPricingApiKey.apiKey }}
+        {{- if or .Values.global.cspPricingApiKey.apiKey .Values.global.cspPricingApiKey.useDefaultApiKey }}
         checksum/csp-pricing-api-key-secret: {{ include (print .Template.BasePath "/csp-api-key-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.agent.cloudability.enabled }}

@@ -9,3 +9,4 @@ Kubecost Agent Enabled: {{ include "finops-agent.kubecostEnabled" . }}
 Cloudability Agent Enabled: {{ .Values.agent.cloudability.enabled }}
 
 {{- include "finops-agent.configCheck" . }}
+{{- include "finops-agent.cspPricingApiKeyWarning" . }}

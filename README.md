@@ -1,22 +1,24 @@
-## FinOps Agent
+# IBM FinOps Agent Helm Chart
 
-The IBM FinOps Agent collects usage and cost data from items running in the kubernetes cluster. These can then be consumed by Cloudability(TM) and Kubecost(TM).
+A Helm chart for deploying the IBM FinOps Agent on Kubernetes clusters. The agent collects usage and cost data from cluster resources and supports integration with Cloudability™ and Kubecost™.
+
+## Installation
+
+```bash
+helm install ibm-finops-agent \
+  --repo https://kubecost.github.io/finops-agent-chart finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
+```
+
+## Documentation
+
+For complete configuration options, prerequisites, and advanced usage, see the [detailed chart documentation](https://github.com/kubecost/finops-agent-chart/blob/main/charts/finops-agent/README.md).
 
 ## Maintainers
 
 **IBM, Inc. All Rights Reserved.**  
 [https://ibm.com](https://ibm.com)
 
-## Usage
-
-[Helm](https://helm.sh/) must be installed to use the charts. Please refer to Helm's [documentation](https://helm.sh/docs/) to get started.
-
-Once Helm is set up properly, add the repo as follows:
-
-```bash
-helm repo add finops-agent https://kubecost.github.io/finops-agent-chart
-```
-
-## Licensing
+## License
 
 Licensed under the Apache License, Version 2.0 (the "License")

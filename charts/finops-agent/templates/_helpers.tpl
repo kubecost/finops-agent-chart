@@ -58,9 +58,9 @@ Check if the cluster is running on GCP and provide appropriate warnings
   {{- end -}}
 {{- end -}}
 {{- if $isGCP -}}
-{{- if not (or (.Values.global.cspPricingApiKey.apiKey) (.Values.global.cspPricingApiKey.existingSecret) (.Values.global.ignoreGcpPricingCheck)) }}
+{{- if not (or (.Values.global.cspPricingApiKey.apiKey) (.Values.global.cspPricingApiKey.existingSecret) (.Values.global.cspPricingApiKey.useDefaultApiKey)) }}
 {{ printf "\nCONFIGURATION ERROR: GCP detected. For GCP clusters, an API key is required to access on-demand pricing data." }}
-{{ fail "\nTo install, please set one of the following values:\n\nglobal.cspPricingApiKey.apiKey\nglobal.cspPricingApiKey.existingSecret\nglobal.ignoreGcpPricingCheck\n" }}
+{{ fail "\nTo install, please set one of the following values:\n\nglobal.cspPricingApiKey.apiKey\nglobal.cspPricingApiKey.existingSecret\nglobal.cspPricingApiKey.useDefaultApiKey\n" }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -102,7 +102,7 @@ define the name of the cloudability secret
 define the name of the csp pricing api key secret
 */}}
 {{- define "finops-agent.cspPricingApiKeySecretName" }}
-{{- if .Values.global.cspPricingApiKey.apiKey }}
+{{- if or .Values.global.cspPricingApiKey.apiKey .Values.global.cspPricingApiKey.useDefaultApiKey }}
 {{ .Release.Name }}-csp-pricing-api-key-secret
 {{- else if .Values.global.cspPricingApiKey.existingSecret }}
 {{.Values.global.cspPricingApiKey.existingSecret}}

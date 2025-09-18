@@ -32,13 +32,17 @@ global:
     #       secret_key: xxx
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
-    fileName: federated-store.yaml  # set this value to change what the file name for the yaml config is
-  ## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
-  ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
-  ## When using GCP, an API key to access on-demand pricing is required.
+    fileName: federated-store.yaml # set this value to change what the file name for the yaml config is
+  ## @param cspPricingApiKey.existingSecret The name of an existing secret containing a GCP API key. If set, this existing secret will be used instead of creating a new one.
+  ## @param cspPricingApiKey.apiKey The GCP API key value used to access pricing data. Required for GCP clusters to fetch on-demand pricing.
+  ## If set, a new secret will be created with this API key. Leave empty if using an existing secret via cspPricingApiKey.existingSecret.
+  ## @param cspPricingApiKey.useDefaultApiKey When true, the default GCP API key will be used.
+  ## WARNING: The default API key provided here is rate-limited and shared across all users.
+  ## For production use, it is strongly recommended to create and use your own GCP API key to avoid quota limits.
   cspPricingApiKey:
     existingSecret: ""
     apiKey: ""
+    useDefaultApiKey: true
   ## @param global.imageRegistry The image registry to use for the finops agent
   ## @param global.imagePullSecrets The image pull secrets to use for the finops agent
   ## @param global.defaultStorageClass The default storage class to use for the finops agent
@@ -127,12 +131,9 @@ image:
   debug: false
 ## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
-## @param gcpKey gcpKey is for the old key, use global.cspPricingApiKey instead. TODO: remove for GA release
-gcpKey: ""  # TODO: remove for GA release
 
 ## @param logLevel The log level for the finops agent
 logLevel: "info"
-
 
 # Agent configuration
 # For the collector data source, note that all retention settings may directly impact the memory usage of the agent. The default values safely capture the required retention to operate
@@ -296,7 +297,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: ["ALL"]
+    drop: [ "ALL" ]
   seccompProfile:
     type: "RuntimeDefault"
 ## Configure extra options for the FinOps Agent container's liveness, readiness and startup probes
@@ -566,7 +567,7 @@ persistence:
   ## @param persistence.accessModes Persistent Volume Access Modes
   ##
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   ## @param persistence.size PVC Storage Request for the FinOps Agent data volume
   ##
   size: 8Gi

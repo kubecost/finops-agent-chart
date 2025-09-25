@@ -144,6 +144,26 @@ spec:
             - name: EXPORTER_EMISSION_INTERVAL
               value: {{ .Values.agent.exporter.emissionInterval | quote }}
             {{- end }}
+            {{- if .Values.agent.exporter.allocationInterval }}
+            - name: ALLOCATION_EXPORT_INTERVAL
+              value: {{ .Values.agent.exporter.allocationInterval | quote }}
+            {{- end }}
+            {{- if .Values.agent.exporter.assetInterval }}
+            - name: ASSET_EXPORT_INTERVAL
+              value: {{ .Values.agent.exporter.assetInterval | quote }}
+            {{- end }}
+            {{- if .Values.agent.exporter.networkInsightInterval }}
+            - name: NETWORK_INSIGHT_EXPORT_INTERVAL
+              value: {{ .Values.agent.exporter.networkInsightInterval | quote }}
+            {{- end }}
+            {{- if .Values.agent.exporter.heartbeatInterval }}
+            - name: HEARTBEAT_EXPORT_INTERVAL
+              value: {{ .Values.agent.exporter.heartbeatInterval | quote }}
+            {{- end }}
+            {{- if .Values.agent.exporter.diagnosticsInterval }}
+            - name: DIAGNOSTICS_EXPORT_INTERVAL
+              value: {{ .Values.agent.exporter.diagnosticsInterval | quote }}
+            {{- end }}
 
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME

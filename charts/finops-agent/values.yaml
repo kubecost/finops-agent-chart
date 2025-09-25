@@ -184,6 +184,11 @@ agent:
     retention1d: 2
   exporter:
     emissionInterval: 1m
+    allocationInterval: 10m
+    assetInterval: 10m
+    networkInsightInterval: 10m
+    heartbeatInterval: 5m
+    diagnosticsInterval: 10m
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false

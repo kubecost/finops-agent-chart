@@ -144,6 +144,11 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
+## @param agent.exportIntervals.allocation A duration string of how often allocation data is exported.
+## @param agent.exportIntervals.asset A duration string of how often asset data is exported.
+## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
+## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
+## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
@@ -182,13 +187,14 @@ agent:
     retention10m: 6
     retention1h: 3
     retention1d: 2
+  exportIntervals:
+    allocation: 10m
+    asset: 10m
+    networkInsight: 10m
+    heartbeat: 5m
+    diagnostics: 10m
   exporter:
     emissionInterval: 1m
-    allocationInterval: 10m
-    assetInterval: 10m
-    networkInsightInterval: 10m
-    heartbeatInterval: 5m
-    diagnosticsInterval: 10m
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false

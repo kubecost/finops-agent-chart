@@ -144,25 +144,25 @@ spec:
             - name: EXPORTER_EMISSION_INTERVAL
               value: {{ .Values.agent.exporter.emissionInterval | quote }}
             {{- end }}
-            {{- if .Values.agent.exporter.allocationInterval }}
+            {{- if .Values.agent.exportIntervals.allocation }}
             - name: ALLOCATION_EXPORT_INTERVAL
-              value: {{ .Values.agent.exporter.allocationInterval | quote }}
+              value: {{ .Values.agent.exportIntervals.allocation | quote }}
             {{- end }}
-            {{- if .Values.agent.exporter.assetInterval }}
+            {{- if .Values.agent.exportIntervals.asset }}
             - name: ASSET_EXPORT_INTERVAL
-              value: {{ .Values.agent.exporter.assetInterval | quote }}
+              value: {{ .Values.agent.exportIntervals.asset | quote }}
             {{- end }}
-            {{- if .Values.agent.exporter.networkInsightInterval }}
+            {{- if .Values.agent.exportIntervals.networkInsight }}
             - name: NETWORK_INSIGHT_EXPORT_INTERVAL
-              value: {{ .Values.agent.exporter.networkInsightInterval | quote }}
+              value: {{ .Values.agent.exportIntervals.networkInsight | quote }}
             {{- end }}
-            {{- if .Values.agent.exporter.heartbeatInterval }}
+            {{- if .Values.agent.exportIntervals.heartbeat }}
             - name: HEARTBEAT_EXPORT_INTERVAL
-              value: {{ .Values.agent.exporter.heartbeatInterval | quote }}
+              value: {{ .Values.agent.exportIntervals.heartbeat | quote }}
             {{- end }}
-            {{- if .Values.agent.exporter.diagnosticsInterval }}
+            {{- if .Values.agent.exportIntervals.diagnostics }}
             - name: DIAGNOSTICS_EXPORT_INTERVAL
-              value: {{ .Values.agent.exporter.diagnosticsInterval | quote }}
+              value: {{ .Values.agent.exportIntervals.diagnostics | quote }}
             {{- end }}
 
             {{- if .Values.agent.cloudability.enabled }}

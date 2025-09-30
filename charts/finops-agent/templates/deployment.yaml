@@ -29,7 +29,7 @@ spec:
   template:
     metadata:
       annotations:
-        {{- if include "finops-agent.kubecostEnabled" . }}
+        {{- if eq (include "finops-agent.kubecostEnabled" .) "true" }}
         checksum/federated-storage-config-secret: {{ include (print .Template.BasePath "/federated-storage-config-secret.yaml") . | sha256sum }}
         {{- end }}
         {{- if or .Values.global.cspPricingApiKey.apiKey .Values.global.cspPricingApiKey.useDefaultApiKey }}
@@ -328,7 +328,7 @@ spec:
             - name: empty-dir
               mountPath: /var/configs
               subPath: configs-dir
-            {{- if include "finops-agent.kubecostEnabled" . }}
+            {{- if eq (include "finops-agent.kubecostEnabled" .) "true" }}
             - name: federated-storage-config
               mountPath: /var/configs/federated-store.yaml
               subPath: {{ include "finops-agent.federatedStorageFileName" . | trim }}
@@ -358,7 +358,7 @@ spec:
           emptyDir: {}
         - name: var-configs-empty-dir
           emptyDir: {}
-        {{- if include "finops-agent.kubecostEnabled" . }}
+        {{- if eq (include "finops-agent.kubecostEnabled" .) "true" }}
         - name: federated-storage-config
           secret:
             defaultMode: 420

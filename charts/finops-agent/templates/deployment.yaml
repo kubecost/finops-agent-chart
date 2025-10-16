@@ -74,9 +74,39 @@ spec:
       securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" .) | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ template "finops-agent.serviceAccountName" . }}
-      {{- if .Values.initContainers }}
+      {{- if or .Values.initContainers .Values.global.updateCaTrust.enabled }}
       initContainers:
+        {{- if .Values.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" .) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.global.updateCaTrust.enabled }}
+        - name: update-ca-trust
+          image: {{ include "finops-agent.image" . }}
+          {{- if .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- else }}
+          imagePullPolicy: Always
+          {{- end }}
+          {{- with .Values.global.updateCaTrust.securityContext }}
+          securityContext: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.global.updateCaTrust.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          command:
+            - 'sh'
+            - '-c'
+            - >
+              mkdir -p /etc/pki/ca-trust/extracted/{edk2,java,openssl,pem};
+              /usr/bin/update-ca-trust extract;
+          volumeMounts:
+            - name: ca-certs-secret
+              mountPath: {{ .Values.global.updateCaTrust.caCertsMountPath | quote }}
+            - name: ssl-path
+              mountPath: "/etc/pki/ca-trust/extracted"
+              readOnly: false
+        {{- end}}
       {{- end }}
       containers:
         - name: finops-agent
@@ -347,6 +377,13 @@ spec:
             - mountPath: {{ .Values.persistence.mountPath }}
               name: data
             {{- end }}
+            {{- if .Values.global.updateCaTrust.enabled }}
+            - name: ca-certs-secret
+              mountPath: {{ .Values.global.updateCaTrust.caCertsMountPath | quote }}
+            - name: ssl-path
+              mountPath: "/etc/pki/ca-trust/extracted"
+              readOnly: false
+            {{- end }}
           {{- if .Values.extraVolumeMounts }}
           {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" .) | nindent 12 }}
           {{- end }}
@@ -375,6 +412,19 @@ spec:
           secret:
             secretName: {{ include "finops-agent.cspPricingApiKeySecretName" . | trim }}
             defaultMode: 256
+        {{- end }}
+        {{- if .Values.global.updateCaTrust.enabled }}
+        - name: ca-certs-secret
+          {{- if .Values.global.updateCaTrust.caCertsSecret }}
+          secret:
+            defaultMode: 420
+            secretName: {{ .Values.global.updateCaTrust.caCertsSecret }}
+          {{- else }}
+          configMap:
+            name: {{ .Values.global.updateCaTrust.caCertsConfig }}
+          {{- end }}
+        - name: ssl-path
+          emptyDir: {}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}

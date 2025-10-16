@@ -70,6 +70,30 @@ global:
       ##
       adaptSecurityContext: auto
   chartName: finops-agent
+
+  ## @section global.updateCaTrust Installs custom CA certificates onto finops-agent pod
+  ## @param global.updateCaTrust.enabled Enable the updateCaTrust feature
+  ## @param global.updateCaTrust.securityContext Security context settings for the init container.
+  ## @param global.updateCaTrust.caCertsSecret The name of the Secret containing custom CA certificates to mount to the finops-agent container.
+  ## @param global.updateCaTrust.caCertsConfig The name of the ConfigMap containing the CA trust configuration. Only one of caCertsSecret or caCertsConfig can be set.
+  ## @param global.updateCaTrust.resources Resources for the init container.
+  ## @param global.updateCaTrust.caCertsMountPath The path where the custom CA certificates will be mounted in the init container. Defaults to /etc/pki/ca-trust/source/anchors unless you are sure.
+  ##
+  updateCaTrust:
+    enabled: false
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: RuntimeDefault
+    caCertsSecret: ca-certs-secret
+    # caCertsConfig: ca-certs-config
+    resources: {}
+    caCertsMountPath: /etc/pki/ca-trust/source/anchors
+
 ## @section Common parameters
 
 ## @param kubeVersion Override Kubernetes version

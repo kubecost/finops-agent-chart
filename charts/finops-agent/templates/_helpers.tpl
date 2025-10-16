@@ -154,3 +154,12 @@ We may want for this to be a failure if the agent cannot send historical data th
 {{- $checksum | sha256sum -}}
 {{- end -}}
 
+{{- define "finops-agent.caCertsSecretConfig.check" }}
+  {{- if .Values.global.updateCaTrust.enabled }}
+    {{- if and .Values.global.updateCaTrust.caCertsSecret .Values.global.updateCaTrust.caCertsConfig }}
+      {{- fail "Both caCertsSecret and caCertsConfig are defined. Please specify only one." }}
+    {{- else if and (not .Values.global.updateCaTrust.caCertsSecret) (not .Values.global.updateCaTrust.caCertsConfig) }}
+      {{- fail "Neither caCertsSecret nor caCertsConfig is defined, but updateCaTrust is enabled. Please specify atleast one." }}
+    {{- end }}
+  {{- end }}
+{{- end }}

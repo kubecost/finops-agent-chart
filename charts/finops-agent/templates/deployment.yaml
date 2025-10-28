@@ -41,6 +41,7 @@ spec:
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" .) | nindent 8 }}
         {{- end }}
+        checksum/metrics-config-secret: {{ include (print .Template.BasePath "/metrics-configs-secret.yaml") . | sha256sum }}
       labels: {{- include "common.labels.standard" (dict "customLabels" $podLabels "context" .) | nindent 8 }}
         app.kubernetes.io/part-of: finops-agent
         app.kubernetes.io/component: agent
@@ -373,6 +374,10 @@ spec:
               mountPath: /opt/gcp
               readOnly: true
             {{- end }}
+            - name: metrics-config
+              mountPath: /var/configs/metrics.json
+              subPath: metrics.json
+              readOnly: true
             {{- if .Values.persistence.enabled }}
             - mountPath: {{ .Values.persistence.mountPath }}
               name: data
@@ -426,6 +431,10 @@ spec:
         - name: ssl-path
           emptyDir: {}
         {{- end }}
+        - name: metrics-config
+          secret:
+            defaultMode: 420
+            secretName: {{ .Release.Name }}-metrics-config
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}
         {{- end }}

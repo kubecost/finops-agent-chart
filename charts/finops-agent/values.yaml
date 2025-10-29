@@ -32,7 +32,7 @@ global:
     #       secret_key: xxx
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
-    fileName: federated-store.yaml # set this value to change what the file name for the yaml config is
+    fileName: federated-store.yaml   # set this value to change what the file name for the yaml config is
   ## @param cspPricingApiKey.existingSecret The name of an existing secret containing a GCP API key. If set, this existing secret will be used instead of creating a new one.
   ## @param cspPricingApiKey.apiKey The GCP API key value used to access pricing data. Required for GCP clusters to fetch on-demand pricing.
   ## If set, a new secret will be created with this API key. Leave empty if using an existing secret via cspPricingApiKey.existingSecret.
@@ -136,7 +136,6 @@ useHelmHooks: true
 ## @param image.digest IBM FinOps Agent image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
 ## @param image.pullPolicy IBM FinOps Agent image pull policy
 ## @param image.pullSecrets Specify docker-registry secret names as an array
-## @param image.debug Specify if debug logs should be enabled
 ##
 image:
   registry: icr.io
@@ -152,7 +151,6 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
-  debug: false
 ## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
 
@@ -332,7 +330,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: [ "ALL" ]
+    drop: ["ALL"]
   seccompProfile:
     type: "RuntimeDefault"
 ## Configure extra options for the FinOps Agent container's liveness, readiness and startup probes
@@ -652,3 +650,25 @@ rbac:
   create: true
   clusterRole:
     create: true
+extraObjects: []
+# - apiVersion: external-secrets.io/v1
+#   kind: ExternalSecret
+#   metadata:
+#     name: example
+#   spec:
+#     refreshInterval: 1h
+#     secretStoreRef:
+#       name: secretstore-sample
+#       kind: SecretStore
+#     target:
+#       name: secret-to-be-created
+#       creationPolicy: Owner
+#     data:
+#     - secretKey: secret-key-to-be-managed
+#       remoteRef:
+#         key: provider-key
+#         version: provider-key-version
+#         property: provider-key-property
+#     dataFrom:
+#     - extract:
+#         key: remote-key-in-the-provider

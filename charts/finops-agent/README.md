@@ -324,6 +324,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `rbac.create`                                 | Whether to create & use RBAC resources or not                                                                                                     | `true`  |
 | `rbac.clusterRole.create`                     | Whether to create & use ClusterRole resources or not                                                                                              | `true`  |
 | `localStoreEnabled`                           | this values is only used by the Kubecost main chart, it must be set to false for the FinOps Agent to work when deployed by the FinOps Agent chart | `false` |
+| `extraObjects`                                | Additional custom objects to deploy with the chart                                                                                                | `[]`    |
 
 ## License
 

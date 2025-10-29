@@ -2,31 +2,46 @@ name: Chart build and test 3.x
 
 on:
   workflow_dispatch: {}
-  # Normally using pull_request_target along with checking out the ref of the PR is not
-  # a good idea, but this is low risk since it's a Helm chart repo.
-  pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review]
+  # Security note: pull_request_target has elevated permissions, but we're only using it
+  # for a Helm chart repo which has limited security risk
+  # pull_request_target:
+  #   types: [opened, synchronize, reopened, ready_for_review]
+  #   paths:
+  #     - 'charts/**'
+  #     - '.github/workflows/test-chart.yaml'
+  #     - '.github/ci-helmValues/**'
 
   # Uncomment this if you need to actively test this workflow from a PR draft
   # pull_request:
   #   branches:
   #     - develop
 
-# Prevents multiple runs of the same workflow on the same branch from executing 
+# Prevents multiple runs of the same workflow on the same branch from executing
 # simultaneously. Saves resources.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   test-chart:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0
@@ -34,23 +49,26 @@ jobs:
       # Lint all chart values including those in the ci directory.
       - name: Run chart-testing (lint)
         run: |
-          ## ct run the dependency build
-          # helm repo add bitnami https://charts.bitnami.com/bitnami
-          # helm repo update
-          # helm dependency build charts/finops-agent/
           ct lint --chart-dirs=charts/finops-agent/ --charts=charts/finops-agent/ --validate-maintainers=false
 
       # Run `helm template` on the main values file plus all those in the ci directory.
       - name: Helm template
         run: |
+          # Build dependencies first
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo update
+          helm dependency build charts/finops-agent/
+
+          # Generate template output
           helm template charts/finops-agent/ -f .github/ci-helmValues/helmValues-default-test.yaml > full.yaml
-          ## below can be used to add more tests:
+
+          # Uncomment to test with additional values files
           # directory="charts/finops-agent/ci"
           # for file in "$directory"/*; do
-          # if [ -f "$file" ]; then
+          #   if [ -f "$file" ]; then
           #     echo "Templating file $file"
           #     helm template charts/finops-agent/ -f "$file" >> full.yaml
-          # fi
+          #   fi
           # done
 
       # Run Kubeconform on the combined, full.yaml output across all tested values
@@ -72,11 +90,20 @@ jobs:
             version: v1.34.1
     needs: test-chart
     name: ${{ matrix.k8s-version.name }} test
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0
@@ -84,7 +111,6 @@ jobs:
       - name: Create KinD cluster
         uses: helm/kind-action@v1.12.0
         with:
-          # version: v0.20.0
           node_image: kindest/node:${{ matrix.k8s-version.version }}
           kubectl_version: ${{ matrix.k8s-version.version }}
 
@@ -95,8 +121,7 @@ jobs:
 
       # Install the chart with default values and check results.
       - name: Install finops-agent chart
-        # working-directory: ./charts/finops-agent
-
+        working-directory: ./charts/finops-agent
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo update
@@ -104,33 +129,44 @@ jobs:
           helm install --wait --wait-for-jobs \
             finops-agent . \
             -n finops-agent \
-            -f ./.github/ci-helmValues/helmValues-default-test.yaml
+            -f ../../.github/ci-helmValues/helmValues-default-test.yaml \
+            --timeout 1m
 
-      - name: Wait for ready 
+      - name: Wait for ready
         run: kubectl wait -n finops-agent --for=condition=ready pod --selector app.kubernetes.io/instance=finops-agent --timeout=120s
-      
-      - name: gather debug info - install 
+
+      - name: Gather debug info - install
         if: failure()
         run: |
+          echo "=== Pods in finops-agent namespace ==="
           kubectl get pods -n finops-agent
+          echo "=== Pod details ==="
           kubectl get pods -n finops-agent -o yaml
+          echo "=== Container images ==="
           kubectl get pods -n finops-agent -o jsonpath='{.items[*].spec.containers[*].image}'
+          echo "=== Pod descriptions ==="
           kubectl -n finops-agent describe pods
-          kubectl -n finops-agent logs -l app.kubernetes.io/instance=finops-agent
+          echo "=== Pod logs ==="
+          kubectl -n finops-agent logs -l app.kubernetes.io/instance=finops-agent --tail=100
 
-      - name: Run Helm tests 
-        run: helm test -n finops-agent finops-agent
+      - name: Run Helm tests
+        run: helm test -n finops-agent finops-agent --timeout 1m
 
-      - name: gather debug info - test
+      - name: Gather debug info on failure
         if: failure()
         run: |
+          echo "=== Pods in finops-agent namespace ==="
           kubectl get pods -n finops-agent
+          echo "=== Pod details ==="
           kubectl get pods -n finops-agent -o yaml
+          echo "=== Container images ==="
           kubectl get pods -n finops-agent -o jsonpath='{.items[*].spec.containers[*].image}'
+          echo "=== Pod descriptions ==="
           kubectl -n finops-agent describe pods
-          echo "===finops-agent logs==="
-          kubectl -n finops-agent logs -l app.kubernetes.io/instance=finops-agent
+          echo "=== finops-agent logs ==="
+          kubectl -n finops-agent logs -l app.kubernetes.io/instance=finops-agent --tail=100
 
       - name: Uninstall chart
+        if: always()
         run: helm uninstall finops-agent -n finops-agent --no-hooks --wait
 

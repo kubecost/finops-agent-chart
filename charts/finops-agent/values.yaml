@@ -32,13 +32,17 @@ global:
     #       secret_key: xxx
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
-    fileName: federated-store.yaml  # set this value to change what the file name for the yaml config is
-  ## @param cspPricingApiKey.existingSecret The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.
-  ## @param cspPricingApiKey.apiKey The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.
-  ## When using GCP, an API key to access on-demand pricing is required.
+    fileName: federated-store.yaml # set this value to change what the file name for the yaml config is
+  ## @param cspPricingApiKey.existingSecret The name of an existing secret containing a GCP API key. If set, this existing secret will be used instead of creating a new one.
+  ## @param cspPricingApiKey.apiKey The GCP API key value used to access pricing data. Required for GCP clusters to fetch on-demand pricing.
+  ## If set, a new secret will be created with this API key. Leave empty if using an existing secret via cspPricingApiKey.existingSecret.
+  ## @param cspPricingApiKey.useDefaultApiKey When true, the default GCP API key will be used.
+  ## WARNING: The default API key provided here is rate-limited and shared across all users.
+  ## For production use, it is strongly recommended to create and use your own GCP API key to avoid quota limits.
   cspPricingApiKey:
     existingSecret: ""
     apiKey: ""
+    useDefaultApiKey: true
   ## @param global.imageRegistry The image registry to use for the finops agent
   ## @param global.imagePullSecrets The image pull secrets to use for the finops agent
   ## @param global.defaultStorageClass The default storage class to use for the finops agent
@@ -66,6 +70,30 @@ global:
       ##
       adaptSecurityContext: auto
   chartName: finops-agent
+
+  ## @section global.updateCaTrust Installs custom CA certificates onto finops-agent pod
+  ## @param global.updateCaTrust.enabled Enable the updateCaTrust feature
+  ## @param global.updateCaTrust.securityContext Security context settings for the init container.
+  ## @param global.updateCaTrust.caCertsSecret The name of the Secret containing custom CA certificates to mount to the finops-agent container.
+  ## @param global.updateCaTrust.caCertsConfig The name of the ConfigMap containing the CA trust configuration. Only one of caCertsSecret or caCertsConfig can be set.
+  ## @param global.updateCaTrust.resources Resources for the init container.
+  ## @param global.updateCaTrust.caCertsMountPath The path where the custom CA certificates will be mounted in the init container. Defaults to /etc/pki/ca-trust/source/anchors unless you are sure.
+  ##
+  updateCaTrust:
+    enabled: false
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: RuntimeDefault
+    caCertsSecret: ca-certs-secret
+    # caCertsConfig: ca-certs-config
+    resources: {}
+    caCertsMountPath: /etc/pki/ca-trust/source/anchors
+
 ## @section Common parameters
 
 ## @param kubeVersion Override Kubernetes version
@@ -110,9 +138,9 @@ useHelmHooks: true
 ## @param image.pullSecrets Specify docker-registry secret names as an array
 ##
 image:
-  registry: gcr.io
-  repository: kubecost1/ibm-finops-agent
-  tag: 0.0.0-beta.2
+  registry: icr.io
+  repository: ibm-finops/agent
+  tag: v1.0.3
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -125,8 +153,6 @@ image:
   pullSecrets: []
 ## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
-## @param gcpKey gcpKey is for the old key, use global.cspPricingApiKey instead. TODO: remove for GA release
-gcpKey: ""  # TODO: remove for GA release
 
 ## @param logLevel The log level for the finops agent
 logLevel: "info"
@@ -140,6 +166,11 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
+## @param agent.exportIntervals.allocation A duration string of how often allocation data is exported.
+## @param agent.exportIntervals.asset A duration string of how often asset data is exported.
+## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
+## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
+## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
@@ -178,6 +209,12 @@ agent:
     retention10m: 6
     retention1h: 3
     retention1d: 2
+  exportIntervals:
+    allocation: 10m
+    asset: 10m
+    networkInsight: 10m
+    heartbeat: 5m
+    diagnostics: 10m
   exporter:
     emissionInterval: 1m
   cloudability:
@@ -293,7 +330,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: ["ALL"]
+    drop: [ "ALL" ]
   seccompProfile:
     type: "RuntimeDefault"
 ## Configure extra options for the FinOps Agent container's liveness, readiness and startup probes
@@ -538,6 +575,12 @@ metrics:
     ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
     ##
     honorLabels: false
+  ## @param metrics.configs configurable values to be accessible to ibm-finops-agent at /var/configs/metrics.json
+  ##
+  configs:
+    ## @param metrics.configs.disabledMetrics metrics that should not be emitted by ibm-finops-agent
+    ##
+    disabledMetrics: []
 
 ## @section Persistence parameters
 
@@ -563,7 +606,7 @@ persistence:
   ## @param persistence.accessModes Persistent Volume Access Modes
   ##
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   ## @param persistence.size PVC Storage Request for the FinOps Agent data volume
   ##
   size: 8Gi

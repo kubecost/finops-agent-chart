@@ -8,15 +8,16 @@ This helm chart deploys the IBM FinOps Agent, which supports both Cloudability a
 
 ```sh
 helm repo add ibm-finops https://kubecost.github.io/finops-agent-chart
-helm install ibm-finops-agent ibm-finops/finops-agent-chart --set clusterId="globally-unique-cluster-id"
+helm install ibm-finops-agent ibm-finops/finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
 ```
 
 Or a one-liner:
 
 ```sh
 helm install ibm-finops-agent \
-  --repo https://kubecost.github.io/ finops-agent-chart \
-  --set clusterId="globally-unique-cluster-id"
+  --repo https://kubecost.github.io/finops-agent-chart finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
 ```
 
 ## Introduction
@@ -42,7 +43,8 @@ To install the chart with the release name `ibm-finops-agent`:
 
 ```sh
 helm repo add ibm-finops https://kubecost.github.io/finops-agent-chart
-helm install ibm-finops-agent ibm-finops/finops-agent-chart --set clusterId="globally-unique-cluster-id"
+helm install ibm-finops-agent ibm-finops/finops-agent \
+  --set global.clusterId="globally-unique-cluster-id"
 ```
 
 These commands deploy the FinOps Agent on the Kubernetes cluster in the default configuration. The [Parameters](#parameters) section lists the parameters that can be configured during installation.
@@ -163,9 +165,9 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `image.pullSecrets`                                  | Specify docker-registry secret names as an array                                                                                                                                           | `[]`                                           |
 | `image.debug`                                        | Specify if debug logs should be enabled                                                                                                                                                    | `false`                                        |
 | `fullImageName`                                      | If set, this will override the image name and tag.                                                                                                                                         | `""`                                           |
-| `gcpKey`                                             | gcpKey is for the old key, use cspPricingApiKey instead. TODO: remove for GA release                                                                                                       | `""`                                           |
 | `cspPricingApiKey.existingSecret`                    | The name of an existing secret to use for the GCP API key. If this is set, the secret will be used. Leave empty to create a new secret.                                                    | `""`                                           |
 | `cspPricingApiKey.apiKey`                            | The GCP API key value. If this is set, the secret will be created. Leave empty to use an existing secret.                                                                                  | `""`                                           |
+| `cspPricingApiKey.useDefaultApiKey`                  | When true, the default GCP API key will be used.                                                                                                                                          | `true`                                         |
 | `logLevel`                                           | The log level for the finops agent                                                                                                                                                         | `info`                                         |
 | `federatedStorage.config`                            | The config for the federated storage                                                                                                                                                       | `""`                                           |
 | `federatedStorage.existingSecret`                    | The name of an existing secret to use for the federated storage config. Note, you cannot set both `config` and `existingSecret`.                                                           | `""`                                           |

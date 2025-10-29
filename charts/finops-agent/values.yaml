@@ -577,6 +577,12 @@ metrics:
     ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
     ##
     honorLabels: false
+  ## @param metrics.configs configurable values to be accessible to ibm-finops-agent at /var/configs/metrics.json
+  ##
+  configs:
+    ## @param metrics.configs.disabledMetrics metrics that should not be emitted by ibm-finops-agent
+    ##
+    disabledMetrics: []
 
 ## @section Persistence parameters
 

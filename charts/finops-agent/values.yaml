@@ -32,7 +32,7 @@ global:
     #       secret_key: xxx
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
-    fileName: federated-store.yaml # set this value to change what the file name for the yaml config is
+    fileName: federated-store.yaml   # set this value to change what the file name for the yaml config is
   ## @param cspPricingApiKey.existingSecret The name of an existing secret containing a GCP API key. If set, this existing secret will be used instead of creating a new one.
   ## @param cspPricingApiKey.apiKey The GCP API key value used to access pricing data. Required for GCP clusters to fetch on-demand pricing.
   ## If set, a new secret will be created with this API key. Leave empty if using an existing secret via cspPricingApiKey.existingSecret.
@@ -330,7 +330,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: [ "ALL" ]
+    drop: ["ALL"]
   seccompProfile:
     type: "RuntimeDefault"
 ## Configure extra options for the FinOps Agent container's liveness, readiness and startup probes

@@ -32,7 +32,7 @@ global:
     #       secret_key: xxx
     existingSecret: ""
     # If you want to use a different file name for the federated storage config, you can set the fileName value.
-    fileName: federated-store.yaml # set this value to change what the file name for the yaml config is
+    fileName: federated-store.yaml   # set this value to change what the file name for the yaml config is
   ## @param cspPricingApiKey.existingSecret The name of an existing secret containing a GCP API key. If set, this existing secret will be used instead of creating a new one.
   ## @param cspPricingApiKey.apiKey The GCP API key value used to access pricing data. Required for GCP clusters to fetch on-demand pricing.
   ## If set, a new secret will be created with this API key. Leave empty if using an existing secret via cspPricingApiKey.existingSecret.
@@ -70,6 +70,30 @@ global:
       ##
       adaptSecurityContext: auto
   chartName: finops-agent
+
+  ## @section global.updateCaTrust Installs custom CA certificates onto finops-agent pod
+  ## @param global.updateCaTrust.enabled Enable the updateCaTrust feature
+  ## @param global.updateCaTrust.securityContext Security context settings for the init container.
+  ## @param global.updateCaTrust.caCertsSecret The name of the Secret containing custom CA certificates to mount to the finops-agent container.
+  ## @param global.updateCaTrust.caCertsConfig The name of the ConfigMap containing the CA trust configuration. Only one of caCertsSecret or caCertsConfig can be set.
+  ## @param global.updateCaTrust.resources Resources for the init container.
+  ## @param global.updateCaTrust.caCertsMountPath The path where the custom CA certificates will be mounted in the init container. Defaults to /etc/pki/ca-trust/source/anchors unless you are sure.
+  ##
+  updateCaTrust:
+    enabled: false
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      seccompProfile:
+        type: RuntimeDefault
+    caCertsSecret: ca-certs-secret
+    # caCertsConfig: ca-certs-config
+    resources: {}
+    caCertsMountPath: /etc/pki/ca-trust/source/anchors
+
 ## @section Common parameters
 
 ## @param kubeVersion Override Kubernetes version
@@ -112,12 +136,11 @@ useHelmHooks: true
 ## @param image.digest IBM FinOps Agent image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
 ## @param image.pullPolicy IBM FinOps Agent image pull policy
 ## @param image.pullSecrets Specify docker-registry secret names as an array
-## @param image.debug Specify if debug logs should be enabled
 ##
 image:
   registry: icr.io
   repository: ibm-finops/agent
-  tag: v1.0.2
+  tag: v1.0.3
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -128,7 +151,6 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
-  debug: false
 ## @param fullImageName If set, this will override the image name and tag.
 fullImageName: ""
 
@@ -308,7 +330,7 @@ containerSecurityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   capabilities:
-    drop: [ "ALL" ]
+    drop: ["ALL"]
   seccompProfile:
     type: "RuntimeDefault"
 ## Configure extra options for the FinOps Agent container's liveness, readiness and startup probes
@@ -553,6 +575,12 @@ metrics:
     ## @param metrics.serviceMonitor.honorLabels honorLabels chooses the metric's labels on collisions with target labels
     ##
     honorLabels: false
+  ## @param metrics.configs configurable values to be accessible to ibm-finops-agent at /var/configs/metrics.json
+  ##
+  configs:
+    ## @param metrics.configs.disabledMetrics metrics that should not be emitted by ibm-finops-agent
+    ##
+    disabledMetrics: []
 
 ## @section Persistence parameters
 
@@ -622,3 +650,25 @@ rbac:
   create: true
   clusterRole:
     create: true
+extraObjects: []
+# - apiVersion: external-secrets.io/v1
+#   kind: ExternalSecret
+#   metadata:
+#     name: example
+#   spec:
+#     refreshInterval: 1h
+#     secretStoreRef:
+#       name: secretstore-sample
+#       kind: SecretStore
+#     target:
+#       name: secret-to-be-created
+#       creationPolicy: Owner
+#     data:
+#     - secretKey: secret-key-to-be-managed
+#       remoteRef:
+#         key: provider-key
+#         version: provider-key-version
+#         property: provider-key-property
+#     dataFrom:
+#     - extract:
+#         key: remote-key-in-the-provider

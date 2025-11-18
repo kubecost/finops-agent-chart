@@ -6,7 +6,7 @@ annotations:
   licenses: Apache-2.0
   kubecost.com/version: 3.0.0-test.0
 apiVersion: v2
-appVersion: v1.0.3
+appVersion: v1.0.4
 dependencies:
 - name: common
   repository: oci://registry-1.docker.io/bitnamicharts
@@ -28,4 +28,4 @@ maintainers:
 name: finops-agent
 sources:
 - https://github.com/kubecost/finops-agent-chart
-version: 1.0.3
+version: 1.0.4

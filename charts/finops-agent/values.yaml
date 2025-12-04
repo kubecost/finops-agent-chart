@@ -254,8 +254,7 @@ agent:
     awsSpotDataBucket: ""
     awsSpotDataPrefix: ""
     awsSpotDataRegion: ""
-    customPricesEnabled: false
-    defaultModelPricing:
+    customPrices:
       enabled: false
       CPU: ""
       GPU: ""

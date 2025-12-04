@@ -1,0 +1,150 @@
+{{- /*
+Copyright IBM, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.agent.productConfigs }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pricing-configs
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" .) | nindent 4 }}
+    app.kubernetes.io/part-of: finops-agent
+    app.kubernetes.io/component: config
+  {{- if .Values.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" .) | nindent 4 }}
+  {{- end }}
+data:
+  {{- if .Values.agent.productConfigs.defaultModelPricing }}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.enabled }}
+  {{- if .Values.agent.productConfigs.customPricesEnabled }}
+  customPricesEnabled: "{{ .Values.agent.productConfigs.customPricesEnabled }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.CPU }}
+  CPU: "{{ .Values.agent.productConfigs.defaultModelPricing.CPU | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.spotCPU }}
+  spotCPU: "{{ .Values.agent.productConfigs.defaultModelPricing.spotCPU | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.RAM }}
+  RAM: "{{ .Values.agent.productConfigs.defaultModelPricing.RAM | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.spotRAM }}
+  spotRAM: "{{ .Values.agent.productConfigs.defaultModelPricing.spotRAM | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.GPU }}
+  GPU: "{{ .Values.agent.productConfigs.defaultModelPricing.GPU | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.spotGPU }}
+  spotGPU: "{{ .Values.agent.productConfigs.defaultModelPricing.spotGPU | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.storage }}
+  storage: "{{ .Values.agent.productConfigs.defaultModelPricing.storage | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.zoneNetworkEgress }}
+  zoneNetworkEgress: "{{ .Values.agent.productConfigs.defaultModelPricing.zoneNetworkEgress | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.regionNetworkEgress }}
+  regionNetworkEgress: "{{ .Values.agent.productConfigs.defaultModelPricing.regionNetworkEgress | toString }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultModelPricing.internetNetworkEgress }}
+  internetNetworkEgress: "{{ .Values.agent.productConfigs.defaultModelPricing.internetNetworkEgress | toString }}"
+  {{- end -}}
+  {{- end -}}
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.clusterName }}
+  clusterName: "{{ .Values.agent.productConfigs.clusterName }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.clusterAccountID }}
+  clusterAccountID: "{{ .Values.agent.productConfigs.clusterAccountID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.currencyCode }}
+  currencyCode: "{{ .Values.agent.productConfigs.currencyCode }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.azureBillingRegion }}
+  azureBillingRegion: "{{ .Values.agent.productConfigs.azureBillingRegion }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.azureSubscriptionID }}
+  azureSubscriptionID: "{{ .Values.agent.productConfigs.azureSubscriptionID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.azureClientID }}
+  azureClientID: "{{ .Values.agent.productConfigs.azureClientID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.azureTenantID }}
+  azureTenantID: "{{ .Values.agent.productConfigs.azureTenantID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.azureOfferDurableID }}
+  azureOfferDurableID: "{{ .Values.agent.productConfigs.azureOfferDurableID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.discount }}
+  discount: "{{ .Values.agent.productConfigs.discount }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.negotiatedDiscount }}
+  negotiatedDiscount: "{{ .Values.agent.productConfigs.negotiatedDiscount }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.defaultIdle }}
+  defaultIdle: "{{ .Values.agent.productConfigs.defaultIdle }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.sharedNamespaces }}
+  sharedNamespaces: "{{ .Values.agent.productConfigs.sharedNamespaces }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.sharedOverhead }}
+  sharedOverhead: "{{ .Values.agent.productConfigs.sharedOverhead }}"
+  {{- end -}}
+  {{- if gt (len (toString .Values.agent.productConfigs.shareTenancyCosts)) 0 }}
+  {{- if eq (toString .Values.agent.productConfigs.shareTenancyCosts) "false" }}
+  shareTenancyCosts: "false"
+  {{- else if eq (toString .Values.agent.productConfigs.shareTenancyCosts) "true" }}
+  shareTenancyCosts: "true"
+  {{- end -}}
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.spotLabel }}
+  spotLabel: "{{ .Values.agent.productConfigs.spotLabel }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.spotLabelValue }}
+  spotLabelValue: "{{ .Values.agent.productConfigs.spotLabelValue }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.awsSpotDataRegion }}
+  spotDataRegion: "{{ .Values.agent.productConfigs.awsSpotDataRegion }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.awsSpotDataBucket }}
+  spotDataBucket: "{{ .Values.agent.productConfigs.awsSpotDataBucket }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.awsSpotDataPrefix }}
+  spotDataPrefix: "{{ .Values.agent.productConfigs.awsSpotDataPrefix }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.projectID }}
+  projectID: "{{ .Values.agent.productConfigs.projectID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.bigQueryBillingDataDataset }}
+  billingDataDataset: "{{ .Values.agent.productConfigs.bigQueryBillingDataDataset }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.athenaProjectID }}
+  athenaProjectID: "{{ .Values.agent.productConfigs.athenaProjectID }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.athenaBucketName }}
+  athenaBucketName: "{{ .Values.agent.productConfigs.athenaBucketName }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.athenaRegion }}
+  athenaRegion: "{{ .Values.agent.productConfigs.athenaRegion }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.athenaDatabase }}
+  athenaDatabase: "{{ .Values.agent.productConfigs.athenaDatabase }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.athenaTable }}
+  athenaTable: "{{ .Values.agent.productConfigs.athenaTable }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.athenaWorkgroup }}
+  athenaWorkgroup: "{{ .Values.agent.productConfigs.athenaWorkgroup }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.masterPayerARN}}
+  masterPayerARN: "{{ .Values.agent.productConfigs.masterPayerARN }}"
+  {{- end }}
+  {{- if .Values.agent.productConfigs.gpuLabel }}
+  gpuLabel: "{{ .Values.agent.productConfigs.gpuLabel }}"
+  {{- end -}}
+  {{- if .Values.agent.productConfigs.gpuLabelValue }}
+  gpuLabelValue: "{{ .Values.agent.productConfigs.gpuLabelValue }}"
+  {{- end -}}
+{{- end -}}

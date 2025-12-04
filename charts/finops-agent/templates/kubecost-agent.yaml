@@ -16,41 +16,39 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" .) | nindent 4 }}
   {{- end }}
 data:
-  {{- if .Values.agent.kubecost.defaultModelPricing }}
-  {{- if .Values.agent.kubecost.defaultModelPricing.enabled }}
-  {{- if .Values.agent.kubecost.customPricesEnabled }}
-  customPricesEnabled: "{{ .Values.agent.kubecost.customPricesEnabled }}"
+  {{- if .Values.agent.kubecost.customPrices }}
+  {{- if .Values.agent.kubecost.customPrices.enabled }}
+  customPricesEnabled: "{{ .Values.agent.kubecost.customPrices.enabled | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.CPU }}
-  CPU: "{{ .Values.agent.kubecost.defaultModelPricing.CPU | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.CPU }}
+  CPU: "{{ .Values.agent.kubecost.customPrices.CPU | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.spotCPU }}
-  spotCPU: "{{ .Values.agent.kubecost.defaultModelPricing.spotCPU | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.spotCPU }}
+  spotCPU: "{{ .Values.agent.kubecost.customPrices.spotCPU | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.RAM }}
-  RAM: "{{ .Values.agent.kubecost.defaultModelPricing.RAM | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.RAM }}
+  RAM: "{{ .Values.agent.kubecost.customPrices.RAM | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.spotRAM }}
-  spotRAM: "{{ .Values.agent.kubecost.defaultModelPricing.spotRAM | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.spotRAM }}
+  spotRAM: "{{ .Values.agent.kubecost.customPrices.spotRAM | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.GPU }}
-  GPU: "{{ .Values.agent.kubecost.defaultModelPricing.GPU | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.GPU }}
+  GPU: "{{ .Values.agent.kubecost.customPrices.GPU | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.spotGPU }}
-  spotGPU: "{{ .Values.agent.kubecost.defaultModelPricing.spotGPU | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.spotGPU }}
+  spotGPU: "{{ .Values.agent.kubecost.customPrices.spotGPU | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.storage }}
-  storage: "{{ .Values.agent.kubecost.defaultModelPricing.storage | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.storage }}
+  storage: "{{ .Values.agent.kubecost.customPrices.storage | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.zoneNetworkEgress }}
-  zoneNetworkEgress: "{{ .Values.agent.kubecost.defaultModelPricing.zoneNetworkEgress | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.zoneNetworkEgress }}
+  zoneNetworkEgress: "{{ .Values.agent.kubecost.customPrices.zoneNetworkEgress | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.regionNetworkEgress }}
-  regionNetworkEgress: "{{ .Values.agent.kubecost.defaultModelPricing.regionNetworkEgress | toString }}"
+  {{- if .Values.agent.kubecost.customPrices.regionNetworkEgress }}
+  regionNetworkEgress: "{{ .Values.agent.kubecost.customPrices.regionNetworkEgress | toString }}"
   {{- end -}}
-  {{- if .Values.agent.kubecost.defaultModelPricing.internetNetworkEgress }}
-  internetNetworkEgress: "{{ .Values.agent.kubecost.defaultModelPricing.internetNetworkEgress | toString }}"
-  {{- end -}}
+  {{- if .Values.agent.kubecost.customPrices.internetNetworkEgress }}
+  internetNetworkEgress: "{{ .Values.agent.kubecost.customPrices.internetNetworkEgress | toString }}"
   {{- end -}}
   {{- end -}}
   {{- if .Values.agent.kubecost.discount }}

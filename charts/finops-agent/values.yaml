@@ -251,6 +251,7 @@ agent:
       customAzureClientSecret: ""
 
   kubecost:
+    projectID: ""
     awsSpotDataBucket: ""
     awsSpotDataPrefix: ""
     awsSpotDataRegion: ""

@@ -72,6 +72,9 @@ data:
   {{- if .Values.agent.kubecost.awsSpotDataPrefix }}
   spotDataPrefix: "{{ .Values.agent.kubecost.awsSpotDataPrefix }}"
   {{- end -}}
+  {{- if .Values.agent.kubecost.projectID }}
+  projectID: "{{ .Values.agent.kubecost.projectID }}"
+  {{- end -}}
   {{- if .Values.agent.kubecost.gpuLabel }}
   gpuLabel: "{{ .Values.agent.kubecost.gpuLabel }}"
   {{- end -}}

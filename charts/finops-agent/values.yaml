@@ -250,6 +250,30 @@ agent:
       cloudabilityEnvId: ""
       customAzureClientSecret: ""
 
+  kubecost:
+    projectID: ""
+    awsSpotDataBucket: ""
+    awsSpotDataPrefix: ""
+    awsSpotDataRegion: ""
+    customPrices:
+      enabled: false
+      CPU: ""
+      GPU: ""
+      RAM: ""
+      spotCPU: ""
+      spotGPU: ""
+      spotRAM: ""
+      storage: ""
+      internetNetworkEgress: ""
+      regionNetworkEgress: ""
+      zoneNetworkEgress: ""
+    discount: ""
+    negotiatedDiscount: ""
+    gpuLabel: ""
+    gpuLabelValue: ""
+    spotLabel: ""
+    spotLabelValue: ""
+
 ## @param command Override default container command (useful when using custom images)
 ##
 command: []

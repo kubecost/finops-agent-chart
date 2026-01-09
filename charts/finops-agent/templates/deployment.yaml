@@ -130,7 +130,7 @@ spec:
             - name: APP_NAME
               value: finops-agent
             - name: INSTALL_NAMESPACE
-              value: {{ .Release.Namespace }}}
+              value: {{ .Release.Namespace }}
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED

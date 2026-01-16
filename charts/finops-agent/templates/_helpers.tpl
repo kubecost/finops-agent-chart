@@ -172,7 +172,7 @@ Warn if Chart version doesn't match image tag version
   {{- $chartVersion := trimPrefix "v" .Chart.Version }}
   {{- $imageTag := trimPrefix "v" .Values.image.tag }}
   {{- if ne $chartVersion $imageTag }}
-    {{ printf "\nWARNING: Chart version (%s) does not match image tag (%s).\nFor best compatibility, these versions should match.\nSee: https://github.com/kubecost/finops-agent-chart#installing-the-finops-agent\n" .Chart.Version .Values.image.tag }}
+    {{ printf "\nWARNING: Chart version (%s) does not match image tag (%s). For best compatibility, these versions should match. See: https://github.com/kubecost/finops-agent-chart/blob/main/README.md#installing-the-finops-agent\n" .Chart.Version .Values.image.tag }}
   {{- end }}
 {{- end }}
 {{- end }}

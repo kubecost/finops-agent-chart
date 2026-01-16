@@ -163,3 +163,16 @@ We may want for this to be a failure if the agent cannot send historical data th
     {{- end }}
   {{- end }}
 {{- end }}
+
+{{/*
+Warn if Chart version doesn't match image tag version
+*/}}
+{{- define "finops-agent.versionCheck" }}
+{{- if not .Values.fullImageName }}
+  {{- $chartVersion := trimPrefix "v" .Chart.Version }}
+  {{- $imageTag := trimPrefix "v" .Values.image.tag }}
+  {{- if ne $chartVersion $imageTag }}
+    {{ printf "\nWARNING: Chart version (%s) does not match image tag (%s).\nFor best compatibility, these versions should match.\nSee: https://github.com/kubecost/finops-agent-chart#installing-the-finops-agent\n" .Chart.Version .Values.image.tag }}
+  {{- end }}
+{{- end }}
+{{- end }}

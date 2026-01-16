@@ -24,6 +24,8 @@ Both methods will deploy the same underlying container.
 
 ## Installing the FinOps Agent
 
+> **Important:** The [Chart version](https://github.com/kubecost/finops-agent-chart/blob/v1.0.8/charts/finops-agent/Chart.yaml#L31) must match the [container image version](https://github.com/kubecost/finops-agent-chart/blob/v1.0.8/charts/finops-agent/values.yaml#L143). For example, Chart version `1.0.8` should use image tag `v1.0.8`.
+
 Follow the instructions in the chart's [README](charts/finops-agent/README.md) to install the FinOps Agent using this Helm chart.
 
 ## License

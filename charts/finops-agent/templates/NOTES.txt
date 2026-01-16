@@ -1,4 +1,5 @@
-{{ include "finops-agent.gcpCheck" . }}
+{{- include "finops-agent.versionCheck" . }}
+{{- include "finops-agent.gcpCheck" . }}
 {{- include "finops-agent.exportBucketLegacyCheck" . }}
 
 CHART NAME: {{ .Chart.Name }}

@@ -310,11 +310,13 @@ extraContainerPorts: []
 ## Example:
 resources:
   requests:
-    cpu: 1
+    cpu: 500m
     memory: 512Mi
+    ephemeral-storage: 50Mi
   limits:
     cpu: 2
     memory: 2048Mi
+    ephemeral-storage: 2Gi
 ##
 ## Configure FinOps Agent pod Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod

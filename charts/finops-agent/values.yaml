@@ -301,13 +301,11 @@ containerPorts:
 ##
 extraContainerPorts: []
 ## The FinOps Agent pod's resource requests and limits
-## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set.
-## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-## Example:
-## resourcesPreset: "none"
-## @param resources Set container requests and limits for different resources like CPU or memory, if the presents won't work
-## Example:
+## Consider setting a limit after a baseline has been established
+## The agent can consume significant resources due to the built-in metrics db.
+## The below defaults assume a cluster with 10 nodes with 500 pods
+## In large clusters with hundreds of nodes, the agent can take 50Gi+ of RAM and use 5+ CPUs
+## The baseline should stabilize after 48 hours of usage, and there can be noticeable startup spike that must also be considered.
 resources:
   requests:
     cpu: 500m

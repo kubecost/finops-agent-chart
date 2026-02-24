@@ -201,6 +201,7 @@ logLevel: "info"
 ## @param agent.cloudability.secret.cloudabilitySecretKey The cloudability secret key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilityEnvId The cloudability env id for the cloudability data source
 ## @param agent.cloudability.secret.customAzureClientSecret The cloudability client secret for azure blob upload
+## @param agent.nodeStatsBackgroundCollector Allows for node stats to be collected asynchronously to allow for greater scale
 ##
 agent:
   collectorDataSource:
@@ -275,6 +276,7 @@ agent:
     gpuLabelValue: ""
     spotLabel: ""
     spotLabelValue: ""
+  nodeStatsBackgroundCollector: true
 
 ## @param command Override default container command (useful when using custom images)
 ##

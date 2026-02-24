@@ -171,6 +171,7 @@ logLevel: "info"
 ## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
 ## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
 ## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
+## @param agent.nodes.allowKubeProxy Controls if the cluster role has the permission to use nodes/proxy.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
@@ -218,6 +219,8 @@ agent:
     diagnostics: 10m
   exporter:
     emissionInterval: 1m
+  nodes:
+    allowKubeProxy: true
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false

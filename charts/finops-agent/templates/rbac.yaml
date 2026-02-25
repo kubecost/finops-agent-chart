@@ -52,7 +52,7 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces", "nodes", "pods", "services", "persistentvolumeclaims", "persistentvolumes", "replicationcontrollers", "nodes/metrics", "nodes/stats", "resourcequotas"]
     verbs: ["get", "list", "watch"]
-  {{- if .Values.agent.nodes.allowKubeProxy }}
+  {{- if .Values.rbac.clusterRole.allowKubeProxy }}
   - apiGroups: [""]
     resources: ["nodes/proxy"]
     verbs: ["get", "list", "watch"]

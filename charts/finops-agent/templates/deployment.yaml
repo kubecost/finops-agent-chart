@@ -131,6 +131,8 @@ spec:
               value: finops-agent
             - name: INSTALL_NAMESPACE
               value: {{ .Release.Namespace }}
+            - name: NODE_STATS_BG_COLLECTION_ENABLED
+              value: {{ .Values.agent.nodes.backgroundStatsCollector }}
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED

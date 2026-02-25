@@ -673,11 +673,13 @@ serviceAccount:
 ## ref: https://kubernetes.io/docs/admin/authorization/rbac/
 ## @param rbac.create Whether to create & use RBAC resources or not
 ## @param rbac.clusterRole.create Whether to create & use ClusterRole resources or not
+## @param rbac.clusterRole.allowKubeProxy Controls if the ClusterRole has the permission to use nodes/proxy.
 ##
 rbac:
   create: true
   clusterRole:
     create: true
+    allowKubeProxy: true
 extraObjects: []
 # - apiVersion: external-secrets.io/v1
 #   kind: ExternalSecret

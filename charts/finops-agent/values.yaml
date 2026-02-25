@@ -171,6 +171,7 @@ logLevel: "info"
 ## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
 ## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
 ## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
+## @param agent.nodes.backgroundStatsCollector Allows for node stats to be collected asynchronously to allow for greater scale
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
@@ -201,7 +202,6 @@ logLevel: "info"
 ## @param agent.cloudability.secret.cloudabilitySecretKey The cloudability secret key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilityEnvId The cloudability env id for the cloudability data source
 ## @param agent.cloudability.secret.customAzureClientSecret The cloudability client secret for azure blob upload
-## @param agent.nodeStatsBackgroundCollector Allows for node stats to be collected asynchronously to allow for greater scale
 ##
 agent:
   collectorDataSource:
@@ -219,6 +219,8 @@ agent:
     diagnostics: 10m
   exporter:
     emissionInterval: 1m
+  nodes:
+    backgroundStatsCollector: true
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false
@@ -276,7 +278,6 @@ agent:
     gpuLabelValue: ""
     spotLabel: ""
     spotLabelValue: ""
-  nodeStatsBackgroundCollector: true
 
 ## @param command Override default container command (useful when using custom images)
 ##

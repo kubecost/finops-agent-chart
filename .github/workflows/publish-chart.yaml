@@ -93,8 +93,15 @@ jobs:
           git commit -m "Update chart index for ${{ github.ref_name }}"
           git push origin gh-pages
 
+      - name: Checkout github-actions
+        uses: actions/checkout@v4
+        with:
+          repository: kubecost/github-actions
+          path: github-actions
+          token: ${{ secrets.ACTIONS_PAT }}
+
       - name: Create Release
-        uses: kubecost/github-actions/action-gh-release@main
+        uses: ./github-actions/action-gh-release
         with:
           files: .cr-release-packages/*.tgz
           generate_release_notes: true

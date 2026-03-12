@@ -94,7 +94,7 @@ jobs:
           git push origin gh-pages
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: kubecost/github-actions/action-gh-release@main
         with:
           files: .cr-release-packages/*.tgz
           generate_release_notes: true

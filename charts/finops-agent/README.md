@@ -118,6 +118,12 @@ This chart allows you to set your custom affinity using the `affinity` parameter
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/main/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 
+## Persistence
+
+Local data can be persisted by default using PVC(s), to survive restarts until uploaded to bucket storage. You can disable the persistence setting the `persistence.enabled` parameter to `false`.
+
+A default `StorageClass` is needed in the Kubernetes cluster to dynamically provision the volumes. Specify another StorageClass in the `persistence.storageClass` or set `persistence.existingClaim` if you have already existing persistent volumes to use.
+
 ## Parameters
 
 ### Global parameters
@@ -293,6 +299,20 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 | `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                                              | `[]`    |
 | `metrics.serviceMonitor.selector`          | Prometheus instance selector labels                                                                    | `{}`    |
 | `metrics.serviceMonitor.honorLabels`       | honorLabels chooses the metric's labels on collisions with target labels                               | `false` |
+
+### Persistence parameters
+
+| Name                                              | Description                                                                                                                                                                | Value               |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `persistence.enabled`                             | Enable FinOps Agent data persistence for WAL and other local data                                                                                                          | `true`              |
+| `persistence.existingClaim`                       | A manually managed Persistent Volume and Claim                                                                                                                             | `""`                |
+| `persistence.storageClass`                        | PVC Storage Class for the FinOps Agent data volume                                                                                                                         | `""`                |
+| `persistence.accessModes`                         | Persistent Volume Access Modes                                                                                                                                             | `["ReadWriteOnce"]` |
+| `persistence.size`                                | PVC Storage Request for the FinOps Agent data volume                                                                                                                       | `8Gi`               |
+| `persistence.dataSource`                          | Custom PVC data source                                                                                                                                                     | `{}`                |
+| `persistence.annotations.helm.sh/resource-policy` | The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method. | `keep`              |
+| `persistence.selector`                            | Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it                              | `{}`                |
+| `persistence.mountPath`                           | Mount path of the IBM FinOps Agent data volume                                                                                                                             | `/opt/finops-agent` |
 
 ### Other Parameters
 

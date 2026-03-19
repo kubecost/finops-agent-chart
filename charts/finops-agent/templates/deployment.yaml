@@ -386,6 +386,10 @@ spec:
               mountPath: /var/configs/metrics.json
               subPath: metrics.json
               readOnly: true
+            {{- if .Values.persistence.enabled }}
+            - mountPath: {{ .Values.persistence.mountPath }}
+              name: data
+            {{- end }}
             {{- if .Values.global.updateCaTrust.enabled }}
             - name: ca-certs-secret
               mountPath: {{ .Values.global.updateCaTrust.caCertsMountPath | quote }}
@@ -441,4 +445,13 @@ spec:
             secretName: {{ .Release.Name }}-metrics-config
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ (tpl .Values.persistence.existingClaim .) | default (include "common.names.fullname" .) }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         {{- end }}

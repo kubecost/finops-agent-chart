@@ -446,7 +446,6 @@ spec:
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" .) | nindent 8 }}
         {{- end }}
-        {{- if .Values.persistence.enabled }}
         - name: data
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
@@ -454,4 +453,3 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- end }}

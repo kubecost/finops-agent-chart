@@ -618,7 +618,7 @@ metrics:
 persistence:
   ## @param persistence.enabled Enable FinOps Agent data persistence for WAL and other local data
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
   ## If defined, PVC must be created manually before volume will be bound
   ## The value is evaluated as a template

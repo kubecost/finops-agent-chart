@@ -140,7 +140,7 @@ useHelmHooks: true
 image:
   registry: icr.io
   repository: ibm-finops/agent
-  tag: v1.0.11
+  tag: v1.0.15
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -171,6 +171,7 @@ logLevel: "info"
 ## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
 ## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
 ## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
+## @param agent.nodes.backgroundStatsCollector Allows for node stats to be collected asynchronously to allow for greater scale
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
@@ -218,6 +219,8 @@ agent:
     diagnostics: 10m
   exporter:
     emissionInterval: 1m
+  nodes:
+    backgroundStatsCollector: true
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false
@@ -607,51 +610,6 @@ metrics:
     ##
     disabledMetrics: []
 
-## @section Persistence parameters
-
-## Enable persistence using Persistent Volume Claims
-## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-##
-persistence:
-  ## @param persistence.enabled Enable FinOps Agent data persistence for WAL and other local data
-  ##
-  enabled: true
-  ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
-  ## If defined, PVC must be created manually before volume will be bound
-  ## The value is evaluated as a template
-  ##
-  existingClaim: ""
-  ## @param persistence.storageClass PVC Storage Class for the FinOps Agent data volume
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ## set, choosing the default provisioner.
-  ##
-  storageClass: ""
-  ## @param persistence.accessModes Persistent Volume Access Modes
-  ##
-  accessModes:
-  - ReadWriteOnce
-  ## @param persistence.size PVC Storage Request for the FinOps Agent data volume
-  ##
-  size: 8Gi
-  ## @param persistence.dataSource Custom PVC data source
-  ##
-  dataSource: {}
-  ## @param persistence.annotations.helm.sh/resource-policy The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method.
-  ##
-  annotations:
-    helm.sh/resource-policy: keep
-  ## @param persistence.selector Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it
-  ## selector:
-  ##   matchLabels:
-  ##     app: my-app
-  ##
-  selector: {}
-  ## @param persistence.mountPath Mount path of the IBM FinOps Agent data volume
-  ##
-  mountPath: /opt/finops-agent
-
 ## @section Other Parameters
 
 ## Service Account for IBM FinOps Agent
@@ -670,11 +628,13 @@ serviceAccount:
 ## ref: https://kubernetes.io/docs/admin/authorization/rbac/
 ## @param rbac.create Whether to create & use RBAC resources or not
 ## @param rbac.clusterRole.create Whether to create & use ClusterRole resources or not
+## @param rbac.clusterRole.allowKubeProxy Controls if the ClusterRole has the permission to use nodes/proxy.
 ##
 rbac:
   create: true
   clusterRole:
     create: true
+    allowKubeProxy: true
 extraObjects: []
 # - apiVersion: external-secrets.io/v1
 #   kind: ExternalSecret

@@ -50,8 +50,13 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 rules:
   - apiGroups: [""]
-    resources: ["namespaces", "nodes", "pods", "services", "persistentvolumeclaims", "persistentvolumes", "replicationcontrollers", "nodes/metrics", "nodes/stats", "nodes/proxy", "resourcequotas"]
+    resources: ["namespaces", "nodes", "pods", "services", "persistentvolumeclaims", "persistentvolumes", "replicationcontrollers", "nodes/metrics", "nodes/stats", "resourcequotas"]
     verbs: ["get", "list", "watch"]
+  {{- if .Values.rbac.clusterRole.allowKubeProxy }}
+  - apiGroups: [""]
+    resources: ["nodes/proxy"]
+    verbs: ["get", "list", "watch"]
+  {{- end }}
   - apiGroups: ["apps"]
     resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
     verbs: ["get", "list", "watch"]

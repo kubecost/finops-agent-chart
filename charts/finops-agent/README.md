@@ -120,7 +120,7 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 
 ## Persistence
 
-Local data can be persisted by default using PVC(s), to survive restarts until uploaded to bucket storage. You can disable the persistence setting the `persistence.enabled` parameter to `false`.
+Local data can persisted using PVC(s), to survive restarts until uploaded to bucket storage. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
 
 A default `StorageClass` is needed in the Kubernetes cluster to dynamically provision the volumes. Specify another StorageClass in the `persistence.storageClass` or set `persistence.existingClaim` if you have already existing persistent volumes to use.
 

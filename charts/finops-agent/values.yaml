@@ -178,7 +178,6 @@ logLevel: "info"
 ## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
 ## @param agent.cloudability.keySecretFile the name of the keySecretFile
 ## @param agent.cloudability.envIDFile the name of the envIDFile
-## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
 ## @param agent.cloudability.uploadRegion The upload region for the cloudability data source
 ## @param agent.cloudability.httpsClientTimeout Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.
 ## @param agent.cloudability.uploadRetryCount Number of attempts the agent will retry to upload a payload
@@ -228,7 +227,6 @@ agent:
     keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
     keySecretFile: "CLOUDABILITY_KEY_SECRET"
     envIDFile: "CLOUDABILITY_ENV_ID"
-    localWorkingDir: /tmp
     uploadRegion: us
     httpsClientTimeout: 60
     uploadRetryCount: 5

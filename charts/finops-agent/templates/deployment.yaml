@@ -206,11 +206,7 @@ spec:
             - name: CLOUDABILITY_EMITTER_ENABLED
               value: "true"
             - name: CLOUDABILITY_SCRATCH_DIR
-              {{- if .Values.persistence.enabled }}
               value: {{ .Values.persistence.mountPath | quote }}
-              {{- else }}
-              value: {{ .Values.agent.cloudability.localWorkingDir | quote }}
-              {{- end }}
             - name: CLOUDABILITY_UPLOAD_REGION
               value: {{ .Values.agent.cloudability.uploadRegion | quote }}
             {{- if .Values.agent.cloudability.httpsClientTimeout }}
@@ -390,10 +386,8 @@ spec:
               mountPath: /var/configs/metrics.json
               subPath: metrics.json
               readOnly: true
-            {{- if .Values.persistence.enabled }}
             - mountPath: {{ .Values.persistence.mountPath }}
               name: data
-            {{- end }}
             {{- if .Values.global.updateCaTrust.enabled }}
             - name: ca-certs-secret
               mountPath: {{ .Values.global.updateCaTrust.caCertsMountPath | quote }}

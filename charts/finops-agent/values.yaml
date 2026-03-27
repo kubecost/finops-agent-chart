@@ -651,7 +651,7 @@ persistence:
   selector: {}
   ## @param persistence.mountPath Mount path of the IBM FinOps Agent data volume
   ##
-  mountPath: /opt/finops-agent
+  mountPath: /tmp/scratch
 
 ## @section Other Parameters
 

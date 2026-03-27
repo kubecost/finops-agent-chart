@@ -311,7 +311,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `persistence.dataSource`                          | Custom PVC data source                                                                                                                                                     | `{}`                |
 | `persistence.annotations.helm.sh/resource-policy` | The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method. | `keep`              |
 | `persistence.selector`                            | Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it                              | `{}`                |
-| `persistence.mountPath`                           | Mount path of the IBM FinOps Agent data volume                                                                                                                             | `/tmp/scratch` |
+| `persistence.mountPath`                           | Mount path of the IBM FinOps Agent data volume                                                                                                                             | `/opt/finops-agent` |
 
 ### Other Parameters
 

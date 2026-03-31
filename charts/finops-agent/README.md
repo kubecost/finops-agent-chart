@@ -118,6 +118,12 @@ This chart allows you to set your custom affinity using the `affinity` parameter
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/main/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 
+## Persistence
+
+Local data can persisted using PVC(s), to survive restarts until uploaded to bucket storage. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
+
+A default `StorageClass` is needed in the Kubernetes cluster to dynamically provision the volumes. Specify another StorageClass in the `persistence.storageClass` or set `persistence.existingClaim` if you have already existing persistent volumes to use.
+
 ## Parameters
 
 ### Global parameters
@@ -177,7 +183,6 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 | `agent.cloudability.keyAccessFile`                   | the name of the keyAccessFile                                                                                                                                                              | `CLOUDABILITY_KEY_ACCESS`                      |
 | `agent.cloudability.keySecretFile`                   | the name of the keySecretFile                                                                                                                                                              | `CLOUDABILITY_KEY_SECRET`                      |
 | `agent.cloudability.envIDFile`                       | the name of the envIDFile                                                                                                                                                                  | `CLOUDABILITY_ENV_ID`                          |
-| `agent.cloudability.localWorkingDir`                 | The local working directory for the cloudability data source                                                                                                                               | `/tmp`                                         |
 | `agent.cloudability.uploadRegion`                    | The upload region for the cloudability data source                                                                                                                                         | `us`                                           |
 | `agent.cloudability.httpsClientTimeout`              | Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.                                                    | `60`                                           |
 | `agent.cloudability.uploadRetryCount`                | Number of attempts the agent will retry to upload a payload                                                                                                                                | `5`                                            |
@@ -293,6 +298,20 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 | `metrics.serviceMonitor.metricRelabelings` | MetricRelabelConfigs to apply to samples before ingestion                                              | `[]`    |
 | `metrics.serviceMonitor.selector`          | Prometheus instance selector labels                                                                    | `{}`    |
 | `metrics.serviceMonitor.honorLabels`       | honorLabels chooses the metric's labels on collisions with target labels                               | `false` |
+
+### Persistence parameters
+
+| Name                                              | Description                                                                                                                                                                | Value               |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `persistence.enabled`                             | Enable FinOps Agent data persistence for WAL and other local data                                                                                                          | `false`              |
+| `persistence.existingClaim`                       | A manually managed Persistent Volume and Claim                                                                                                                             | `""`                |
+| `persistence.storageClass`                        | PVC Storage Class for the FinOps Agent data volume                                                                                                                         | `""`                |
+| `persistence.accessModes`                         | Persistent Volume Access Modes                                                                                                                                             | `["ReadWriteOnce"]` |
+| `persistence.size`                                | PVC Storage Request for the FinOps Agent data volume                                                                                                                       | `8Gi`               |
+| `persistence.dataSource`                          | Custom PVC data source                                                                                                                                                     | `{}`                |
+| `persistence.annotations.helm.sh/resource-policy` | The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method. | `keep`              |
+| `persistence.selector`                            | Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it                              | `{}`                |
+| `persistence.mountPath`                           | Mount path of the IBM FinOps Agent data volume                                                                                                                             | `/opt/finops-agent` |
 
 ### Other Parameters
 

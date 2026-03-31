@@ -178,7 +178,6 @@ logLevel: "info"
 ## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
 ## @param agent.cloudability.keySecretFile the name of the keySecretFile
 ## @param agent.cloudability.envIDFile the name of the envIDFile
-## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
 ## @param agent.cloudability.uploadRegion The upload region for the cloudability data source
 ## @param agent.cloudability.httpsClientTimeout Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.
 ## @param agent.cloudability.uploadRetryCount Number of attempts the agent will retry to upload a payload
@@ -228,7 +227,6 @@ agent:
     keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
     keySecretFile: "CLOUDABILITY_KEY_SECRET"
     envIDFile: "CLOUDABILITY_ENV_ID"
-    localWorkingDir: /tmp
     uploadRegion: us
     httpsClientTimeout: 60
     uploadRetryCount: 5
@@ -609,6 +607,51 @@ metrics:
     ## @param metrics.configs.disabledMetrics metrics that should not be emitted by ibm-finops-agent
     ##
     disabledMetrics: []
+
+## @section Persistence parameters
+
+## Enable persistence using Persistent Volume Claims
+## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+##
+persistence:
+  ## @param persistence.enabled Enable FinOps Agent data persistence for WAL and other local data
+  ##
+  enabled: false
+  ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
+  ## If defined, PVC must be created manually before volume will be bound
+  ## The value is evaluated as a template
+  ##
+  existingClaim: ""
+  ## @param persistence.storageClass PVC Storage Class for the FinOps Agent data volume
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ## set, choosing the default provisioner.
+  ##
+  storageClass: ""
+  ## @param persistence.accessModes Persistent Volume Access Modes
+  ##
+  accessModes:
+  - ReadWriteOnce
+  ## @param persistence.size PVC Storage Request for the FinOps Agent data volume
+  ##
+  size: 8Gi
+  ## @param persistence.dataSource Custom PVC data source
+  ##
+  dataSource: {}
+  ## @param persistence.annotations.helm.sh/resource-policy The \"helm.sh/resource-policy: keep\" annotation is used to prevent the persistent volume from being deleted when uninstalling or moving to a different deployment method.
+  ##
+  annotations:
+    helm.sh/resource-policy: keep
+  ## @param persistence.selector Selector to match an existing Persistent Volume for the FinOps Agent data PVC. If set, the PVC can't have a PV dynamically provisioned for it
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: {}
+  ## @param persistence.mountPath Mount path of the IBM FinOps Agent data volume
+  ##
+  mountPath: /opt/finops-agent
 
 ## @section Other Parameters
 

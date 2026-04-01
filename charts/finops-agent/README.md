@@ -60,8 +60,6 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **CA Region**: HTTPS access to `https://api-ca.cloudability.com`
    - **ME Region**: HTTPS access to `https://api-me.cloudability.com`
    - **Gov Regions**: `https://api.usgov.cloudability.com` and `https://api.usgov2.cloudability.com`
-   - Default timeout: 60 seconds (configurable via `agent.cloudability.httpsClientTimeout`)
-   - Retry attempts: 5 (configurable via `agent.cloudability.uploadRetryCount`)
 
 2. **Frontdoor API Endpoints** (for authentication)
    - **US Region**: HTTPS access to `https://frontdoor.apptio.com`
@@ -74,23 +72,16 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **ME Region**: HTTPS access to `https://frontdoor-me.apptio.com`
    - **Gov Regions**: `https://frontdoor-usgov.apptio.com` and `https://frontdoor-usgov2.apptio.com`
 
-3. **Kubernetes API Server**
-   - Internal cluster access to Kubernetes API for metrics collection
-   - Requires RBAC permissions for nodes, pods, and resource metrics
-
-4. **Federated Storage** (Optional)
-   - **AWS S3**: HTTPS access to `s3.amazonaws.com` or regional endpoints
-   - **Azure Blob Storage**: HTTPS access to `*.blob.core.windows.net`
-   - **Google Cloud Storage**: HTTPS access to GCS endpoints
-
-**Proxy Support:**
-- HTTP/HTTPS proxy configuration available via `agent.cloudability.outboundProxy`
-- Proxy authentication supported via `agent.cloudability.outboundProxyAuth`
-- Option to use proxy only for upload endpoints via `agent.cloudability.useProxyForGettingUploadURLonly`
-
-**Inbound Connections:**
-- **Port 9003**: HTTP port for health checks and diagnostics (ClusterIP service)
-- **Port 3001**: Internal collector data source port
+3. **S3 Upload Buckets** (for metrics data upload)
+   - **US Region**: `apptio-cake-services-cldyctr-uw2p` (us-west-2)
+   - **EU Region**: `apptio-cake-services-cldyctr-ec1p` (eu-central-1)
+   - **AU Region**: `apptio-cake-services-cldyctr-ase2p` (ap-southeast-2)
+   - **JP Region**: `apptio-cake-services-cldyctr-ane1p` (ap-northeast-1)
+   - **SG Region**: `apptio-cake-services-cldyctr-ase1p` (ap-southeast-1)
+   - **IN Region**: `apptio-cake-services-cldyctr-as1p` (ap-south-1)
+   - **CA Region**: `apptio-cake-services-cldyctr-asesp` (ca-central-1)
+   - **ME Region**: `apptio-cake-services-cldyctr-mc1p` (me-central-1)
+   - **Gov Region**: `apptio-cake-services-prd-ugw1g` (us-gov-west-1)
 
 ### Cloudability Advanced Container
 
@@ -109,43 +100,6 @@ For Cloudability Advanced Container deployments with enhanced features, addition
 
 3. **Custom Upload Destinations** (Optional)
    - **Custom S3**: Access to custom S3 buckets (via `agent.cloudability.customS3UploadBucket`)
-   - **Custom Azure Blob**: Access to custom Azure storage accounts (via `agent.cloudability.customAzureBlobURL`)
-
-4. **Node Proxy Access** (Optional)
-   - When `agent.cloudability.forceKubeProxy` is enabled, requires proxy access to node endpoints
-
-**Network Egress Tracking:**
-- The agent can track and report on network egress costs:
-  - Internet egress
-  - Cross-region egress
-  - Cross-zone egress
-
-**Security Considerations:**
-- TLS certificate verification enabled by default
-- Can be disabled via `agent.cloudability.outboundProxyInsecure` (not recommended for production)
-- Supports custom CA certificates via `global.updateCaTrust` configuration
-
-**Firewall Rules Summary:**
-
-| Direction | Protocol | Port/Endpoint | Purpose |
-|-----------|----------|---------------|---------|
-| Outbound | HTTPS (443) | Cloudability upload endpoints | Data upload |
-| Outbound | HTTPS (443) | Cloud provider APIs | Pricing data |
-| Outbound | HTTPS (443) | S3/Azure/GCS endpoints | Federated storage |
-| Inbound | HTTP (9003) | Agent service | Health checks |
-| Internal | HTTP (3001) | Collector service | Metrics collection |
-
-**Proxy Configuration Example:**
-
-```yaml
-agent:
-  cloudability:
-    enabled: true
-    outboundProxy: "http://proxy.example.com:8080"
-    outboundProxyAuth: "username:password"
-    outboundProxyInsecure: false
-    useProxyForGettingUploadURLonly: false
-```
 
 ## Installing the Chart
 

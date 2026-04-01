@@ -27,6 +27,9 @@ This chart bootstraps an IBM FinOps Agent deployment on a [Kubernetes](https://k
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
+- [Network Requirements](#network-requirements)
+  - [Cloudability Container Insight](#cloudability-container-insight)
+  - [Cloudability Advanced Container](#cloudability-advanced-container)
 - [Installing the Chart](#installing-the-chart)
 - [Configuration and installation details](#configuration-and-installation-details)
 - [Parameters](#parameters)
@@ -36,6 +39,113 @@ This chart bootstraps an IBM FinOps Agent deployment on a [Kubernetes](https://k
 - Kubernetes 1.31+
 - Helm 3.8.0+
 - PV provisioner support in the underlying infrastructure
+
+## Network Requirements
+
+The IBM FinOps Agent requires network connectivity to various endpoints depending on the features enabled. Below are the network requirements for different deployment scenarios.
+
+### Cloudability Container Insight
+
+For Cloudability Container Insight deployments, the agent requires the following network access:
+
+**Outbound Connections:**
+
+1. **Cloudability API Endpoints**
+   - **US Region**: HTTPS access to `https://api.cloudability.com`
+   - **EU Region**: HTTPS access to `https://api-eu.cloudability.com`
+   - **AU Region**: HTTPS access to `https://api-au.cloudability.com`
+   - **JP Region**: HTTPS access to `https://api-jp.cloudability.com`
+   - **SG Region**: HTTPS access to `https://api-sg.cloudability.com`
+   - **IN Region**: HTTPS access to `https://api-in.cloudability.com`
+   - **CA Region**: HTTPS access to `https://api-ca.cloudability.com`
+   - **ME Region**: HTTPS access to `https://api-me.cloudability.com`
+   - **Gov Regions**: `https://api.usgov.cloudability.com` and `https://api.usgov2.cloudability.com`
+   - Default timeout: 60 seconds (configurable via `agent.cloudability.httpsClientTimeout`)
+   - Retry attempts: 5 (configurable via `agent.cloudability.uploadRetryCount`)
+
+2. **Frontdoor API Endpoints** (for authentication)
+   - **US Region**: HTTPS access to `https://frontdoor.apptio.com`
+   - **EU Region**: HTTPS access to `https://frontdoor-eu.apptio.com`
+   - **AU Region**: HTTPS access to `https://frontdoor-au.apptio.com`
+   - **JP Region**: HTTPS access to `https://frontdoor-jp.apptio.com`
+   - **SG Region**: HTTPS access to `https://frontdoor-sg.apptio.com`
+   - **IN Region**: HTTPS access to `https://frontdoor-in.apptio.com`
+   - **CA Region**: HTTPS access to `https://frontdoor-ca.apptio.com`
+   - **ME Region**: HTTPS access to `https://frontdoor-me.apptio.com`
+   - **Gov Regions**: `https://frontdoor-usgov.apptio.com` and `https://frontdoor-usgov2.apptio.com`
+
+3. **Kubernetes API Server**
+   - Internal cluster access to Kubernetes API for metrics collection
+   - Requires RBAC permissions for nodes, pods, and resource metrics
+
+4. **Federated Storage** (Optional)
+   - **AWS S3**: HTTPS access to `s3.amazonaws.com` or regional endpoints
+   - **Azure Blob Storage**: HTTPS access to `*.blob.core.windows.net`
+   - **Google Cloud Storage**: HTTPS access to GCS endpoints
+
+**Proxy Support:**
+- HTTP/HTTPS proxy configuration available via `agent.cloudability.outboundProxy`
+- Proxy authentication supported via `agent.cloudability.outboundProxyAuth`
+- Option to use proxy only for upload endpoints via `agent.cloudability.useProxyForGettingUploadURLonly`
+
+**Inbound Connections:**
+- **Port 9003**: HTTP port for health checks and diagnostics (ClusterIP service)
+- **Port 3001**: Internal collector data source port
+
+### Cloudability Advanced Container
+
+For Cloudability Advanced Container deployments with enhanced features, additional network requirements include:
+
+**Outbound Connections:**
+
+1. **All Container Insight Requirements** (see above)
+
+2. **Cloud Provider Pricing APIs**
+   - **AWS**: Access to AWS Pricing API endpoints for cost data
+     - Optional: S3 access for spot instance data feed (configurable via `agent.kubecost.awsSpotDataBucket`)
+   - **Azure**: Access to Azure pricing endpoints
+   - **GCP**: Access to GCP Pricing API
+     - Requires GCP API key (configurable via `cspPricingApiKey.apiKey`)
+
+3. **Custom Upload Destinations** (Optional)
+   - **Custom S3**: Access to custom S3 buckets (via `agent.cloudability.customS3UploadBucket`)
+   - **Custom Azure Blob**: Access to custom Azure storage accounts (via `agent.cloudability.customAzureBlobURL`)
+
+4. **Node Proxy Access** (Optional)
+   - When `agent.cloudability.forceKubeProxy` is enabled, requires proxy access to node endpoints
+
+**Network Egress Tracking:**
+- The agent can track and report on network egress costs:
+  - Internet egress
+  - Cross-region egress
+  - Cross-zone egress
+
+**Security Considerations:**
+- TLS certificate verification enabled by default
+- Can be disabled via `agent.cloudability.outboundProxyInsecure` (not recommended for production)
+- Supports custom CA certificates via `global.updateCaTrust` configuration
+
+**Firewall Rules Summary:**
+
+| Direction | Protocol | Port/Endpoint | Purpose |
+|-----------|----------|---------------|---------|
+| Outbound | HTTPS (443) | Cloudability upload endpoints | Data upload |
+| Outbound | HTTPS (443) | Cloud provider APIs | Pricing data |
+| Outbound | HTTPS (443) | S3/Azure/GCS endpoints | Federated storage |
+| Inbound | HTTP (9003) | Agent service | Health checks |
+| Internal | HTTP (3001) | Collector service | Metrics collection |
+
+**Proxy Configuration Example:**
+
+```yaml
+agent:
+  cloudability:
+    enabled: true
+    outboundProxy: "http://proxy.example.com:8080"
+    outboundProxyAuth: "username:password"
+    outboundProxyInsecure: false
+    useProxyForGettingUploadURLonly: false
+```
 
 ## Installing the Chart
 

@@ -55,29 +55,26 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **EU Region**: HTTPS access to `https://api-eu.cloudability.com`
    - **AU Region**: HTTPS access to `https://api-au.cloudability.com`
    - **JP Region**: HTTPS access to `https://api-jp.cloudability.com`
-   - **SG Region**: HTTPS access to `https://api-sg.cloudability.com`
    - **IN Region**: HTTPS access to `https://api-in.cloudability.com`
    - **CA Region**: HTTPS access to `https://api-ca.cloudability.com`
    - **ME Region**: HTTPS access to `https://api-me.cloudability.com`
-   - **Gov Regions**: `https://api.usgov.cloudability.com` and `https://api.usgov2.cloudability.com`
+   - **Gov Region**: `https://api.usgov.cloudability.com`
 
 2. **Frontdoor API Endpoints** (for authentication)
    - **US Region**: HTTPS access to `https://frontdoor.apptio.com`
    - **EU Region**: HTTPS access to `https://frontdoor-eu.apptio.com`
    - **AU Region**: HTTPS access to `https://frontdoor-au.apptio.com`
    - **JP Region**: HTTPS access to `https://frontdoor-jp.apptio.com`
-   - **SG Region**: HTTPS access to `https://frontdoor-sg.apptio.com`
    - **IN Region**: HTTPS access to `https://frontdoor-in.apptio.com`
    - **CA Region**: HTTPS access to `https://frontdoor-ca.apptio.com`
    - **ME Region**: HTTPS access to `https://frontdoor-me.apptio.com`
-   - **Gov Regions**: `https://frontdoor-usgov.apptio.com` and `https://frontdoor-usgov2.apptio.com`
+   - **Gov Region**: `https://frontdoor-usgov.apptio.com`
 
 3. **S3 Upload Buckets** (for metrics data upload)
    - **US Region**: `apptio-cake-services-cldyctr-uw2p` (us-west-2)
    - **EU Region**: `apptio-cake-services-cldyctr-ec1p` (eu-central-1)
    - **AU Region**: `apptio-cake-services-cldyctr-ase2p` (ap-southeast-2)
    - **JP Region**: `apptio-cake-services-cldyctr-ane1p` (ap-northeast-1)
-   - **SG Region**: `apptio-cake-services-cldyctr-ase1p` (ap-southeast-1)
    - **IN Region**: `apptio-cake-services-cldyctr-as1p` (ap-south-1)
    - **CA Region**: `apptio-cake-services-cldyctr-asesp` (ca-central-1)
    - **ME Region**: `apptio-cake-services-cldyctr-mc1p` (me-central-1)

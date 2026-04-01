@@ -80,6 +80,9 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **ME Region**: `apptio-cake-services-cldyctr-mc1p.s3.me-central-1.amazonaws.com`
    - **Gov Region**: `apptio-cake-services-prd-ugw1g.s3.us-gov-west-1.amazonaws.com`
 
+   **Note:**
+   - For cross-region customer that uses network proxy, they should allow out-bound traffic to `apptio-cake-services-cldyctr-uw2p.s3.us-west-2.amazonaws.com`.
+
 ### Cloudability Advanced Container
 
 For Cloudability Advanced Container deployments with enhanced features, additional network requirements include:
@@ -95,8 +98,8 @@ For Cloudability Advanced Container deployments with enhanced features, addition
    - **GCP**: Access to GCP Pricing API
      - Requires GCP API key (configurable via `cspPricingApiKey.apiKey`)
 
-3. **Custom Upload Destinations** (Optional)
-   - **Custom S3**: Access to custom S3 buckets (via `agent.cloudability.customS3UploadBucket`)
+3. **Custom Upload Destinations**
+   - **Custom S3**: Specific bucketname can be retrieved from the provisioning page. The format is `kcp-*.s3.<region>.amazonaws.com`
 
 ## Installing the Chart
 

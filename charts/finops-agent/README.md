@@ -27,6 +27,9 @@ This chart bootstraps an IBM FinOps Agent deployment on a [Kubernetes](https://k
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
+- [Network Requirements](#network-requirements)
+  - [Cloudability Container Insight](#cloudability-container-insight)
+  - [Cloudability Advanced Container](#cloudability-advanced-container)
 - [Installing the Chart](#installing-the-chart)
 - [Configuration and installation details](#configuration-and-installation-details)
 - [Parameters](#parameters)
@@ -36,6 +39,67 @@ This chart bootstraps an IBM FinOps Agent deployment on a [Kubernetes](https://k
 - Kubernetes 1.31+
 - Helm 3.8.0+
 - PV provisioner support in the underlying infrastructure
+
+## Network Requirements
+
+The IBM FinOps Agent requires network connectivity to various endpoints depending on the features enabled. Below are the network requirements for different deployment scenarios.
+
+### Cloudability Container Insight
+
+For Cloudability Container Insight deployments, the agent requires the following network access:
+
+**Outbound Connections:**
+
+1. **Cloudability API Endpoints**
+   - **US Region**: HTTPS access to `https://api.cloudability.com`
+   - **EU Region**: HTTPS access to `https://api-eu.cloudability.com`
+   - **AU Region**: HTTPS access to `https://api-au.cloudability.com`
+   - **JP Region**: HTTPS access to `https://api-jp.cloudability.com`
+   - **IN Region**: HTTPS access to `https://api-in.cloudability.com`
+   - **CA Region**: HTTPS access to `https://api-ca.cloudability.com`
+   - **ME Region**: HTTPS access to `https://api-me.cloudability.com`
+   - **Gov Region**: HTTPS access to `https://api.usgov.cloudability.com`
+
+2. **Frontdoor API Endpoints** (for authentication)
+   - **US Region**: HTTPS access to `https://frontdoor.apptio.com`
+   - **EU Region**: HTTPS access to `https://frontdoor-eu.apptio.com`
+   - **AU Region**: HTTPS access to `https://frontdoor-au.apptio.com`
+   - **JP Region**: HTTPS access to `https://frontdoor-jp.apptio.com`
+   - **IN Region**: HTTPS access to `https://frontdoor-in.apptio.com`
+   - **CA Region**: HTTPS access to `https://frontdoor-ca.apptio.com`
+   - **ME Region**: HTTPS access to `https://frontdoor-me.apptio.com`
+   - **Gov Region**: HTTPS access to `https://frontdoor-usgov.apptio.com`
+
+3. **S3 Upload Buckets** (for metrics data upload)
+   - **US Region**: `apptio-cake-services-cldyctr-uw2p.s3.us-west-2.amazonaws.com`
+   - **EU Region**: `apptio-cake-services-cldyctr-ec1p.s3.eu-central-1.amazonaws.com`
+   - **AU Region**: `apptio-cake-services-cldyctr-ase2p.s3.ap-southeast-2.amazonaws.com`
+   - **JP Region**: `apptio-cake-services-cldyctr-ane1p.s3.ap-northeast-1.amazonaws.com`
+   - **IN Region**: `apptio-cake-services-cldyctr-as1p.s3.ap-south-1.amazonaws.com`
+   - **CA Region**: `apptio-cake-services-cldyctr-cc1p.s3.ca-central-1.amazonaws.com`
+   - **ME Region**: `apptio-cake-services-cldyctr-mc1p.s3.me-central-1.amazonaws.com`
+   - **Gov Region**: `apptio-cake-services-prd-ugw1g.s3.us-gov-west-1.amazonaws.com`
+
+   **Note:**
+   - For cross-region customer that uses network proxy, they should allow out-bound traffic to `apptio-cake-services-cldyctr-uw2p.s3.us-west-2.amazonaws.com`.
+
+### Cloudability Advanced Container
+
+For Cloudability Advanced Container deployments with enhanced features, additional network requirements include:
+
+**Outbound Connections:**
+
+1. **All Container Insight Requirements** (see above)
+
+2. **Cloud Provider Pricing APIs**
+   - **AWS**: Access to AWS Pricing API endpoints for cost data
+     - Optional: S3 access for spot instance data feed (configurable via `agent.kubecost.awsSpotDataBucket`)
+   - **Azure**: Access to Azure pricing endpoints
+   - **GCP**: Access to GCP Pricing API
+     - Requires GCP API key (configurable via `cspPricingApiKey.apiKey`)
+
+3. **Custom Upload Destinations**
+   - **Custom S3**: Specific bucketname can be retrieved from the provisioning page. The format is `kcp-*.s3.<region>.amazonaws.com`
 
 ## Installing the Chart
 
@@ -178,34 +242,6 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `agent.collectorDataSource.retention1h`              | The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.                                                                         | `3`                                            |
 | `agent.collectorDataSource.retention1d`              | The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.                                                                         | `2`                                            |
 | `agent.exporter.emissionInterval`                    | A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.                                                                               | `1m`                                           |
-| `agent.cloudability.enabled`                         | Enable the cloudability data source                                                                                                                                                        | `false`                                        |
-| `agent.cloudability.pathToCloudabilitySecrets`       | the path to the location on the filesystem the cloudability secrets are stored                                                                                                             | `/opt/cloudability`                            |
-| `agent.cloudability.keyAccessFile`                   | the name of the keyAccessFile                                                                                                                                                              | `CLOUDABILITY_KEY_ACCESS`                      |
-| `agent.cloudability.keySecretFile`                   | the name of the keySecretFile                                                                                                                                                              | `CLOUDABILITY_KEY_SECRET`                      |
-| `agent.cloudability.envIDFile`                       | the name of the envIDFile                                                                                                                                                                  | `CLOUDABILITY_ENV_ID`                          |
-| `agent.cloudability.uploadRegion`                    | The upload region for the cloudability data source                                                                                                                                         | `us`                                           |
-| `agent.cloudability.httpsClientTimeout`              | Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.                                                    | `60`                                           |
-| `agent.cloudability.uploadRetryCount`                | Number of attempts the agent will retry to upload a payload                                                                                                                                | `5`                                            |
-| `agent.cloudability.outboundProxyInsecure`           | When true, does not verify certificates when making TLS connections.                                                                                                                       | `false`                                        |
-| `agent.cloudability.parseMetricData`                 | When true, core files will be parsed and non-relevant data will be removed prior to upload.                                                                                                | `false`                                        |
-| `agent.cloudability.emissionInterval`                | A duration string of how often samples are emitted to the cloudability uploader                                                                                                            | `3m`                                           |
-| `agent.cloudability.outboundProxy`                   | The URL of an outbound HTTP/HTTPS proxy for the agent to use (eg: <http://x.x.x.x:8080>). The URL must contain the scheme prefix (http:// or https://)                                       | `""`                                           |
-| `agent.cloudability.outboundProxyAuth`               | Basic Authentication credentials to be used with the defined outbound proxy. If your outbound proxy requires basic authentication credentials can be defined in the form username:password | `""`                                           |
-| `agent.cloudability.useProxyForGettingUploadURLonly`               | When true, the cloudability client will only use the proxy for clusters/upload and frontdoor apikey login | `false`                                           |
-| `agent.cloudability.forceKubeProxy`               | When true, the cloudability client will only use the proxy to read node data | `false`                                           |
-| `agent.cloudability.customS3UploadBucket`            | S3 bucket for custom uploading agent                                                                                                                                                       | `""`                                           |
-| `agent.cloudability.customS3UploadRegion`            | S3 region for custom uploading agent                                                                                                                                                       | `""`                                           |
-| `agent.cloudability.customAzureBlobContainerName`    | Azure blob name for custom uploading agent                                                                                                                                                 | `""`                                           |
-| `agent.cloudability.customAzureBlobURL`              | Azure blob url for custom uploading agent                                                                                                                                                  | `""`                                           |
-| `agent.cloudability.customAzureTenantID`             | Azure tenantID for custom uploading agent                                                                                                                                                  | `""`                                           |
-| `agent.cloudability.customAzureClientID`             | Azure clientID for custom uploading agent                                                                                                                                                  | `""`                                           |
-| `agent.cloudability.customAzureBlobClientSecretFile` | the name of the customAzureBlobClientSecretFile                                                                                                                                            | `CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET` |
-| `agent.cloudability.secret.existingSecret`           | The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.                                                           | `""`                                           |
-| `agent.cloudability.secret.create`                   | Create a secret for the cloudability data source. cannot be used with existingSecret                                                                                                       | `true`                                         |
-| `agent.cloudability.secret.cloudabilityAccessKey`    | The cloudability access key for the cloudability data source                                                                                                                               | `""`                                           |
-| `agent.cloudability.secret.cloudabilitySecretKey`    | The cloudability secret key for the cloudability data source                                                                                                                               | `""`                                           |
-| `agent.cloudability.secret.cloudabilityEnvId`        | The cloudability env id for the cloudability data source                                                                                                                                   | `""`                                           |
-| `agent.cloudability.secret.customAzureClientSecret`  | The cloudability client secret for azure blob upload                                                                                                                                       | `""`                                           |
 | `command`                                            | Override default container command (useful when using custom images)                                                                                                                       | `[]`                                           |
 | `args`                                               | Override default container args (useful when using custom images)                                                                                                                          | `[]`                                           |
 | `extraEnvVars`                                       | Array with extra environment variables to add to the FinOps Agent container                                                                                                                | `[]`                                           |
@@ -272,6 +308,40 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `extraVolumes`                                       | Optionally specify extra list of additional volumes for the FinOps Agent pods                                                                                                              | `[]`                                           |
 | `sidecars`                                           | Add additional sidecar containers to the FinOps Agent pod(s)                                                                                                                               | `[]`                                           |
 | `initContainers`                                     | Add additional init-containers to the FinOps Agent pod(s)                                                                                                                                  | `[]`                                           |
+
+### IBM Cloudability Emitter Parameters
+
+| Name                                                 | Description                                                                                                                                                                                | Value                                          | Required |
+|------------------------------------------------------| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- | -------- |
+| `agent.cloudability.enabled`                         | Enable the cloudability data source                                                                                                                                                        | `false`                                        | Yes ( set to 'true' to enable cloudability emitter to upload to Cloudability )       |
+| `agent.cloudability.pathToCloudabilitySecrets`       | the path to the location on the filesystem the cloudability secrets are stored                                                                                                             | `/opt/cloudability`                            | No       |
+| `agent.cloudability.keyAccessFile`                   | the name of the keyAccessFile                                                                                                                                                              | `CLOUDABILITY_KEY_ACCESS`                      | No       |
+| `agent.cloudability.keySecretFile`                   | the name of the keySecretFile                                                                                                                                                              | `CLOUDABILITY_KEY_SECRET`                      | No       |
+| `agent.cloudability.envIDFile`                       | the name of the envIDFile                                                                                                                                                                  | `CLOUDABILITY_ENV_ID`                          | No       |
+| `agent.cloudability.localWorkingDir`                 | The local working directory for the cloudability data source                                                                                                                               | `/tmp`                                         | No       |
+| `agent.cloudability.uploadRegion`                    | The upload region for the cloudability data source                                                                                                                                         | `us`                                           | No       |
+| `agent.cloudability.httpsClientTimeout`              | Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.                                                    | `60`                                           | No       |
+| `agent.cloudability.uploadRetryCount`                | Number of attempts the agent will retry to upload a payload                                                                                                                                | `5`                                            | No       |
+| `agent.cloudability.outboundProxyInsecure`           | When true, does not verify certificates when making TLS connections.                                                                                                                       | `false`                                        | No       |
+| `agent.cloudability.parseMetricData`                 | When true, core files will be parsed and non-relevant data will be removed prior to upload.                                                                                                | `false`                                        | No       |
+| `agent.cloudability.emissionInterval`                | A duration string of how often samples are emitted to the cloudability uploader                                                                                                            | `3m`                                           | No       |
+| `agent.cloudability.outboundProxy`                   | The URL of an outbound HTTP/HTTPS proxy for the agent to use (eg: <http://x.x.x.x:8080>). The URL must contain the scheme prefix (http:// or https://)                                       | `""`                                           | No       |
+| `agent.cloudability.outboundProxyAuth`               | Basic Authentication credentials to be used with the defined outbound proxy. If your outbound proxy requires basic authentication credentials can be defined in the form username:password | `""`                                           | No       |
+| `agent.cloudability.useProxyForGettingUploadURLonly` | When true, the cloudability client will only use the proxy for clusters/upload and frontdoor apikey login                                                                                  | `false`                                        | No       |
+| `agent.cloudability.forceKubeProxy`                  | When true, the cloudability client will only use the proxy to read node data                                                                                                               | `false`                                        | No       |
+| `agent.cloudability.customS3UploadBucket`            | S3 bucket for custom uploading agent                                                                                                                                                       | `""`                                           | No       |
+| `agent.cloudability.customS3UploadRegion`            | S3 region for custom uploading agent                                                                                                                                                       | `""`                                           | No       |
+| `agent.cloudability.customAzureBlobContainerName`    | Azure blob name for custom uploading agent                                                                                                                                                 | `""`                                           | No       |
+| `agent.cloudability.customAzureBlobURL`              | Azure blob url for custom uploading agent                                                                                                                                                  | `""`                                           | No       |
+| `agent.cloudability.customAzureTenantID`             | Azure tenantID for custom uploading agent                                                                                                                                                  | `""`                                           | No       |
+| `agent.cloudability.customAzureClientID`             | Azure clientID for custom uploading agent                                                                                                                                                  | `""`                                           | No       |
+| `agent.cloudability.customAzureBlobClientSecretFile` | the name of the customAzureBlobClientSecretFile                                                                                                                                            | `CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_SECRET` | No       |
+| `agent.cloudability.secret.existingSecret`           | The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.                                                           | `""`                                           | No       |
+| `agent.cloudability.secret.create`                   | Create a secret for the cloudability data source. cannot be used with existingSecret                                                                                                       | `true`                                         | No       |
+| `agent.cloudability.secret.cloudabilityAccessKey`    | The cloudability access key for the cloudability data source                                                                                                                               | `""`                                           | Yes ( Required when uploading metrics directly to Cloudability )       |
+| `agent.cloudability.secret.cloudabilitySecretKey`    | The cloudability secret key for the cloudability data source                                                                                                                               | `""`                                           | Yes ( Required when uploading metrics directly to Cloudability )       |
+| `agent.cloudability.secret.cloudabilityEnvId`        | The cloudability env id for the cloudability data source                                                                                                                                   | `""`                                           | Yes ( Required when uploading metrics directly to Cloudability )       |
+| `agent.cloudability.secret.customAzureClientSecret`  | The cloudability client secret for azure blob upload                                                                                                                                       | `""`                                           | No       |
 
 ### Service parameters
 

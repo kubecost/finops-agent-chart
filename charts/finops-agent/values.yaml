@@ -205,7 +205,7 @@ logLevel: "info"
 agent:
   collectorDataSource:
     enabled: true
-    scrapeInterval: 60s
+    scrapeInterval: 60s  # If the agent diagnostics fails with node stat errors, consider increasing the interval or adding additional resources to the agent.
     networkPort: 3001
     retention10m: 6
     retention1h: 3

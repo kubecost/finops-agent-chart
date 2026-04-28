@@ -205,7 +205,7 @@ logLevel: "info"
 agent:
   collectorDataSource:
     enabled: true
-    scrapeInterval: 30s
+    scrapeInterval: 60s
     networkPort: 3001
     retention10m: 6
     retention1h: 3

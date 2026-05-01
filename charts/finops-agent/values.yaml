@@ -274,6 +274,20 @@ agent:
     spotLabel: ""
     spotLabelValue: ""
 
+
+## @section Support parameters (Advanced)
+## These are advanced override flags for specific use cases.
+## In most cases, you should not need to set these values.
+## The agent automatically enables Kubecost data collection when global.federatedStorage is configured.
+## Use these flags to override that behavior.
+
+## @param support.kubecostEmitterEnabled Override automatic Kubecost enablement. Set to "disabled" to force disable Kubecost data collection even when global.federatedStorage is configured. Any other value (or omitting this parameter) will enable it.
+## @param support.opencostSourceEnabled Override automatic OpenCost source enablement. Set to "disabled" to force disable OpenCost data source even when global.federatedStorage is configured. Any other value (or omitting this parameter) will enable it.
+##
+# support:
+#   kubecostEmitterEnabled: "disabled"
+#   opencostSourceEnabled: "disabled"
+
 ## @param command Override default container command (useful when using custom images)
 ##
 command: []

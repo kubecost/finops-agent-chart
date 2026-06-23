@@ -309,6 +309,10 @@ spec:
             {{- else }}
               value: {{ include "finops-agent.kubecostEnabled" . | quote }}
             {{- end }}
+            - name: EXPORT_LEGACY_DATA_MODEL
+              value: {{ .Values.agent.kubecost.exportLegacyDataModels | quote }}
+            - name: EXPORT_KUBEMODEL
+              value: {{ .Values.agent.kubecost.exportKubeModel | quote }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}

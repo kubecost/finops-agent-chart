@@ -700,3 +700,16 @@ extraObjects: []
 #     dataFrom:
 #     - extract:
 #         key: remote-key-in-the-provider
+
+# External labels to import from an existing Kubernetes ConfigMap.
+# These labels are merged into node resources that are created.
+# externalLabels:
+#   configMap:
+#     # ConfigMap name.
+#     name: cluster-monitoring-config
+
+#     # Namespace containing the ConfigMap.
+#     namespace: openshift-monitoring
+
+#     # YAML path to the external labels within `config.yaml`.
+#     path: prometheusK8s.externalLabels

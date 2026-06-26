@@ -47,10 +47,7 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
-    {{- /* Restrict to exactly the named ConfigMap — no broader access. */}}
-    resourceNames:
-      - {{ .Values.externalLabels.configMap.name }}
-    verbs: ["get", "watch"]
+    verbs: ["get", "list", "watch"]
 ---
 {{- /* RoleBinding: attaches the Role to the agent's ServiceAccount. */}}
 {{- /*

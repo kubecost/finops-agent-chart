@@ -7,26 +7,20 @@ SPDX-License-Identifier: APACHE-2.0
 This file is only rendered when all three externalLabels.configMap fields are set:
   name, namespace, and path.
 
-When externalLabels is configured, the FinOps Agent needs to read a ConfigMap that
-may live in a different namespace from where the agent is deployed. Kubernetes RBAC
-is namespace-scoped by default, so a Role and RoleBinding must be created in the
-*target* namespace to grant the agent's ServiceAccount read access to that specific
-ConfigMap.
+When externalLabels is configured, the deployment needs to read a ConfigMap that
+may live in a different namespace from where the agent is deployed. A ClusterRole and
+ClusterRoleBinding are used so that the agent's ServiceAccount can access the ConfigMap
+regardless of which namespace it resides in, without requiring resources to be created
+in the target namespace.
 
-Role
-  - Created in the ConfigMap's namespace (externalLabels.configMap.namespace), NOT
-    the agent's own namespace.
-  - Grants "get" and "watch" on the single named ConfigMap only (resourceNames),
-    following least-privilege: the agent cannot read any other ConfigMap in that
-    namespace.
+ClusterRole
+  - Cluster-scoped; no namespace in metadata.
+  - Grants "get", "list", and "watch" on ConfigMaps across the cluster.
 
-RoleBinding
-  - Also created in the ConfigMap's namespace so Kubernetes evaluates it when the
-    agent makes an API call to that namespace.
-  - Binds the Role to the agent's ServiceAccount, which lives in the agent's own
-    release namespace (.Release.Namespace). The cross-namespace subject reference
-    (ServiceAccount in namespace A, RoleBinding in namespace B) is valid Kubernetes
-    RBAC and is the standard pattern for granting cross-namespace access.
+ClusterRoleBinding
+  - Cluster-scoped; no namespace in metadata.
+  - Binds the ClusterRole to the agent's ServiceAccount, which lives in the agent's
+    own release namespace (.Release.Namespace).
 */}}
 
 {{- if and
@@ -34,12 +28,11 @@ RoleBinding
       ((.Values.externalLabels).configMap).namespace
       ((.Values.externalLabels).configMap).path
 }}
-{{- /* Role: grants read access to the named ConfigMap in its namespace. */}}
+{{- /* ClusterRole: grants read access to ConfigMaps cluster-wide. */}}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: {{ printf "%s-configmap-reader" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
-  namespace: {{ .Values.externalLabels.configMap.namespace }}
   labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" .) | nindent 4 }}
@@ -49,17 +42,15 @@ rules:
     resources: ["configmaps"]
     verbs: ["get", "list", "watch"]
 ---
-{{- /* RoleBinding: attaches the Role to the agent's ServiceAccount. */}}
+{{- /* ClusterRoleBinding: attaches the ClusterRole to the agent's ServiceAccount. */}}
 {{- /*
   subjects.namespace is the agent's release namespace (where the ServiceAccount lives).
-  metadata.namespace is the ConfigMap's namespace (where the Role was created).
-  This cross-namespace binding is what allows the agent to reach across namespaces.
+  ClusterRoleBinding is cluster-scoped so no metadata.namespace is needed.
 */}}
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
+kind: ClusterRoleBinding
 metadata:
   name: {{ printf "%s-configmap-reader" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
-  namespace: {{ .Values.externalLabels.configMap.namespace }}
   labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
   {{- if .Values.commonAnnotations }}
   annotations: {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" .) | nindent 4 }}
@@ -70,6 +61,6 @@ subjects:
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
+  kind: ClusterRole
   name: {{ printf "%s-configmap-reader" (include "common.names.fullname" .) | trunc 63 | trimSuffix "-" }}
 {{- end }}

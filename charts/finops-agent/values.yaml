@@ -701,15 +701,33 @@ extraObjects: []
 #     - extract:
 #         key: remote-key-in-the-provider
 
-# External labels to import from an existing Kubernetes ConfigMap.
-# These labels are merged into node resources that are created.
-# externalLabels:
-#   configMap:
-#     # ConfigMap name.
-#     name: cluster-monitoring-config
-
-#     # Namespace containing the ConfigMap.
-#     namespace: openshift-monitoring
-
-#     # YAML path to the external labels within `config.yaml`.
-#     path: prometheusK8s.externalLabels
+# External labels allow users to apply custom labels to node assets and
+# allocations so they can be used for filtering and grouping in the
+# Kubecost UI.
+#
+# The FinOps Agent discovers the external labels ConfigMap by looking for
+# the label:
+#
+#   ibm.kubecost.com/external-labels: "true"
+#
+# The ConfigMap must exist in the same namespace as the FinOps Agent and
+# contain the external labels as key/value pairs under the data section.
+#
+# Customers with existing ConfigMaps in other namespaces or formats can
+# use the provided migration script to generate a compatible ConfigMap.
+#
+# Example ConfigMap:
+#
+#   apiVersion: v1
+#   kind: ConfigMap
+#   metadata:
+#     name: external-labels
+#     labels:
+#       ibm.kubecost.com/external-labels: "true"
+#   data:
+#     cluster: 1de3e77b-266d-48c1-91cb-ec5e22902af7
+#     env: dev
+#     region: nam
+#
+externalLabels:
+  enabled: false

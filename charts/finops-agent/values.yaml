@@ -730,21 +730,19 @@ extraObjects: []
 #            region: nam
 #
 #    In this case, specify the key that contains the YAML document and
-#    a route to the externalLabels map. Prefix the route with
-#    (parse_yaml) so the YAML string is parsed before traversing it. 
-#    In case of missing parse_yaml, it errors out.
+#    a dot-separated route to the labels map within it.
+#
 # Fields:
 #   configMapName - name of the ConfigMap to read.
 #   namespace     - namespace of the ConfigMap. Defaults to the agent's
 #                   own namespace if left empty.
-#   key           - Optional. The ConfigMap data key containing the configuration.
+#   key           - Optional. The ConfigMap data key containing the YAML
 #                   document. Required only for block-scalar ConfigMaps.
-#   route         - Optional.
-#                 - • When omitted or empty, labels are read directly from
-#                     ConfigMap.data (traditional ConfigMap).
-#                 - • For block-scalar ConfigMaps, specify the path to the labels map
-#                     and prefix it with (parse_yaml), for example:
-#                     (parse_yaml)metadata.externalLabels
+#   route         - Optional. Dot-separated path to the labels map within
+#                   the key's YAML content, e.g. "metadata.externalLabels".
+#                   When omitted or empty, labels are read directly from
+#                   ConfigMap.data (traditional ConfigMap).
+#
 # Traditional ConfigMap example:
 #
 # externalLabels:
@@ -757,10 +755,10 @@ extraObjects: []
 #   configMapName: my-config-map
 #   namespace: monitoring
 #   key: config.yaml
-#   route: (parse_yaml)metadata.externalLabels
+#   route: metadata.externalLabels
 #
-externalLabels:
-  configMapName: my-config-map
-  namespace: ""
-  key: config.yaml
-  route: (parse_yaml)metadata.externalLabels
+# externalLabels:
+#   configMapName: my-config-map
+#   namespace: ""
+#   key: config.yaml
+#   route: metadata.externalLabels

@@ -309,9 +309,21 @@ spec:
             {{- else }}
               value: {{ include "finops-agent.kubecostEnabled" . | quote }}
             {{- end }}
-            {{- if (.Values.externalLabels).enabled }}
-            - name: EXTERNAL_LABELS_ENABLED
-              value: "true"
+            {{- if (.Values.externalLabels).configMapName }}
+            - name: EXTERNAL_LABELS_CONFIG_MAP_NAME
+              value: {{ .Values.externalLabels.configMapName | quote }}
+            {{- if .Values.externalLabels.namespace }}
+            - name: EXTERNAL_LABELS_NAMESPACE
+              value: {{ .Values.externalLabels.namespace | quote }}
+            {{- end }}
+            {{- if .Values.externalLabels.key }}
+            - name: EXTERNAL_LABELS_KEY
+              value: {{ .Values.externalLabels.key | quote }}
+            {{- end }}
+            {{- if .Values.externalLabels.route }}
+            - name: EXTERNAL_LABELS_ROUTE
+              value: {{ .Values.externalLabels.route | quote }}
+            {{- end }}
             {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}

@@ -52,6 +52,11 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces", "nodes", "pods", "services", "persistentvolumeclaims", "persistentvolumes", "replicationcontrollers", "nodes/metrics", "nodes/stats", "resourcequotas"]
     verbs: ["get", "list", "watch"]
+  {{- if and (.Values.externalLabels).configMapName .Values.externalLabels.namespace }}
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  {{- end }}
   {{- if .Values.rbac.clusterRole.allowKubeProxy }}
   - apiGroups: [""]
     resources: ["nodes/proxy"]

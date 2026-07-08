@@ -745,14 +745,16 @@ extraObjects: []
 #
 # Traditional ConfigMap example:
 #
-# externalLabels:
-#   configMapName: external-label-configmap
-#   namespace: ""
+# external:
+#   nodeLabels:
+#     configMapName: external-label-configmap
+#     namespace: ""
 #
 # Block-scalar ConfigMap example:
 #
-# externalLabels:
-#   configMapName: external-label-configmap
-#   namespace: ""
-#   key: config.yaml
-#   route: metadata.externalLabels
+# external:
+#   nodeLabels:
+#     configMapName: external-label-configmap
+#     namespace: ""
+#     key: config.yaml
+#     route: metadata.externalLabels

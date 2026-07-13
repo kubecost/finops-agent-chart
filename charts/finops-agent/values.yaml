@@ -218,6 +218,9 @@ agent:
     diagnostics: 10m
   exporter:
     emissionInterval: 1m
+    exportLegacyDataModels: true
+    exportKubeModel: true
+    forceKubeModelV1: true
   nodes:
     backgroundStatsCollector: true
   cloudability:
@@ -276,8 +279,6 @@ agent:
     gpuLabelValue: ""
     spotLabel: ""
     spotLabelValue: ""
-    exportLegacyDataModels: true
-    exportKubeModel: true
 
 ## @param command Override default container command (useful when using custom images)
 ##

@@ -309,20 +309,20 @@ spec:
             {{- else }}
               value: {{ include "finops-agent.kubecostEnabled" . | quote }}
             {{- end }}
-            {{- if (.Values.externalLabels).configMapName }}
-            - name: EXTERNAL_LABELS_CONFIG_MAP_NAME
-              value: {{ .Values.externalLabels.configMapName | quote }}
-            {{- if .Values.externalLabels.namespace }}
-            - name: EXTERNAL_LABELS_NAMESPACE
-              value: {{ .Values.externalLabels.namespace | quote }}
+            {{- if ((.Values.external).nodeLabels).configMapName }}
+            - name: EXTERNAL_NODELABELS_CONFIG_MAP_NAME
+              value: {{ .Values.external.nodeLabels.configMapName | quote }}
+            {{- if ((.Values.external).nodeLabels).namespace }}
+            - name: EXTERNAL_NODELABELS_NAMESPACE
+              value: {{ .Values.external.nodeLabels.namespace | quote }}
             {{- end }}
-            {{- if .Values.externalLabels.key }}
-            - name: EXTERNAL_LABELS_KEY
-              value: {{ .Values.externalLabels.key | quote }}
+            {{- if ((.Values.external).nodeLabels).key }}
+            - name: EXTERNAL_NODELABELS_KEY
+              value: {{ .Values.external.nodeLabels.key | quote }}
             {{- end }}
-            {{- if .Values.externalLabels.route }}
-            - name: EXTERNAL_LABELS_ROUTE
-              value: {{ .Values.externalLabels.route | quote }}
+            {{- if ((.Values.external).nodeLabels).route }}
+            - name: EXTERNAL_NODELABELS_ROUTE
+              value: {{ .Values.external.nodeLabels.route | quote }}
             {{- end }}
             {{- end }}
             {{- if .Values.extraEnvVars }}

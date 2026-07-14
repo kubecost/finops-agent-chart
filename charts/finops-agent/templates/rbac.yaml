@@ -52,7 +52,7 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces", "nodes", "pods", "services", "persistentvolumeclaims", "persistentvolumes", "replicationcontrollers", "nodes/metrics", "nodes/stats", "resourcequotas"]
     verbs: ["get", "list", "watch"]
-  {{- if and (.Values.externalLabels).configMapName .Values.externalLabels.namespace }}
+  {{- if and ((.Values.external).nodeLabels).configMapName ((.Values.external).nodeLabels).namespace }}
   - apiGroups: [""]
     resources: ["configmaps"]
     verbs: ["get", "list", "watch"]

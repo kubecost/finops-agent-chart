@@ -172,6 +172,7 @@ logLevel: "info"
 ## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
 ## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
 ## @param agent.nodes.backgroundStatsCollector Allows for node stats to be collected asynchronously to allow for greater scale
+## @param agent.nodes.concurrentPollers The number of concurrent node pollers used when collecting node stats. When empty, the agent's built-in default is used.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
@@ -223,6 +224,7 @@ agent:
     forceKubeModelV1: true
   nodes:
     backgroundStatsCollector: true
+    concurrentPollers: ""
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false

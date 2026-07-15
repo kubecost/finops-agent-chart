@@ -133,6 +133,10 @@ spec:
               value: {{ .Release.Namespace }}
             - name: NODE_STATS_BG_COLLECTION_ENABLED
               value: {{ .Values.agent.nodes.backgroundStatsCollector | quote }}
+            {{- if .Values.agent.nodes.concurrentPollers }}
+            - name: NUMBER_OF_CONCURRENT_NODE_POLLERS
+              value: {{ .Values.agent.nodes.concurrentPollers | quote }}
+            {{- end }}
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED

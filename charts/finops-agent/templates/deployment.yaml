@@ -133,6 +133,10 @@ spec:
               value: {{ .Release.Namespace }}
             - name: NODE_STATS_BG_COLLECTION_ENABLED
               value: {{ .Values.agent.nodes.backgroundStatsCollector | quote }}
+            {{- if .Values.agent.nodes.concurrentPollers }}
+            - name: NUMBER_OF_CONCURRENT_NODE_POLLERS
+              value: {{ .Values.agent.nodes.concurrentPollers | quote }}
+            {{- end }}
             {{- with .Values.agent.collectorDataSource }}
             {{- if .enabled }}
             - name: COLLECTOR_DATA_SOURCE_ENABLED
@@ -269,6 +273,10 @@ spec:
             - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_ID
               value: {{ .Values.agent.cloudability.customAzureClientID | quote }}
             {{- end }}
+            {{- if .Values.agent.cloudability.apiKeyFile }}
+            - name: CLOUDABILITY_API_KEY_FILEPATH
+              value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.apiKeyFile }}"
+            {{- end }}
             {{- if .Values.agent.cloudability.keyAccessFile }}
             - name: CLOUDABILITY_KEY_ACCESS_FILEPATH
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.keyAccessFile }}"
@@ -309,6 +317,12 @@ spec:
             {{- else }}
               value: {{ include "finops-agent.kubecostEnabled" . | quote }}
             {{- end }}
+            - name: EXPORT_LEGACY_DATA_MODEL
+              value: {{ .Values.agent.exporter.exportLegacyDataModels | quote }}
+            - name: EXPORT_KUBEMODEL
+              value: {{ .Values.agent.exporter.exportKubeModel | quote }}
+            - name: FORCE_KUBEMODEL_V1
+              value: {{ .Values.agent.exporter.forceKubeModelV1 | quote }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}

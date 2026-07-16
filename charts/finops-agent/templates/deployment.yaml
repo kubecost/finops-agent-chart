@@ -200,8 +200,6 @@ spec:
             - name: HEARTBEAT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.heartbeat | quote }}
             {{- end }}
-            - name: HEARTBEAT_EXPORT_ENABLED
-              value: "true"
             {{- else }}
             - name: HEARTBEAT_EXPORT_ENABLED
               value: "false"
@@ -211,8 +209,6 @@ spec:
             - name: DIAGNOSTICS_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.diagnostics | quote }}
             {{- end }}
-            - name: DIAGNOSTICS_EXPORT_ENABLED
-              value: "true"
             {{- else }}
             - name: DIAGNOSTICS_EXPORT_ENABLED
               value: "false"

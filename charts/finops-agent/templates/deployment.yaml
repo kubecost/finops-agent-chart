@@ -149,7 +149,7 @@ spec:
             - name: NETWORK_PORT
               value: {{ .networkPort | quote }}
             {{- end }}
-            {{- if .Values.agent.exports.10mResolution }}
+            {{- if .Values.agent.exports.resolution10m }}
             {{- if .retention10m }}
             - name: COLLECTOR_RESOLUTION_10M_RETENTION
               value: {{ .retention10m | quote }}

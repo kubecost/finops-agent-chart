@@ -159,13 +159,11 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if .Values.agent.exports.resolution10m }}
-            {{- if .Values.agent.collectorDataSource.retention10m }}
+            {{- if and .Values.agent.exports.resolution10m .Values.agent.collectorDataSource.retention10m }}
             - name: COLLECTOR_RESOLUTION_10M_RETENTION
               value: {{ .Values.agent.collectorDataSource.retention10m | quote }}
             - name: MINUTE_METRICS_ENABLED
               value: "true"
-            {{- end }}
             {{- else }}
             - name: MINUTE_METRICS_ENABLED
               value: "false"
@@ -200,23 +198,17 @@ spec:
             - name: NETWORK_INSIGHT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.networkInsight | quote }}
             {{- end }}
-            {{- if .Values.agent.exports.heartbeat }}
-            {{- if .Values.agent.exportIntervals.heartbeat }}
+            - name: HEARTBEAT_EXPORT_ENABLED
+              value: {{ .Values.agent.exports.heartbeat | quote }}
+            {{- if and .Values.agent.exports.heartbeat .Values.agent.exportIntervals.heartbeat }}
             - name: HEARTBEAT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.heartbeat | quote }}
             {{- end }}
-            {{- else }}
-            - name: HEARTBEAT_EXPORT_ENABLED
-              value: "false"
-            {{- end }}
-            {{- if .Values.agent.exports.diagnostics }}
-            {{- if .Values.agent.exportIntervals.diagnostics }}
+            - name: DIAGNOSTICS_EXPORT_ENABLED
+              value: {{ .Values.agent.exports.diagnostics | quote }}
+            {{- if and .Values.agent.exports.diagnostics .Values.agent.exportIntervals.diagnostics }}
             - name: DIAGNOSTICS_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.diagnostics | quote }}
-            {{- end }}
-            {{- else }}
-            - name: DIAGNOSTICS_EXPORT_ENABLED
-              value: "false"
             {{- end }}
 
             {{- if .Values.agent.cloudability.enabled }}

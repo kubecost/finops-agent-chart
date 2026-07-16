@@ -163,7 +163,7 @@ logLevel: "info"
 ## @param agent.collectorDataSource.enabled Enable the collector data source
 ## @param agent.collectorDataSource.scrapeInterval The scrape interval for the collector data source
 ## @param agent.collectorDataSource.networkPort The network port for the collector data source
-## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution. Set to false to disable 10m resolution exports entirely.
+## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
 ## @param agent.exports.heartbeat Enable/disable heartbeat exports
@@ -212,10 +212,11 @@ agent:
     enabled: true
     scrapeInterval: 60s
     networkPort: 3001
-    retention10m: 6  # Set to "false" to disable 10m resolution exports entirely
+    retention10m: 6
     retention1h: 3
     retention1d: 2
   exports:
+    10mResolution: true
     heartbeat: true
     diagnostics: true
   exportIntervals:

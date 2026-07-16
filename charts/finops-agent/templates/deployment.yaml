@@ -191,13 +191,27 @@ spec:
             - name: NETWORK_INSIGHT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.networkInsight | quote }}
             {{- end }}
+            {{- if .Values.agent.exports.heartbeat }}
             {{- if .Values.agent.exportIntervals.heartbeat }}
             - name: HEARTBEAT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.heartbeat | quote }}
             {{- end }}
+            - name: HEARTBEAT_EXPORT_ENABLED
+              value: "true"
+            {{- else }}
+            - name: HEARTBEAT_EXPORT_ENABLED
+              value: "false"
+            {{- end }}
+            {{- if .Values.agent.exports.diagnostics }}
             {{- if .Values.agent.exportIntervals.diagnostics }}
             - name: DIAGNOSTICS_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.diagnostics | quote }}
+            {{- end }}
+            - name: DIAGNOSTICS_EXPORT_ENABLED
+              value: "true"
+            {{- else }}
+            - name: DIAGNOSTICS_EXPORT_ENABLED
+              value: "false"
             {{- end }}
 
             {{- if .Values.agent.cloudability.enabled }}

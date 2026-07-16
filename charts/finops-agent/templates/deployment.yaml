@@ -149,17 +149,6 @@ spec:
             - name: NETWORK_PORT
               value: {{ .networkPort | quote }}
             {{- end }}
-            {{- if .Values.agent.exports.resolution10m }}
-            {{- if .retention10m }}
-            - name: COLLECTOR_RESOLUTION_10M_RETENTION
-              value: {{ .retention10m | quote }}
-            - name: MINUTE_METRICS_ENABLED
-              value: "true"
-            {{- end }}
-            {{- else }}
-            - name: MINUTE_METRICS_ENABLED
-              value: "false"
-            {{- end }}
             {{- if .retention1h }}
             - name: COLLECTOR_RESOLUTION_1H_RETENTION
               value: {{ .retention1h | quote }}
@@ -169,6 +158,17 @@ spec:
               value: {{ .retention1d | quote }}
             {{- end }}
             {{- end }}
+            {{- end }}
+            {{- if .Values.agent.exports.resolution10m }}
+            {{- if .Values.agent.collectorDataSource.retention10m }}
+            - name: COLLECTOR_RESOLUTION_10M_RETENTION
+              value: {{ .Values.agent.collectorDataSource.retention10m | quote }}
+            - name: MINUTE_METRICS_ENABLED
+              value: "true"
+            {{- end }}
+            {{- else }}
+            - name: MINUTE_METRICS_ENABLED
+              value: "false"
             {{- end }}
 
             - name: CLUSTER_ID

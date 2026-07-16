@@ -273,6 +273,10 @@ spec:
             - name: CLOUDABILITY_CUSTOM_AZURE_BLOB_CLIENT_ID
               value: {{ .Values.agent.cloudability.customAzureClientID | quote }}
             {{- end }}
+            {{- if .Values.agent.cloudability.apiKeyFile }}
+            - name: CLOUDABILITY_API_KEY_FILEPATH
+              value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.apiKeyFile }}"
+            {{- end }}
             {{- if .Values.agent.cloudability.keyAccessFile }}
             - name: CLOUDABILITY_KEY_ACCESS_FILEPATH
               value: "{{ .Values.agent.cloudability.pathToCloudabilitySecrets -}}/{{ .Values.agent.cloudability.keyAccessFile }}"

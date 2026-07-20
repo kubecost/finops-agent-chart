@@ -309,20 +309,22 @@ spec:
             {{- else }}
               value: {{ include "finops-agent.kubecostEnabled" . | quote }}
             {{- end }}
-            {{- if ((.Values.external).nodeLabels).configMapName }}
+            {{- $external := .Values.external | default dict }}
+            {{- $nodeLabels := $external.nodeLabels | default dict }}
+            {{- if $nodeLabels.configMapName }}
             - name: EXTERNAL_NODELABELS_CONFIG_MAP_NAME
-              value: {{ .Values.external.nodeLabels.configMapName | quote }}
-            {{- if ((.Values.external).nodeLabels).namespace }}
+              value: {{ $nodeLabels.configMapName | quote }}
+            {{- if $nodeLabels.namespace }}
             - name: EXTERNAL_NODELABELS_NAMESPACE
-              value: {{ .Values.external.nodeLabels.namespace | quote }}
+              value: {{ $nodeLabels.namespace | quote }}
             {{- end }}
-            {{- if ((.Values.external).nodeLabels).key }}
+            {{- if $nodeLabels.key }}
             - name: EXTERNAL_NODELABELS_KEY
-              value: {{ .Values.external.nodeLabels.key | quote }}
+              value: {{ $nodeLabels.key | quote }}
             {{- end }}
-            {{- if ((.Values.external).nodeLabels).route }}
+            {{- if $nodeLabels.route }}
             - name: EXTERNAL_NODELABELS_ROUTE
-              value: {{ .Values.external.nodeLabels.route | quote }}
+              value: {{ $nodeLabels.route | quote }}
             {{- end }}
             {{- end }}
             {{- if .Values.extraEnvVars }}

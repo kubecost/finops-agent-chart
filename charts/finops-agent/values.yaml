@@ -140,7 +140,7 @@ useHelmHooks: true
 image:
   registry: icr.io
   repository: ibm-finops/agent
-  tag: v1.0.20
+  tag: v1.0.21
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -166,15 +166,20 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
+## @param agent.exports.resolution10m Enable/disable exports of 10m resolution data.
+## @param agent.exports.heartbeat Enable/disable heartbeat exports.
+## @param agent.exports.diagnostics Enable/disable diagnostics exports.
 ## @param agent.exportIntervals.allocation A duration string of how often allocation data is exported.
 ## @param agent.exportIntervals.asset A duration string of how often asset data is exported.
 ## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
 ## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
 ## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
 ## @param agent.nodes.backgroundStatsCollector Allows for node stats to be collected asynchronously to allow for greater scale
+## @param agent.nodes.concurrentPollers The number of concurrent node pollers used when collecting node stats. When empty, the agent's built-in default is used.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
+## @param agent.cloudability.apiKeyFile the name of the file containing the Containers Insights API key (legacy metrics-agent upload path)
 ## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
 ## @param agent.cloudability.keySecretFile the name of the keySecretFile
 ## @param agent.cloudability.envIDFile the name of the envIDFile
@@ -197,6 +202,7 @@ logLevel: "info"
 ## @param agent.cloudability.customAzureBlobClientSecretFile the name of the customAzureBlobClientSecretFile
 ## @param agent.cloudability.secret.existingSecret The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.
 ## @param agent.cloudability.secret.create Create a secret for the cloudability data source. cannot be used with existingSecret
+## @param agent.cloudability.secret.cloudabilityApiKey The Containers Insights API key for metrics-collector upload (legacy metrics-agent path)
 ## @param agent.cloudability.secret.cloudabilityAccessKey The cloudability access key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilitySecretKey The cloudability secret key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilityEnvId The cloudability env id for the cloudability data source
@@ -210,6 +216,10 @@ agent:
     retention10m: 6
     retention1h: 3
     retention1d: 2
+  exports:
+    resolution10m: true
+    heartbeat: true
+    diagnostics: true
   exportIntervals:
     allocation: 10m
     asset: 10m
@@ -218,12 +228,17 @@ agent:
     diagnostics: 10m
   exporter:
     emissionInterval: 1m
+    exportLegacyDataModels: true
+    exportKubeModel: true
+    forceKubeModelV1: true
   nodes:
     backgroundStatsCollector: true
+    concurrentPollers: ""
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false
     pathToCloudabilitySecrets: "/opt/cloudability"
+    apiKeyFile: "CLOUDABILITY_API_KEY"
     keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
     keySecretFile: "CLOUDABILITY_KEY_SECRET"
     envIDFile: "CLOUDABILITY_ENV_ID"
@@ -248,6 +263,7 @@ agent:
     secret:
       create: true
       existingSecret: ""
+      cloudabilityApiKey: ""
       cloudabilityAccessKey: ""
       cloudabilitySecretKey: ""
       cloudabilityEnvId: ""

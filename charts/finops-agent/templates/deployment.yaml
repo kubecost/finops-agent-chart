@@ -330,20 +330,18 @@ spec:
               value: {{ .Values.agent.exporter.exportKubeModel | quote }}
             - name: FORCE_KUBEMODEL_V1
               value: {{ .Values.agent.exporter.forceKubeModelV1 | quote }}
-            {{- $external := .Values.external | default dict }}
-            {{- $nodeLabels := $external.nodeLabels | default dict }}
-            {{- if $nodeLabels.configMapName }}
+            {{- if ((.Values.external).nodeLabels).configMapName }}
             - name: EXTERNAL_NODELABELS_CONFIG_MAP_NAME
               value: {{ $nodeLabels.configMapName | quote }}
-            {{- if $nodeLabels.namespace }}
+            {{- if ((.Values.external).nodeLabels).namespace }}
             - name: EXTERNAL_NODELABELS_NAMESPACE
               value: {{ $nodeLabels.namespace | quote }}
             {{- end }}
-            {{- if $nodeLabels.key }}
+            {{- if ((.Values.external).nodeLabels).key }}
             - name: EXTERNAL_NODELABELS_KEY
               value: {{ $nodeLabels.key | quote }}
             {{- end }}
-            {{- if $nodeLabels.route }}
+            {{- if ((.Values.external).nodeLabels).route }}
             - name: EXTERNAL_NODELABELS_ROUTE
               value: {{ $nodeLabels.route | quote }}
             {{- end }}

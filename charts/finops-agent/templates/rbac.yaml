@@ -55,6 +55,7 @@ rules:
   {{- if and ((.Values.external).nodeLabels).configMapName ((.Values.external).nodeLabels).namespace }}
   - apiGroups: [""]
     resources: ["configmaps"]
+    resourceNames: [{{ $nodeLabels.configMapName | quote }}]
     verbs: ["get", "list", "watch"]
   {{- end }}
   {{- if .Values.rbac.clusterRole.allowKubeProxy }}

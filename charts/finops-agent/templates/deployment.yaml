@@ -330,6 +330,22 @@ spec:
               value: {{ .Values.agent.exporter.exportKubeModel | quote }}
             - name: FORCE_KUBEMODEL_V1
               value: {{ .Values.agent.exporter.forceKubeModelV1 | quote }}
+            {{- if ((.Values.external).nodeLabels).configMapName }}
+            - name: EXTERNAL_NODELABELS_CONFIG_MAP_NAME
+              value: {{ .Values.external.nodeLabels.configMapName | quote }}
+            {{- if ((.Values.external).nodeLabels).namespace }}
+            - name: EXTERNAL_NODELABELS_NAMESPACE
+              value: {{ .Values.external.nodeLabels.namespace | quote }}
+            {{- end }}
+            {{- if ((.Values.external).nodeLabels).key }}
+            - name: EXTERNAL_NODELABELS_KEY
+              value: {{ .Values.external.nodeLabels.key | quote }}
+            {{- end }}
+            {{- if ((.Values.external).nodeLabels).route }}
+            - name: EXTERNAL_NODELABELS_ROUTE
+              value: {{ .Values.external.nodeLabels.route | quote }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}

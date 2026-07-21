@@ -93,12 +93,24 @@ jobs:
           git commit -m "Update chart index for ${{ github.ref_name }}"
           git push origin gh-pages
 
-      - name: Update Release
+      - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
         run: |
-          gh release upload "${{ github.ref_name }}" .cr-release-packages/*.tgz \
-            --repo "${{ github.repository }}"
+          # Check if release exists
+          if gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            echo "Release ${{ github.ref_name }} exists, uploading chart package..."
+            gh release upload "${{ github.ref_name }}" .cr-release-packages/*.tgz \
+              --repo "${{ github.repository }}" \
+              --clobber  # Replace existing assets if present (enables idempotency)
+          else
+            echo "Creating release ${{ github.ref_name }} with chart package..."
+            gh release create "${{ github.ref_name }}" \
+              .cr-release-packages/*.tgz \
+              --repo "${{ github.repository }}" \
+              --title "${{ github.ref_name }}" \
+              --generate-notes
+          fi
 
       - name: Notify Release
         uses: slackapi/slack-github-action@v3

@@ -332,18 +332,18 @@ spec:
               value: {{ .Values.agent.exporter.forceKubeModelV1 | quote }}
             {{- if ((.Values.external).nodeLabels).configMapName }}
             - name: EXTERNAL_NODELABELS_CONFIG_MAP_NAME
-              value: {{ $nodeLabels.configMapName | quote }}
+              value: {{ .Values.external.nodeLabels.configMapName | quote }}
             {{- if ((.Values.external).nodeLabels).namespace }}
             - name: EXTERNAL_NODELABELS_NAMESPACE
-              value: {{ $nodeLabels.namespace | quote }}
+              value: {{ .Values.external.nodeLabels.namespace | quote }}
             {{- end }}
             {{- if ((.Values.external).nodeLabels).key }}
             - name: EXTERNAL_NODELABELS_KEY
-              value: {{ $nodeLabels.key | quote }}
+              value: {{ .Values.external.nodeLabels.key | quote }}
             {{- end }}
             {{- if ((.Values.external).nodeLabels).route }}
             - name: EXTERNAL_NODELABELS_ROUTE
-              value: {{ $nodeLabels.route | quote }}
+              value: {{ .Values.external.nodeLabels.route | quote }}
             {{- end }}
             {{- end }}
             {{- if .Values.extraEnvVars }}

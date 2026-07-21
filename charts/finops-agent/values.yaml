@@ -166,6 +166,9 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
+## @param agent.exports.resolution10m Enable/disable exports of 10m resolution data.
+## @param agent.exports.heartbeat Enable/disable heartbeat exports.
+## @param agent.exports.diagnostics Enable/disable diagnostics exports.
 ## @param agent.exportIntervals.allocation A duration string of how often allocation data is exported.
 ## @param agent.exportIntervals.asset A duration string of how often asset data is exported.
 ## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
@@ -213,6 +216,10 @@ agent:
     retention10m: 6
     retention1h: 3
     retention1d: 2
+  exports:
+    resolution10m: true
+    heartbeat: true
+    diagnostics: true
   exportIntervals:
     allocation: 10m
     asset: 10m
@@ -709,3 +716,67 @@ extraObjects: []
 #     dataFrom:
 #     - extract:
 #         key: remote-key-in-the-provider
+
+# External labels allow users to apply custom labels to node assets and
+# allocations so they can be used for filtering and grouping in the
+# Kubecost UI.
+#
+# The FinOps Agent can read external labels from an existing ConfigMap.
+#
+# Supported ConfigMap formats:
+#
+# 1. Traditional ConfigMap
+#
+#    data:
+#      cluster: prod
+#      env: dev
+#      region: nam
+#
+#    In this case, labels are read directly from ConfigMap.data. The
+#    key and route fields are optional and may be omitted.
+#
+# 2. Block-scalar ConfigMap
+#
+#    data:
+#      config.yaml: |
+#        metadata:
+#          externalLabels:
+#            cluster: prod
+#            env: dev
+#            region: nam
+#
+#    In this case, specify the key that contains the YAML document and
+#    a dot-separated route to the labels map within it.
+#
+# Fields:
+#   configMapName - name of the ConfigMap to read.
+#   namespace     - namespace of the ConfigMap. Defaults to the agent's
+#                   own namespace if left empty.
+#   key           - Optional. The ConfigMap data key containing the YAML
+#                   document. Required only for block-scalar ConfigMaps.
+#   route         - Optional. Dot-separated path to the labels map within
+#                   the key's YAML content, e.g. "metadata.externalLabels".
+#                   When omitted or empty, labels are read directly from
+#                   ConfigMap.data (traditional ConfigMap).
+#
+# Traditional ConfigMap example:
+#
+# external:
+#   nodeLabels:
+#     configMapName: external-label-configmap
+#     namespace: ""
+#
+# Block-scalar ConfigMap example:
+#
+# external:
+#   nodeLabels:
+#     configMapName: external-label-configmap
+#     namespace: ""
+#     key: config.yaml
+#     route: metadata.externalLabels
+external:
+  nodeLabels:
+    configMapName: ""
+    namespace: ""
+    key: ""
+    route: ""

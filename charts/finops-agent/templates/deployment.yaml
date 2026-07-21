@@ -149,12 +149,6 @@ spec:
             - name: NETWORK_PORT
               value: {{ .networkPort | quote }}
             {{- end }}
-            {{- if .retention10m }}
-            - name: COLLECTOR_RESOLUTION_10M_RETENTION
-              value: {{ .retention10m | quote }}
-            - name: MINUTE_METRICS_ENABLED
-              value: "true"
-            {{- end }}
             {{- if .retention1h }}
             - name: COLLECTOR_RESOLUTION_1H_RETENTION
               value: {{ .retention1h | quote }}
@@ -164,6 +158,15 @@ spec:
               value: {{ .retention1d | quote }}
             {{- end }}
             {{- end }}
+            {{- end }}
+            {{- if and .Values.agent.exports.resolution10m .Values.agent.collectorDataSource.retention10m }}
+            - name: COLLECTOR_RESOLUTION_10M_RETENTION
+              value: {{ .Values.agent.collectorDataSource.retention10m | quote }}
+            - name: MINUTE_METRICS_ENABLED
+              value: "true"
+            {{- else }}
+            - name: MINUTE_METRICS_ENABLED
+              value: "false"
             {{- end }}
 
             - name: CLUSTER_ID
@@ -195,11 +198,15 @@ spec:
             - name: NETWORK_INSIGHT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.networkInsight | quote }}
             {{- end }}
-            {{- if .Values.agent.exportIntervals.heartbeat }}
+            - name: HEARTBEAT_EXPORT_ENABLED
+              value: {{ .Values.agent.exports.heartbeat | quote }}
+            {{- if and .Values.agent.exports.heartbeat .Values.agent.exportIntervals.heartbeat }}
             - name: HEARTBEAT_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.heartbeat | quote }}
             {{- end }}
-            {{- if .Values.agent.exportIntervals.diagnostics }}
+            - name: DIAGNOSTICS_EXPORT_ENABLED
+              value: {{ .Values.agent.exports.diagnostics | quote }}
+            {{- if and .Values.agent.exports.diagnostics .Values.agent.exportIntervals.diagnostics }}
             - name: DIAGNOSTICS_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.diagnostics | quote }}
             {{- end }}
@@ -323,6 +330,22 @@ spec:
               value: {{ .Values.agent.exporter.exportKubeModel | quote }}
             - name: FORCE_KUBEMODEL_V1
               value: {{ .Values.agent.exporter.forceKubeModelV1 | quote }}
+            {{- if ((.Values.external).nodeLabels).configMapName }}
+            - name: EXTERNAL_NODELABELS_CONFIG_MAP_NAME
+              value: {{ .Values.external.nodeLabels.configMapName | quote }}
+            {{- if ((.Values.external).nodeLabels).namespace }}
+            - name: EXTERNAL_NODELABELS_NAMESPACE
+              value: {{ .Values.external.nodeLabels.namespace | quote }}
+            {{- end }}
+            {{- if ((.Values.external).nodeLabels).key }}
+            - name: EXTERNAL_NODELABELS_KEY
+              value: {{ .Values.external.nodeLabels.key | quote }}
+            {{- end }}
+            {{- if ((.Values.external).nodeLabels).route }}
+            - name: EXTERNAL_NODELABELS_ROUTE
+              value: {{ .Values.external.nodeLabels.route | quote }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}
             {{- end }}

@@ -140,7 +140,7 @@ useHelmHooks: true
 image:
   registry: icr.io
   repository: ibm-finops/agent
-  tag: v1.0.8
+  tag: v1.0.24
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -166,18 +166,23 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
+## @param agent.exports.resolution10m Enable/disable exports of 10m resolution data.
+## @param agent.exports.heartbeat Enable/disable heartbeat exports.
+## @param agent.exports.diagnostics Enable/disable diagnostics exports.
 ## @param agent.exportIntervals.allocation A duration string of how often allocation data is exported.
 ## @param agent.exportIntervals.asset A duration string of how often asset data is exported.
 ## @param agent.exportIntervals.networkInsight A duration string of how often network insight data is exported.
 ## @param agent.exportIntervals.heartbeat A duration string of how often heartbeat data is exported.
 ## @param agent.exportIntervals.diagnostics A duration string of how often diagnostics data is exported.
+## @param agent.nodes.backgroundStatsCollector Allows for node stats to be collected asynchronously to allow for greater scale
+## @param agent.nodes.concurrentPollers The number of concurrent node pollers used when collecting node stats. When empty, the agent's built-in default is used.
 ## @param agent.exporter.emissionInterval A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.
 ## @param agent.cloudability.enabled Enable the cloudability data source
 ## @param agent.cloudability.pathToCloudabilitySecrets the path to the location on the filesystem the cloudability secrets are stored
+## @param agent.cloudability.apiKeyFile the name of the file containing the Containers Insights API key (legacy metrics-agent upload path)
 ## @param agent.cloudability.keyAccessFile the name of the keyAccessFile
 ## @param agent.cloudability.keySecretFile the name of the keySecretFile
 ## @param agent.cloudability.envIDFile the name of the envIDFile
-## @param agent.cloudability.localWorkingDir The local working directory for the cloudability data source
 ## @param agent.cloudability.uploadRegion The upload region for the cloudability data source
 ## @param agent.cloudability.httpsClientTimeout Amount (in seconds) of time the http client has before timing out requests. Might need to be increased to clusters with large payloads.
 ## @param agent.cloudability.uploadRetryCount Number of attempts the agent will retry to upload a payload
@@ -187,6 +192,7 @@ logLevel: "info"
 ## @param agent.cloudability.outboundProxy The URL of an outbound HTTP/HTTPS proxy for the agent to use (eg: http://x.x.x.x:8080). The URL must contain the scheme prefix (http:// or https://)
 ## @param agent.cloudability.outboundProxyAuth Basic Authentication credentials to be used with the defined outbound proxy. If your outbound proxy requires basic authentication credentials can be defined in the form username:password
 ## @param agent.cloudability.useProxyForGettingUploadURLonly When true, the cloudability client will only use the proxy for clusters/upload and frontdoor apikey login
+## @param agent.cloudability.forceKubeProxy When true, the cloudability client will only use the proxy to read node data
 ## @param agent.cloudability.customS3UploadBucket S3 bucket for custom uploading agent
 ## @param agent.cloudability.customS3UploadRegion S3 region for custom uploading agent
 ## @param agent.cloudability.customAzureBlobContainerName Azure blob name for custom uploading agent
@@ -196,6 +202,7 @@ logLevel: "info"
 ## @param agent.cloudability.customAzureBlobClientSecretFile the name of the customAzureBlobClientSecretFile
 ## @param agent.cloudability.secret.existingSecret The name of an existing secret to use for the cloudability data source. Note, you cannot set both `create` and `existingSecret`.
 ## @param agent.cloudability.secret.create Create a secret for the cloudability data source. cannot be used with existingSecret
+## @param agent.cloudability.secret.cloudabilityApiKey The Containers Insights API key for metrics-collector upload (legacy metrics-agent path)
 ## @param agent.cloudability.secret.cloudabilityAccessKey The cloudability access key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilitySecretKey The cloudability secret key for the cloudability data source
 ## @param agent.cloudability.secret.cloudabilityEnvId The cloudability env id for the cloudability data source
@@ -204,11 +211,15 @@ logLevel: "info"
 agent:
   collectorDataSource:
     enabled: true
-    scrapeInterval: 30s
+    scrapeInterval: 60s
     networkPort: 3001
     retention10m: 6
     retention1h: 3
     retention1d: 2
+  exports:
+    resolution10m: true
+    heartbeat: true
+    diagnostics: true
   exportIntervals:
     allocation: 10m
     asset: 10m
@@ -217,14 +228,20 @@ agent:
     diagnostics: 10m
   exporter:
     emissionInterval: 1m
+    exportLegacyDataModels: true
+    exportKubeModel: true
+    forceKubeModelV1: true
+  nodes:
+    backgroundStatsCollector: true
+    concurrentPollers: ""
   cloudability:
     ## Cloudability requires an API key to send data to the cloudability platform
     enabled: false
     pathToCloudabilitySecrets: "/opt/cloudability"
+    apiKeyFile: "CLOUDABILITY_API_KEY"
     keyAccessFile: "CLOUDABILITY_KEY_ACCESS"
     keySecretFile: "CLOUDABILITY_KEY_SECRET"
     envIDFile: "CLOUDABILITY_ENV_ID"
-    localWorkingDir: /tmp
     uploadRegion: us
     httpsClientTimeout: 60
     uploadRetryCount: 5
@@ -233,6 +250,7 @@ agent:
     outboundProxy: ""
     outboundProxyAuth: ""
     useProxyForGettingUploadURLonly: false
+    forceKubeProxy: false
     customS3UploadBucket: ""
     customS3UploadRegion: ""
     customAzureBlobContainerName: ""
@@ -245,6 +263,7 @@ agent:
     secret:
       create: true
       existingSecret: ""
+      cloudabilityApiKey: ""
       cloudabilityAccessKey: ""
       cloudabilitySecretKey: ""
       cloudabilityEnvId: ""
@@ -315,22 +334,21 @@ containerPorts:
 ##
 extraContainerPorts: []
 ## The FinOps Agent pod's resource requests and limits
-## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set.
-## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
+## Consider setting a limit after a baseline has been established
+## The agent can consume significant resources due to the built-in metrics db.
+## The below defaults assume a cluster with 10 nodes with 500 pods
+## In large clusters with hundreds of nodes, the agent can take 50Gi+ of RAM and use 5+ CPUs
+## The baseline should stabilize after 48 hours of usage, and there can be noticeable startup spike that must also be considered.
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+    ephemeral-storage: 50Mi
+  limits:
+    cpu: 2
+    memory: 2048Mi
+    ephemeral-storage: 2Gi
 ##
-resourcesPreset: "small"
-## @param resources Set container requests and limits for different resources like CPU or memory, if the presents won't work
-## Example:
-## resources:
-##   requests:
-##     cpu: 2
-##     memory: 512Mi
-##   limits:
-##     cpu: 3
-##     memory: 1024Mi
-##
-resources: {}
 ## Configure FinOps Agent pod Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param podSecurityContext.enabled Enable the FinOps Agent pod's Security Context
@@ -628,7 +646,7 @@ metrics:
 persistence:
   ## @param persistence.enabled Enable FinOps Agent data persistence for WAL and other local data
   ##
-  enabled: true
+  enabled: false
   ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
   ## If defined, PVC must be created manually before volume will be bound
   ## The value is evaluated as a template
@@ -683,11 +701,13 @@ serviceAccount:
 ## ref: https://kubernetes.io/docs/admin/authorization/rbac/
 ## @param rbac.create Whether to create & use RBAC resources or not
 ## @param rbac.clusterRole.create Whether to create & use ClusterRole resources or not
+## @param rbac.clusterRole.allowKubeProxy Controls if the ClusterRole has the permission to use nodes/proxy.
 ##
 rbac:
   create: true
   clusterRole:
     create: true
+    allowKubeProxy: true
 extraObjects: []
 # - apiVersion: external-secrets.io/v1
 #   kind: ExternalSecret
@@ -710,3 +730,67 @@ extraObjects: []
 #     dataFrom:
 #     - extract:
 #         key: remote-key-in-the-provider
+
+# External labels allow users to apply custom labels to node assets and
+# allocations so they can be used for filtering and grouping in the
+# Kubecost UI.
+#
+# The FinOps Agent can read external labels from an existing ConfigMap.
+#
+# Supported ConfigMap formats:
+#
+# 1. Traditional ConfigMap
+#
+#    data:
+#      cluster: prod
+#      env: dev
+#      region: nam
+#
+#    In this case, labels are read directly from ConfigMap.data. The
+#    key and route fields are optional and may be omitted.
+#
+# 2. Block-scalar ConfigMap
+#
+#    data:
+#      config.yaml: |
+#        metadata:
+#          externalLabels:
+#            cluster: prod
+#            env: dev
+#            region: nam
+#
+#    In this case, specify the key that contains the YAML document and
+#    a dot-separated route to the labels map within it.
+#
+# Fields:
+#   configMapName - name of the ConfigMap to read.
+#   namespace     - namespace of the ConfigMap. Defaults to the agent's
+#                   own namespace if left empty.
+#   key           - Optional. The ConfigMap data key containing the YAML
+#                   document. Required only for block-scalar ConfigMaps.
+#   route         - Optional. Dot-separated path to the labels map within
+#                   the key's YAML content, e.g. "metadata.externalLabels".
+#                   When omitted or empty, labels are read directly from
+#                   ConfigMap.data (traditional ConfigMap).
+#
+# Traditional ConfigMap example:
+#
+# external:
+#   nodeLabels:
+#     configMapName: external-label-configmap
+#     namespace: ""
+#
+# Block-scalar ConfigMap example:
+#
+# external:
+#   nodeLabels:
+#     configMapName: external-label-configmap
+#     namespace: ""
+#     key: config.yaml
+#     route: metadata.externalLabels
+external:
+  nodeLabels:
+    configMapName: ""
+    namespace: ""
+    key: ""
+    route: ""

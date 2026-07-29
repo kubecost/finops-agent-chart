@@ -6,6 +6,7 @@ agent:
   cloudability:
     enabled: true
     secret:
+      cloudabilityApiKey: ""
       cloudabilityAccessKey: ""
       cloudabilityEnvId: ""
       cloudabilitySecretKey: ""

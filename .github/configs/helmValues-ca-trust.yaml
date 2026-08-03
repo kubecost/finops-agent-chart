@@ -1,0 +1,21 @@
+# Values for the ca-trust-e2e CI job. See that job in .github/workflows/helm-validation.yaml
+# for what the tests can and cannot prove.
+global:
+  clusterId: ci-ca-trust
+  updateCaTrust:
+    enabled: true
+    # Created by the workflow before install; the chart never creates it.
+    caCertsSecret: ca-certs-secret
+
+sidecars:
+  # The agent image has no TLS client, so the handshake runs here instead. ubi9-minimal is
+  # already pulled as the init image and ships curl, so this costs no extra pull.
+  # SSL_CERT_FILE is not set here: assertion B reads it off the agent container at run time.
+  - name: ca-probe
+    image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+    imagePullPolicy: IfNotPresent
+    command: ["sleep", "infinity"]
+    volumeMounts:
+      # The same emptyDir the init container writes and the agent reads -- not a copy.
+      - name: ssl-path
+        mountPath: /etc/pki/ca-trust/extracted

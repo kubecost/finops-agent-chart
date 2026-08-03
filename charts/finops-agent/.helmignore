@@ -23,3 +23,6 @@
 img/
 # Changelog
 CHANGELOG.md
+# Test fixtures are not needed by chart consumers
+tests/
+ci/

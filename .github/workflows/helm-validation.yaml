@@ -70,6 +70,145 @@ jobs:
             --selector app.kubernetes.io/instance=finops-agent-chart-test \
             --timeout=120s
 
+  # Test cases live in charts/finops-agent/tests/*_test.yaml.
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
+
+      - name: Install helm-unittest
+        run: helm plugin install https://github.com/helm-unittest/helm-unittest --version 1.1.2 --verify=false
+
+      - name: Build chart dependencies
+        run: helm dependency build ./charts/finops-agent
+
+      - name: Run chart unit tests
+        run: helm unittest ./charts/finops-agent
+
+  # End-to-end: generate a CA, serve HTTPS with it, prove the agent pod trusts it.
+  #
+  # The agent image (ubi9-micro) ships only coreutils and bash -- no curl, no openssl -- so the
+  # handshake cannot run in the agent container itself. A checks the CA lands in the bundle the
+  # agent's Go runtime resolves; B runs the handshake from a sidecar sharing the same emptyDir
+  # and the same SSL_CERT_FILE; C proves B would have failed without the custom CA.
+  # Not covered: the agent binary overriding RootCAs in code. That needs an agent-side fix.
+  ca-trust-e2e:
+    runs-on: ubuntu-latest
+    env:
+      NS: finops-ca-test
+    defaults:
+      run:
+        # GitHub runs this as `bash --noprofile --norc -eo pipefail {0}`, so steps fail fast
+        # without repeating `set -eo pipefail`.
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: latest
+
+      - name: Build chart dependencies
+        run: helm dependency build ./charts/finops-agent
+
+      - name: Create kind cluster
+        uses: helm/kind-action@ef37e7f390d99f746eb8b610417061a60e82a6cc #v1.14.0
+
+      - name: Generate throwaway CA and server certificate
+        run: |
+          cd /tmp
+          openssl req -x509 -newkey rsa:2048 -nodes -days 1 \
+            -subj "/CN=finops-ci-test-ca" -keyout ca.key -out ca.crt
+          # The SAN must match the in-cluster DNS name, or the handshake fails for an
+          # unrelated reason and the failure is misleading.
+          openssl req -newkey rsa:2048 -nodes -subj "/CN=ca-probe-target" \
+            -keyout tls.key -out tls.csr
+          openssl x509 -req -in tls.csr -CA ca.crt -CAkey ca.key -CAcreateserial -days 1 \
+            -extfile <(printf "subjectAltName=DNS:ca-probe-target.%s.svc.cluster.local" "$NS") \
+            -out tls.crt
+          # A unique base64 line from the CA PEM: lets the assertions spot the CA without
+          # needing openssl inside a container.
+          echo "MARKER=$(sed -n '3p' /tmp/ca.crt)" >> "$GITHUB_ENV"
+
+      - name: Create namespace, secrets, and the HTTPS probe target
+        run: |
+          kubectl create ns "$NS"
+          # The chart references this secret by name but never creates it, so it must exist
+          # before install or the pod blocks in ContainerCreating.
+          kubectl -n "$NS" create secret generic ca-certs-secret \
+            --from-file=ci-test-ca.crt=/tmp/ca.crt
+          kubectl -n "$NS" create secret tls ca-probe-target-tls \
+            --cert=/tmp/tls.crt --key=/tmp/tls.key
+          # Applied before the chart install so the nginx pull overlaps the agent's;
+          # nothing waits on it until assertion B.
+          kubectl -n "$NS" apply -f .github/configs/ca-probe-target.yaml
+
+      - name: Install chart with updateCaTrust enabled
+        run: |
+          helm install finops-ca-test ./charts/finops-agent \
+            --namespace "$NS" \
+            --wait --timeout 300s \
+            -f .github/configs/helmValues-ca-trust.yaml
+          POD=$(kubectl -n "$NS" get pod -l app.kubernetes.io/name=finops-agent \
+            --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
+          [ -n "$POD" ] || { echo "FAIL: no running finops-agent pod"; exit 1; }
+          echo "POD=$POD" >> "$GITHUB_ENV"
+
+      - name: 'A: the agent resolves a CA bundle that is not baked into the image'
+        run: |
+          # Guard against a vacuous pass: if the CA were already in the image's built-in
+          # bundle, the check below would succeed no matter what the init container did.
+          kubectl -n "$NS" exec "$POD" -c finops-agent -- \
+            cat /etc/ssl/certs/ca-certificates.crt > /tmp/builtin.pem \
+            || { echo "FAIL: no built-in CA bundle; the guard below would be meaningless"; exit 1; }
+          grep -qF "$MARKER" /tmp/builtin.pem \
+            && { echo "FAIL: test CA already in the built-in bundle; this test proves nothing"; exit 1; }
+
+          # Go reads SSL_CERT_FILE first and stops there when it is readable, so this is
+          # exactly the bundle the agent will use. Unset or unreadable fails the step.
+          kubectl -n "$NS" exec "$POD" -c finops-agent -- \
+            bash -c 'cat "${SSL_CERT_FILE:?not set on the agent container}"' > /tmp/resolved.pem
+          grep -qF "$MARKER" /tmp/resolved.pem \
+            || { echo "FAIL: custom CA absent from the bundle the agent will read"; exit 1; }
+
+      - name: 'B: a real HTTPS handshake succeeds using that bundle'
+        run: |
+          kubectl -n "$NS" wait --for=condition=Ready pod/ca-probe-target --timeout=120s
+          # Read the path off the live agent container rather than hardcoding it here, so the
+          # probe cannot drift onto a stale path if the chart moves the bundle.
+          CERT=$(kubectl -n "$NS" exec "$POD" -c finops-agent -- printenv SSL_CERT_FILE)
+          # Deliberately no --cacert and no -k: trust must come from SSL_CERT_FILE alone.
+          OUT=$(kubectl -n "$NS" exec "$POD" -c ca-probe -- \
+            env SSL_CERT_FILE="$CERT" curl -sS --fail --max-time 15 \
+            "https://ca-probe-target.${NS}.svc.cluster.local/")
+          [ "$OUT" = "finops-ca-probe-ok" ] || { echo "FAIL: unexpected response: $OUT"; exit 1; }
+
+      - name: 'C: negative control -- the same handshake fails without the custom CA'
+        run: |
+          # Identical client, server, and network path as B; only the trust source differs.
+          # Without SSL_CERT_FILE the sidecar falls back to its own public roots, which cannot
+          # sign our throwaway CA. If this succeeds, B was never proving anything.
+          kubectl -n "$NS" exec "$POD" -c ca-probe -- \
+            curl -sS --fail --max-time 15 \
+            "https://ca-probe-target.${NS}.svc.cluster.local/" \
+            && { echo "FAIL: handshake succeeded without the custom CA; B proves nothing"; exit 1; }
+          echo "Negative control OK: handshake correctly rejected without the custom CA."
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl -n "$NS" describe pods || true
+          kubectl -n "$NS" logs -l app.kubernetes.io/name=finops-agent \
+            --all-containers --tail=100 || true
+
   whitespace-check:
     runs-on: ubuntu-latest
     steps:

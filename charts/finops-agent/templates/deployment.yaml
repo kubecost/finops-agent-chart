@@ -83,7 +83,7 @@ spec:
         {{- if .Values.global.updateCaTrust.enabled }}
         - name: update-ca-trust
           image: {{ include "common.images.image" (dict "imageRoot" .Values.global.updateCaTrust.initImage "global" .Values.global) }}
-          imagePullPolicy: {{ .Values.global.updateCaTrust.initImage.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ .Values.global.updateCaTrust.initImage.pullPolicy }}
           {{- with .Values.global.updateCaTrust.securityContext }}
           securityContext: {{- toYaml . | nindent 12 }}
           {{- end }}

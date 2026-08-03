@@ -82,12 +82,8 @@ spec:
         {{- end }}
         {{- if .Values.global.updateCaTrust.enabled }}
         - name: update-ca-trust
-          image: {{ include "finops-agent.image" . }}
-          {{- if .Values.image.pullPolicy }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- else }}
-          imagePullPolicy: Always
-          {{- end }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.global.updateCaTrust.initImage "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.global.updateCaTrust.initImage.pullPolicy | default "IfNotPresent" }}
           {{- with .Values.global.updateCaTrust.securityContext }}
           securityContext: {{- toYaml . | nindent 12 }}
           {{- end }}

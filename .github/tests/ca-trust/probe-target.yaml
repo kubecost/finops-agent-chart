@@ -1,5 +1,5 @@
-# CI-only fixture for the ca-trust-e2e job. NOT part of the chart.
-# HTTPS endpoint serving a cert signed by the job's throwaway CA; the TLS secret comes from
+# Fixture for the CA-trust end-to-end test (see run.sh). NOT part of the chart.
+# HTTPS endpoint serving a cert signed by the test's throwaway CA; the TLS secret comes from
 # the workflow.
 apiVersion: v1
 kind: ConfigMap

@@ -1,5 +1,5 @@
-# Values for the ca-trust-e2e CI job. See that job in .github/workflows/helm-validation.yaml
-# for what the tests can and cannot prove.
+# Values for the CA-trust end-to-end test. See run.sh in this directory for what the checks
+# prove and what they cannot.
 global:
   clusterId: ci-ca-trust
   updateCaTrust:

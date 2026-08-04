@@ -2,38 +2,35 @@
 #
 # End-to-end verification of the chart's global.updateCaTrust feature.
 #
-# Generates a throwaway CA, serves HTTPS with a certificate signed by it, installs the chart
-# with the feature enabled, and checks that the agent pod ends up actually trusting that CA:
+# Serves S3 over HTTPS with a certificate signed by a throwaway CA, points the agent's
+# federated-storage client at it, and checks that the agent trusts that CA:
 #
-#   A  the agent container resolves a CA bundle containing our CA -- and that CA is not already
-#      baked into the image, which would make A pass regardless of what the init container did
-#   B  a real HTTPS handshake against the CA-signed server succeeds
-#   C  negative control: the same handshake fails when the custom CA is not supplied
+#   A  with the CA supplied, the agent completes the handshake and starts
+#   B  negative control: without it, the agent rejects the same certificate
 #
-# Known limitation: the agent image (ubi9-micro) ships only coreutils and bash -- no curl, no
-# openssl -- so the handshakes in B and C run in a sidecar that shares the agent's bundle
-# volume, not in the agent container itself.
+# The handshake is performed by the agent process itself, so unlike a sidecar-based probe this
+# fails if the agent ignores the bundle the init container installs.
 #
 # Requires a cluster in the current kubectl context. Reruns are safe. Run locally against kind:
 #   kind create cluster && .github/tests/ca-trust/run.sh
 
 set -euo pipefail
 
-NS=${NS:-finops-ca-test}
+NS=finops-ca-test  # must match the endpoint in values.yaml
 RELEASE=${RELEASE:-finops-ca-test}
 CHART=${CHART:-./charts/finops-agent}
 VALUES=${VALUES:-.github/tests/ca-trust/values.yaml}
-FIXTURE=${FIXTURE:-.github/tests/ca-trust/probe-target.yaml}
+FIXTURE=${FIXTURE:-.github/tests/ca-trust/minio.yaml}
 
-HOST="ca-probe-target.${NS}.svc.cluster.local"
+HOST="minio.${NS}.svc.cluster.local"
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 
 fail() { echo "FAIL: $*" >&2; exit 1; }
-agent() { kubectl -n "$NS" exec "$POD" -c finops-agent -- "$@"; }
-# Everything the run creates lives in the namespace -- secrets, the probe target, and the Helm
-# release record -- so deleting it is the whole cleanup. Run before the test so reruns work,
-# and again once it passes. Deliberately not on failure: diagnostics need the wreckage.
+agent_logs() { kubectl -n "$NS" logs -l app.kubernetes.io/name=finops-agent --tail=-1 2>/dev/null; }
+# Everything the run creates lives in the namespace -- secrets, MinIO, and the Helm release
+# record -- so deleting it is the whole cleanup. Run before the test so reruns work, and again
+# once it passes. Deliberately not on failure: diagnostics need the wreckage.
 cleanup() { kubectl delete ns "$NS" --ignore-not-found --wait --timeout=180s >/dev/null; }
 
 cleanup
@@ -41,67 +38,51 @@ cleanup
 # --- Certificates ---------------------------------------------------------------------------
 
 openssl req -x509 -newkey rsa:2048 -nodes -days 1 -subj "/CN=finops-ci-test-ca" -keyout "$WORK/ca.key" -out "$WORK/ca.crt"
-openssl req -newkey rsa:2048 -nodes -subj "/CN=ca-probe-target" -keyout "$WORK/tls.key" -out "$WORK/tls.csr"
+openssl req -newkey rsa:2048 -nodes -subj "/CN=minio" -keyout "$WORK/tls.key" -out "$WORK/tls.csr"
 openssl x509 -req -in "$WORK/tls.csr" -CA "$WORK/ca.crt" -CAkey "$WORK/ca.key" -CAcreateserial -days 1 -extfile <(echo "subjectAltName=DNS:$HOST") -out "$WORK/tls.crt"
-
-# A unique base64 line from the CA PEM. Lets the checks below spot our CA inside a bundle
-# without needing openssl in a container that does not have it.
-MARKER=$(sed -n 3p "$WORK/ca.crt")
 
 # --- Install --------------------------------------------------------------------------------
 
 kubectl create ns "$NS"
 
 # On a seconds-old cluster the SA controller has not populated "default" yet, and admission
-# rejects pods until it does. The chart's deployment is retried; the bare probe pod is not.
+# rejects pods until it does. The chart's deployment is retried; the bare MinIO pod is not.
 kubectl -n "$NS" wait --for=create serviceaccount/default --timeout=120s
 
 kubectl -n "$NS" create secret generic ca-certs-secret --from-file=ci-test-ca.crt="$WORK/ca.crt"
-kubectl -n "$NS" create secret tls ca-probe-target-tls --cert="$WORK/tls.crt" --key="$WORK/tls.key"
+kubectl -n "$NS" create secret tls minio-tls --cert="$WORK/tls.crt" --key="$WORK/tls.key"
 kubectl -n "$NS" apply -f "$FIXTURE"
+kubectl -n "$NS" wait --for=condition=Ready pod/minio --timeout=120s
+
+# --- A: the agent trusts the CA and starts ---------------------------------------------------
 
 helm install "$RELEASE" "$CHART" -n "$NS" --wait --timeout 300s -f "$VALUES"
-POD=$(kubectl -n "$NS" get pod -l app.kubernetes.io/name=finops-agent --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}')
-[ -n "$POD" ] || fail "no running finops-agent pod"
 
-# --- A: the agent resolves a bundle containing our CA ----------------------------------------
+# Logged only after the emitter's startup write/read/delete round-trip against the bucket has
+# succeeded, so reaching it means a real TLS handshake completed inside the agent.
+agent_logs | grep -q "Successfully created bucket storage" || fail "A: agent never reached the bucket"
 
-agent cat /etc/ssl/certs/ca-certificates.crt > "$WORK/builtin.pem" || fail "A: agent image has no built-in CA bundle; the guard below would be meaningless"
-if grep -qF "$MARKER" "$WORK/builtin.pem"; then
-  fail "A: test CA is already in the image's built-in bundle; this check proves nothing"
-fi
+# A failed handshake panics the agent rather than degrading it, so any restart means the run
+# below would be testing a container that is already broken.
+RESTARTS=$(kubectl -n "$NS" get pod -l app.kubernetes.io/name=finops-agent -o jsonpath='{.items[0].status.containerStatuses[0].restartCount}')
+[ "$RESTARTS" -eq 0 ] || fail "A: agent restarted $RESTARTS time(s) despite being given the CA"
 
-# Go reads SSL_CERT_FILE first and stops there when it is readable, so this is exactly the
-# bundle the agent will use. Unset or unreadable fails the script.
-# shellcheck disable=SC2016  # single quotes are deliberate: expand inside the container
-agent bash -c 'cat "${SSL_CERT_FILE:?not set on the agent container}"' > "$WORK/resolved.pem"
-grep -qF "$MARKER" "$WORK/resolved.pem" || fail "A: custom CA absent from the bundle the agent will read"
+echo "PASS A: the agent completed a TLS handshake against the CA-signed server"
 
-echo "PASS A: agent resolves a bundle holding our CA, which is not baked into the image"
+# --- B: negative control, the agent rejects the same certificate ------------------------------
 
-# --- B: a real handshake against the CA-signed server succeeds --------------------------------
+# Same server, same config, CA withheld. Without this an image that already trusted the CA --
+# or one that skipped verification entirely -- would pass A.
+helm upgrade "$RELEASE" "$CHART" -n "$NS" -f "$VALUES" --set global.updateCaTrust.enabled=false >/dev/null
 
-kubectl -n "$NS" wait --for=condition=Ready pod/ca-probe-target --timeout=120s
-# Read the bundle path off the live agent container rather than hardcoding it, so the probe
-# cannot drift onto a stale path if the chart ever moves the bundle. 
-CERT=$(agent printenv SSL_CERT_FILE)
-RESPONSE=$(kubectl -n "$NS" exec "$POD" -c ca-probe -- env SSL_CERT_FILE="$CERT" curl -sS --fail --max-time 15 "https://$HOST/")
-[ "$RESPONSE" = "finops-ca-probe-ok" ] || fail "B: unexpected response from probe target: $RESPONSE"
+# The crashing pod flaps to Ready between panics, so poll the logs rather than pod status.
+for _ in $(seq 60); do
+  if agent_logs | grep -q "x509: certificate signed by unknown authority"; then break; fi
+  sleep 5
+done
+agent_logs | grep -q "x509: certificate signed by unknown authority" || fail "B: agent did not reject the untrusted certificate"
 
-echo "PASS B: HTTPS handshake against the CA-signed server succeeded using that bundle"
-
-# --- C: negative control, the handshake fails without our CA ----------------------------------
-
-# Same server, from a throwaway pod holding only stock public roots, which cannot have signed a
-# CA generated moments ago.
-RC=0
-kubectl -n "$NS" run ca-negative-control --rm --attach --quiet --restart=Never \
-  --image=nginx:1-alpine --image-pull-policy=IfNotPresent \
-  --command -- curl -sS --fail --max-time 15 "https://$HOST/" || RC=$?
-# 60 is CURLE_PEER_FAILED_VERIFICATION. Assert that exact code rather than "any failure"
-[ "$RC" -eq 60 ] || fail "C: expected curl 60 (certificate verification failed), got $RC"
-
-echo "PASS C: the same handshake fails from a pod without our CA"
+echo "PASS B: the agent rejected the same certificate when the CA was withheld"
 
 cleanup
 echo "All CA-trust checks passed."

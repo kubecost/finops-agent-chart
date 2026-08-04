@@ -4,18 +4,22 @@ global:
   clusterId: ci-ca-trust
   updateCaTrust:
     enabled: true
-    # Created by the workflow before install; the chart never creates it.
+    # Created by run.sh before install; the chart never creates it.
     caCertsSecret: ca-certs-secret
-
-sidecars:
-  # The agent image has no TLS client, so the handshake runs here instead. ubi9-minimal is
-  # already pulled as the init image and ships curl, so this costs no extra pull.
-  # SSL_CERT_FILE is not set here: assertion B reads it off the agent container at run time.
-  - name: ca-probe
-    image: registry.access.redhat.com/ubi9/ubi-minimal:latest
-    imagePullPolicy: IfNotPresent
-    command: ["sleep", "infinity"]
-    volumeMounts:
-      # The same emptyDir the init container writes and the agent reads -- not a copy.
-      - name: ssl-path
-        mountPath: /etc/pki/ca-trust/extracted
+  federatedStorage:
+    # Setting this enables the kubecost emitter, which validates the bucket at startup with a
+    # write/read/delete round-trip and panics if it fails. That makes the agent's own TLS stack
+    # the thing under test.
+    #
+    # endpoint must match NS in run.sh. insecure:false selects HTTPS. Leaving
+    # http_config.tls_config.ca_file unset is load-bearing: an explicit CA file would pin
+    # RootCAs and bypass SSL_CERT_FILE, which is exactly the path this test exists to cover.
+    config: |-
+      type: S3
+      config:
+        bucket: finops-ca-test
+        endpoint: "minio.finops-ca-test.svc.cluster.local:9000"
+        region: us-east-1
+        access_key: minioadmin
+        secret_key: minioadmin
+        insecure: false

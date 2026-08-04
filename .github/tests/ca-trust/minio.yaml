@@ -1,0 +1,67 @@
+# Fixture for the CA-trust end-to-end test (see run.sh). NOT part of the chart.
+# S3 endpoint serving a certificate signed by the test's throwaway CA. The agent's
+# federated-storage client is pointed here, so the agent process performs the handshake itself.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: minio
+  labels:
+    app: minio
+spec:
+  # A top-level directory in the data dir is a bucket, so creating it up front saves pulling a
+  # second image just to run `mc mb`. The agent panics on an absent bucket, same as on a failed
+  # handshake, so the bucket has to exist before the chart is installed.
+  initContainers:
+    - name: create-bucket
+      image: minio/minio:latest
+      command: ["mkdir", "-p", "/data/finops-ca-test"]
+      volumeMounts:
+        - name: data
+          mountPath: /data
+  containers:
+    - name: minio
+      image: minio/minio:latest
+      # MinIO serves TLS when it finds public.crt/private.key in the certs dir; the secret's
+      # tls.crt/tls.key are renamed to those paths below.
+      args: ["server", "/data", "--certs-dir", "/certs"]
+      env:
+        - name: MINIO_ROOT_USER
+          value: minioadmin
+        - name: MINIO_ROOT_PASSWORD
+          value: minioadmin
+      ports:
+        - containerPort: 9000
+      volumeMounts:
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+        - name: data
+          mountPath: /data
+      # Load-bearing: run.sh gates the install on `kubectl wait --for=condition=Ready`.
+      readinessProbe:
+        tcpSocket:
+          port: 9000
+        initialDelaySeconds: 2
+        periodSeconds: 2
+  volumes:
+    - name: certs
+      secret:
+        secretName: minio-tls
+        items:
+          - key: tls.crt
+            path: public.crt
+          - key: tls.key
+            path: private.key
+    - name: data
+      emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+spec:
+  selector:
+    app: minio
+  ports:
+    - port: 9000
+      targetPort: 9000

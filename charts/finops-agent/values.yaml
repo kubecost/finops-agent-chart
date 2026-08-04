@@ -78,9 +78,18 @@ global:
   ## @param global.updateCaTrust.caCertsConfig The name of the ConfigMap containing the CA trust configuration. Only one of caCertsSecret or caCertsConfig can be set.
   ## @param global.updateCaTrust.resources Resources for the init container.
   ## @param global.updateCaTrust.caCertsMountPath The path where the custom CA certificates will be mounted in the init container. Defaults to /etc/pki/ca-trust/source/anchors unless you are sure.
+  ## @param global.updateCaTrust.initImage.registry Registry for the update-ca-trust init container image.
+  ## @param global.updateCaTrust.initImage.repository Repository for the update-ca-trust init container image. Must include the update-ca-trust binary (ubi9-minimal, not ubi9-micro).
+  ## @param global.updateCaTrust.initImage.tag Tag for the update-ca-trust init container image.
+  ## @param global.updateCaTrust.initImage.pullPolicy Pull policy for the update-ca-trust init container image.
   ##
   updateCaTrust:
     enabled: false
+    initImage:
+      registry: registry.access.redhat.com
+      repository: ubi9/ubi-minimal
+      tag: latest
+      pullPolicy: IfNotPresent
     securityContext:
       runAsUser: 0
       runAsGroup: 0

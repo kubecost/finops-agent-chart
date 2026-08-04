@@ -1,0 +1,78 @@
+suite: global.updateCaTrust
+# deployment.yaml computes checksum annotations by including the two secret templates, so all
+# three must be rendered together. Each test then narrows its assertions to the Deployment.
+templates:
+  - deployment.yaml
+  - metrics-configs-secret.yaml
+  - csp-api-key-secret.yaml
+set:
+  global.clusterId: ci
+tests:
+  - it: renders nothing when disabled (the default)
+    template: deployment.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.initContainers
+      - notMatchRegexRaw:
+          pattern: SSL_CERT_FILE
+
+  - it: wires up the init container, the shared bundle, and SSL_CERT_FILE when enabled
+    template: deployment.yaml
+    set:
+      global.updateCaTrust.enabled: true
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].name
+          value: update-ca-trust
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: registry.access.redhat.com/ubi9/ubi-minimal:latest
+      # The agent image is ubi9-micro and has none of the RHEL ca-trust symlinks, so without
+      # this env var the extracted bundle is never read and the custom CA is silently ignored.
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SSL_CERT_FILE
+            value: /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+      - contains:
+          path: spec.template.spec.initContainers[0].volumeMounts
+          content:
+            name: ssl-path
+            mountPath: /etc/pki/ca-trust/extracted
+            readOnly: false
+      - contains:
+          path: spec.template.spec.containers[0].volumeMounts
+          content:
+            name: ssl-path
+            mountPath: /etc/pki/ca-trust/extracted
+            readOnly: false
+
+  - it: honors initImage overrides
+    template: deployment.yaml
+    set:
+      global.updateCaTrust.enabled: true
+      global.updateCaTrust.initImage:
+        registry: example.test
+        repository: my/ubi
+        tag: "9.9"
+        pullPolicy: Always
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: example.test/my/ubi:9.9
+      - equal:
+          path: spec.template.spec.initContainers[0].imagePullPolicy
+          value: Always
+
+  # global.imageRegistry rewrites the Red Hat registry too. Air-gapped users who mirror only the
+  # agent image get a reference they never mirrored. Asserted here so the behavior stays a
+  # deliberate choice rather than a surprise.
+  - it: applies global.imageRegistry to the init image
+    template: deployment.yaml
+    set:
+      global.updateCaTrust.enabled: true
+      global.imageRegistry: my.mirror.io
+    asserts:
+      - equal:
+          path: spec.template.spec.initContainers[0].image
+          value: my.mirror.io/ubi9/ubi-minimal:latest

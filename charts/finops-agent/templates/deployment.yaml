@@ -82,12 +82,8 @@ spec:
         {{- end }}
         {{- if .Values.global.updateCaTrust.enabled }}
         - name: update-ca-trust
-          image: {{ include "finops-agent.image" . }}
-          {{- if .Values.image.pullPolicy }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- else }}
-          imagePullPolicy: Always
-          {{- end }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.global.updateCaTrust.initImage "global" .Values.global) }}
+          imagePullPolicy: {{ .Values.global.updateCaTrust.initImage.pullPolicy }}
           {{- with .Values.global.updateCaTrust.securityContext }}
           securityContext: {{- toYaml . | nindent 12 }}
           {{- end }}
@@ -345,6 +341,12 @@ spec:
             - name: EXTERNAL_NODELABELS_ROUTE
               value: {{ .Values.external.nodeLabels.route | quote }}
             {{- end }}
+            {{- end }}
+            {{- if .Values.global.updateCaTrust.enabled }}
+            # The agent image (ub9-micro) does not have the RHEL ca-trust symlinks, so the extracted
+            # bundle is not found on its own. Point Go and OpenSSL at it directly.
+            - name: SSL_CERT_FILE
+              value: "/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"
             {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" .) | nindent 12 }}

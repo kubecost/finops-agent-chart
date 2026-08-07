@@ -3,7 +3,7 @@ name: Publish Helm Chart
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   publish:
@@ -12,6 +12,13 @@ jobs:
       contents: write
 
     steps:
+      - name: Generate app token
+        id: generate-app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.KC_ACTIONS_BOT_APP_PRIVATE_KEY }}
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -95,7 +102,7 @@ jobs:
 
       - name: Create or Update Release
         env:
-          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
+          GH_TOKEN: ${{ steps.generate-app-token.outputs.token }}
         run: |
           # Check if release exists
           if gh release view "${{ github.ref_name }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then

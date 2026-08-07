@@ -7,7 +7,7 @@ entries:
       licenses: Apache-2.0
     apiVersion: v2
     appVersion: v1.0.25
-    created: "2026-08-07T18:51:37.912166438Z"
+    created: "2026-08-07T18:58:30.785927937Z"
     dependencies:
     - name: common
       repository: oci://registry-1.docker.io/bitnamicharts
@@ -17,7 +17,7 @@ entries:
     description: The IBM FinOps Agent collects usage and cost data from items running
       in the kubernetes cluster. These can then be consumed by Cloudability(TM) and
       Kubecost(TM).
-    digest: c57512a6f228da8b68c59e909592dba28d6bdc6ec54bca6376d43588ad0b71a5
+    digest: 424aa5af0b434f76bade4213cebfdb45b15e3ca939abd159bc9e7513f6c8982c
     home: https://github.com/kubecost/finops-agent-chart
     icon: https://raw.githubusercontent.com/kubecost/finops-agent-chart/767dfe7d3c4c261b754c14be5d14a131ac575acd/resources/ibm_logo_blue.png
     keywords:
@@ -1662,4 +1662,4 @@ entries:
     urls:
     - https://github.com/kubecost/finops-agent-chart/releases/download/v0.0.0-cdp-test/finops-agent-0.0.0-cdp-test.tgz
     version: 0.0.0-cdp-test
-generated: "2026-08-07T18:51:37.909719329Z"
+generated: "2026-08-07T18:58:30.783006178Z"

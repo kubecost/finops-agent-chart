@@ -42,7 +42,7 @@ subjects:
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: ClusterRole
 metadata:
-  name: {{ printf "%s-%s-cluster-role" (include "common.names.fullname" .) .Release.Namespace | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s-cluster-role" (include "common.names.fullname" .) (include "common.names.namespace" .) | trunc 63 | trimSuffix "-" }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
@@ -79,7 +79,7 @@ rules:
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: ClusterRoleBinding
 metadata:
-  name: {{ printf "%s-%s-cluster-rolebinding" (include "common.names.fullname" .) .Release.Namespace | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-%s-cluster-rolebinding" (include "common.names.fullname" .) (include "common.names.namespace" .) | trunc 63 | trimSuffix "-" }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/part-of: finops-agent
     app.kubernetes.io/component: rbac
@@ -87,7 +87,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" (dict "value" $annotations "context" .) | nindent 4 }}
 roleRef:
     kind: ClusterRole
-    name: {{ printf "%s-%s-cluster-role" (include "common.names.fullname" .) .Release.Namespace | trunc 63 | trimSuffix "-" }}
+    name: {{ printf "%s-%s-cluster-role" (include "common.names.fullname" .) (include "common.names.namespace" .) | trunc 63 | trimSuffix "-" }}
     apiGroup: rbac.authorization.k8s.io
 subjects:
   - kind: ServiceAccount

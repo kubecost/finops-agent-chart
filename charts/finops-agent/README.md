@@ -57,7 +57,6 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **JP Region**: HTTPS access to `https://api-jp.cloudability.com`
    - **IN Region**: HTTPS access to `https://api-in.cloudability.com`
    - **CA Region**: HTTPS access to `https://api-ca.cloudability.com`
-   - **ME Region**: HTTPS access to `https://api-me.cloudability.com`
    - **Gov Region**: HTTPS access to `https://api.usgov.cloudability.com`
 
 2. **Frontdoor API Endpoints** (for authentication)
@@ -67,7 +66,6 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **JP Region**: HTTPS access to `https://frontdoor-jp.apptio.com`
    - **IN Region**: HTTPS access to `https://frontdoor-in.apptio.com`
    - **CA Region**: HTTPS access to `https://frontdoor-ca.apptio.com`
-   - **ME Region**: HTTPS access to `https://frontdoor-me.apptio.com`
    - **Gov Region**: HTTPS access to `https://frontdoor-usgov.apptio.com`
 
 3. **S3 Upload Buckets** (for metrics data upload)
@@ -77,7 +75,6 @@ For Cloudability Container Insight deployments, the agent requires the following
    - **JP Region**: `apptio-cake-services-cldyctr-ane1p.s3.ap-northeast-1.amazonaws.com`
    - **IN Region**: `apptio-cake-services-cldyctr-as1p.s3.ap-south-1.amazonaws.com`
    - **CA Region**: `apptio-cake-services-cldyctr-cc1p.s3.ca-central-1.amazonaws.com`
-   - **ME Region**: `apptio-cake-services-cldyctr-mc1p.s3.me-central-1.amazonaws.com`
    - **Gov Region**: `apptio-cake-services-prd-ugw1g.s3.us-gov-west-1.amazonaws.com`
 
    **Note:**

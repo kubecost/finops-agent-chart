@@ -13,14 +13,15 @@ spec:
   # handshake, so the bucket has to exist before the chart is installed.
   initContainers:
     - name: create-bucket
-      image: us-central1-docker.pkg.dev/guestbook-227502/dev-artifacts/minio:RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+      # RELEASE.2025-09-07T16-13-09Z = public.ecr.aws/c4c5x7w3/utils/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+      image: public.ecr.aws/c4c5x7w3/utils/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
       command: ["mkdir", "-p", "/data/finops-ca-test"]
       volumeMounts:
         - name: data
           mountPath: /data
   containers:
     - name: minio
-      image: us-central1-docker.pkg.dev/guestbook-227502/dev-artifacts/minio:RELEASE.2025-09-07T16-13-09Z@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+      image: public.ecr.aws/c4c5x7w3/utils/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
       # MinIO serves TLS when it finds public.crt/private.key in the certs dir; the secret's
       # tls.crt/tls.key are renamed to those paths below.
       args: ["server", "/data", "--certs-dir", "/certs"]

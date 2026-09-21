@@ -13,14 +13,14 @@ spec:
   # handshake, so the bucket has to exist before the chart is installed.
   initContainers:
     - name: create-bucket
-      image: minio/minio:latest
+      image: quay.io/minio/minio:latest
       command: ["mkdir", "-p", "/data/finops-ca-test"]
       volumeMounts:
         - name: data
           mountPath: /data
   containers:
     - name: minio
-      image: minio/minio:latest
+      image: quay.io/minio/minio:latest
       # MinIO serves TLS when it finds public.crt/private.key in the certs dir; the secret's
       # tls.crt/tls.key are renamed to those paths below.
       args: ["server", "/data", "--certs-dir", "/certs"]

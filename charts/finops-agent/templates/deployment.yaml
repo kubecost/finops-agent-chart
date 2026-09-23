@@ -153,6 +153,10 @@ spec:
             - name: COLLECTOR_RESOLUTION_1D_RETENTION
               value: {{ .retention1d | quote }}
             {{- end }}
+            - name: EMIT_POD_ANNOTATIONS_METRIC
+              value: {{ .emitPodAnnotations | quote }}
+            - name: EMIT_NAMESPACE_ANNOTATIONS_METRIC
+              value: {{ .emitNamespaceAnnotations | quote }}
             {{- end }}
             {{- end }}
             {{- if and .Values.agent.exports.resolution10m .Values.agent.collectorDataSource.retention10m }}

@@ -14,13 +14,13 @@ jobs:
     steps:
       - name: Generate app token
         id: generate-app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3.2.0
         with:
           app-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.KC_ACTIONS_BOT_APP_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           ref: "main"
@@ -31,7 +31,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@v5.0.1
         with:
           version: v3.12.0
 
@@ -69,7 +69,7 @@ jobs:
           git push origin main
 
       - name: Checkout gh-pages
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           ref: gh-pages
           path: gh-pages
@@ -120,7 +120,7 @@ jobs:
           fi
 
       - name: Notify Release
-        uses: slackapi/slack-github-action@v3
+        uses: slackapi/slack-github-action@v4.0.0
         with:
           webhook-type: webhook-trigger
           payload: |

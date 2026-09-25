@@ -154,9 +154,9 @@ spec:
               value: {{ .retention1d | quote }}
             {{- end }}
             - name: EMIT_POD_ANNOTATIONS_METRIC
-              value: {{ .emitPodAnnotations | quote }}
+              value: {{ .collectPodAnnotations | quote }}
             - name: EMIT_NAMESPACE_ANNOTATIONS_METRIC
-              value: {{ .emitNamespaceAnnotations | quote }}
+              value: {{ .collectNamespaceAnnotations | quote }}
             {{- end }}
             {{- end }}
             {{- if and .Values.agent.exports.resolution10m .Values.agent.collectorDataSource.retention10m }}

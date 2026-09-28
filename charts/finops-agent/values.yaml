@@ -175,8 +175,8 @@ logLevel: "info"
 ## @param agent.collectorDataSource.retention10m The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.
 ## @param agent.collectorDataSource.retention1h The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.
 ## @param agent.collectorDataSource.retention1d The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.
-## @param agent.collectorDataSource.emitPodAnnotations Collect pod annotations. Every distinct annotation key becomes a label on the collected metric for every pod, so enabling this on a large cluster can significantly increase memory usage.
-## @param agent.collectorDataSource.emitNamespaceAnnotations Collect namespace annotations.
+## @param agent.collectorDataSource.collectPodAnnotations Collect pod annotations. Every distinct annotation key becomes a label on the collected metric for every pod, so enabling this on a large cluster can significantly increase memory usage.
+## @param agent.collectorDataSource.collectNamespaceAnnotations Collect namespace annotations.
 ## @param agent.exports.resolution10m Enable/disable exports of 10m resolution data.
 ## @param agent.exports.heartbeat Enable/disable heartbeat exports.
 ## @param agent.exports.diagnostics Enable/disable diagnostics exports.
@@ -227,8 +227,8 @@ agent:
     retention10m: 6
     retention1h: 3
     retention1d: 2
-    emitPodAnnotations: false
-    emitNamespaceAnnotations: false
+    collectPodAnnotations: false
+    collectNamespaceAnnotations: false
   exports:
     resolution10m: true
     heartbeat: true

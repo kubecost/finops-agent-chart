@@ -185,6 +185,26 @@ Local data can persisted using PVC(s), to survive restarts until uploaded to buc
 
 A default `StorageClass` is needed in the Kubernetes cluster to dynamically provision the volumes. Specify another StorageClass in the `persistence.storageClass` or set `persistence.existingClaim` if you have already existing persistent volumes to use.
 
+### When to enable persistence
+
+Without persistence, the agent keeps samples and pending uploads in an `emptyDir` volume. An `emptyDir` survives container restarts, including restarts by the liveness probe, but is lost when the pod is deleted or rescheduled. Samples that have not been uploaded yet are lost with it, leaving a gap in the data. This happens when:
+
+- the node is drained, upgraded, preempted or removed (for example spot or preemptible nodes, or cluster autoscaling);
+- the pod is evicted;
+- the chart is upgraded or the deployment is restarted.
+
+With persistence enabled, pending samples and uploads survive these events too. On startup the agent recovers them and sends them on the next upload cycle. Data older than the recovery period (48 hours by default) is discarded on startup. Agent versions up to and including v1.0.26 discard all pending uploads on startup, so persistence only preserves data with later versions.
+
+Consider these trade-offs before enabling it:
+
+- **Zonal volumes.** Most cloud block storage (for example GKE persistent disks and AWS EBS) is tied to one zone. The agent pod can then only be scheduled in that zone, so if no node is available there, the pod stays `Pending` until one is.
+- **Update strategy.** Keep `updateStrategy.type` set to `Recreate` (the default). With `RollingUpdate`, a new pod on a different node cannot attach a `ReadWriteOnce` volume while the old pod still holds it.
+- **Storage class.** Installs fail on clusters without a default `StorageClass` unless `persistence.storageClass` or `persistence.existingClaim` is set.
+
+### Automatic restart of a stuck agent
+
+The liveness probe (`livenessProbe.enabled`, on by default) calls the agent's `/healthz` endpoint. The endpoint reports unhealthy, and Kubernetes restarts the container, when the agent has made no progress for three upload cycles (30 minutes). That includes node-stats collection and, in agent versions after v1.0.26, the Cloudability upload loop. Failed uploads do not count as a lack of progress, so an unreachable upload destination does not cause restarts. Keep the liveness probe enabled unless you replace it with `customLivenessProbe`.
+
 ## Parameters
 
 ### Global parameters

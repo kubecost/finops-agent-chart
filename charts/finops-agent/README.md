@@ -181,7 +181,7 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 
 ## Persistence
 
-Local data can persisted using PVC(s), to survive restarts until uploaded to bucket storage. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
+Pending Cloudability uploads can be persisted using a PVC, so they survive restarts until uploaded. No Kubecost data is stored locally. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
 
 A default `StorageClass` is needed in the Kubernetes cluster to dynamically provision the volumes. Specify another StorageClass in the `persistence.storageClass` or set `persistence.existingClaim` if you have already existing persistent volumes to use.
 
@@ -379,7 +379,7 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 
 | Name                                              | Description                                                                                                                                                                | Value               |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `persistence.enabled`                             | Enable FinOps Agent data persistence for WAL and other local data                                                                                                          | `false`              |
+| `persistence.enabled`                             | Enable FinOps Agent data persistence for pending Cloudability uploads                                                                                                      | `false`              |
 | `persistence.existingClaim`                       | A manually managed Persistent Volume and Claim                                                                                                                             | `""`                |
 | `persistence.storageClass`                        | PVC Storage Class for the FinOps Agent data volume                                                                                                                         | `""`                |
 | `persistence.accessModes`                         | Persistent Volume Access Modes                                                                                                                                             | `["ReadWriteOnce"]` |

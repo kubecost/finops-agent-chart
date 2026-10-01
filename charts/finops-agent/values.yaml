@@ -657,7 +657,7 @@ metrics:
 ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 ##
 persistence:
-  ## @param persistence.enabled Enable FinOps Agent data persistence for WAL and other local data
+  ## @param persistence.enabled Enable FinOps Agent data persistence for pending Kubecost/Cloudability uploads
   ##
   enabled: false
   ## @param persistence.existingClaim A manually managed Persistent Volume and Claim

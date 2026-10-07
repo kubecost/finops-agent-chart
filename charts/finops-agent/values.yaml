@@ -149,7 +149,7 @@ useHelmHooks: true
 image:
   registry: icr.io
   repository: ibm-finops/agent
-  tag: v1.0.29
+  tag: v1.0.30
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.
@@ -243,7 +243,7 @@ agent:
     emissionInterval: 1m
     exportLegacyDataModels: true
     exportKubeModel: true
-    forceKubeModelV1: true
+    forceKubeModelV1: false
   nodes:
     backgroundStatsCollector: true
     concurrentPollers: ""

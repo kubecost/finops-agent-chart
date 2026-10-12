@@ -721,6 +721,21 @@ rbac:
   clusterRole:
     create: true
     allowKubeProxy: true
+## Pod Disruption Budget for the IBM FinOps Agent Deployment
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+## The agent always runs a single replica. minAvailable: 1 or maxUnavailable: 0
+## blocks voluntary evictions, so node drains wait until the PDB is relaxed.
+## Values are an integer or a percentage string. Digit-only strings are not
+## coerced and are rejected by the API server. Use --set, not --set-string.
+## "enabled" must be a real boolean. The string "false" counts as true.
+## @param podDisruptionBudget.enabled Create a PodDisruptionBudget for the FinOps Agent Deployment
+## @param podDisruptionBudget.minAvailable Minimum pods that must stay available (integer or percentage string). Mutually exclusive with maxUnavailable
+## @param podDisruptionBudget.maxUnavailable Maximum pods that may be unavailable (integer or percentage string). Mutually exclusive. Defaults to 1 if neither is set
+##
+podDisruptionBudget:
+  enabled: false
+  minAvailable: ""
+  maxUnavailable: ""
 extraObjects: []
 # - apiVersion: external-secrets.io/v1
 #   kind: ExternalSecret

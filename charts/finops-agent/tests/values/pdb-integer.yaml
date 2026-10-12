@@ -1,0 +1,6 @@
+# Fixture for the "accepts an integer from a values entry (float64)" test in
+# ../podDisruptionBudget_test.yaml. A `values:` entry is the only way to get a
+# float64 integer in helm-unittest (`set:` yields int64).
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

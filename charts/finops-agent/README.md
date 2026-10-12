@@ -179,6 +179,23 @@ This chart allows you to set your custom affinity using the `affinity` parameter
 
 As an alternative, you can use of the preset configurations for pod affinity, pod anti-affinity, and node affinity available at the [bitnami/common](https://github.com/bitnami/charts/tree/main/bitnami/common#affinities) chart. To do so, set the `podAffinityPreset`, `podAntiAffinityPreset`, or `nodeAffinityPreset` parameters.
 
+### Pod Disruption Budget
+
+The chart can optionally create a `policy/v1` PodDisruptionBudget for the FinOps Agent Deployment. It is disabled by default. Enable it with `podDisruptionBudget.enabled=true`:
+
+```yaml
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1
+```
+
+- `podDisruptionBudget.minAvailable` and `podDisruptionBudget.maxUnavailable` are mutually exclusive. Setting both while the PodDisruptionBudget is enabled makes rendering fail.
+- If neither is set, `maxUnavailable: 1` is applied.
+- Each value is either an integer (for example `1`) or a percentage string (for example `"50%"`). `0` is a valid value and is not replaced by the default.
+- The chart does not coerce or validate these values. A digit-only string (for example from `--set-string podDisruptionBudget.minAvailable=1`) is rendered as a string and rejected by the Kubernetes API server. Use `--set` for integers.
+- `podDisruptionBudget.enabled` must be a real boolean. Like the other `enabled` flags in this chart it uses plain truthiness, so `--set-string podDisruptionBudget.enabled=false` enables the PodDisruptionBudget.
+- The FinOps Agent always runs a single replica. `maxUnavailable: 1` (the default) still allows a node drain to evict the only pod. `minAvailable: 1` or `maxUnavailable: 0` blocks voluntary evictions, so node drains wait until the PodDisruptionBudget is removed or relaxed.
+
 ## Persistence
 
 Pending Cloudability uploads can be persisted using a PVC, so they survive restarts until uploaded. No Kubecost data is stored locally. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
@@ -401,6 +418,9 @@ A default `StorageClass` is needed in the Kubernetes cluster to dynamically prov
 | `rbac.clusterRole.create`                     | Whether to create & use ClusterRole resources or not                                                                                              | `true`  |
 | `rbac.clusterRole.allowKubeProxy`                    | Controls if the clusterRole has the permission to use nodes/proxy.                                                                               | `true`                                           |
 | `localStoreEnabled`                           | this values is only used by the Kubecost main chart, it must be set to false for the FinOps Agent to work when deployed by the FinOps Agent chart | `false` |
+| `podDisruptionBudget.enabled`                 | Create a PodDisruptionBudget for the FinOps Agent Deployment                                                                                      | `false` |
+| `podDisruptionBudget.minAvailable`            | Minimum pods that must stay available (integer or percentage string). Mutually exclusive with maxUnavailable                                      | `""`    |
+| `podDisruptionBudget.maxUnavailable`          | Maximum pods that may be unavailable (integer or percentage string). Mutually exclusive. Defaults to 1 if neither is set                          | `""`    |
 | `extraObjects`                                | Additional custom objects to deploy with the chart                                                                                                | `[]`    |
 
 ## License

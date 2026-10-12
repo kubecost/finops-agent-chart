@@ -1,0 +1,5 @@
+global:
+  clusterId: chart-testing
+podDisruptionBudget:
+  enabled: true
+  minAvailable: "50%"

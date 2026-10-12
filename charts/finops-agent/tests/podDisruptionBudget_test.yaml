@@ -1,0 +1,326 @@
+suite: podDisruptionBudget
+# deployment.yaml computes checksum annotations by including the two secret templates, so all
+# of them must be rendered together. Each test then narrows its assertions with `template:`.
+templates:
+  - pdb.yaml
+  - deployment.yaml
+  - metrics-configs-secret.yaml
+  - csp-api-key-secret.yaml
+release:
+  name: pdb-test
+set:
+  global.clusterId: ci
+tests:
+  - it: renders nothing by default
+    template: pdb.yaml
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders nothing when disabled even if minAvailable is set
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: false
+      podDisruptionBudget.minAvailable: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders nothing and does not fail when disabled with both fields set
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: false
+      podDisruptionBudget.minAvailable: 1
+      podDisruptionBudget.maxUnavailable: 1
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: renders nothing when the whole block is null
+    template: pdb.yaml
+    set:
+      podDisruptionBudget: null
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: defaults to maxUnavailable 1 when enabled with neither field set
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+    asserts:
+      - hasDocuments:
+          count: 1
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - notExists:
+          path: spec.minAvailable
+
+  - it: renders minAvailable as an integer
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: 1
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 1
+      - notExists:
+          path: spec.maxUnavailable
+
+  - it: renders maxUnavailable as an integer
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.maxUnavailable: 2
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 2
+      - notExists:
+          path: spec.minAvailable
+
+  - it: renders percentage strings for minAvailable
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: "50%"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "50%"
+      - notExists:
+          path: spec.maxUnavailable
+
+  - it: renders percentage strings for maxUnavailable
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.maxUnavailable: "50%"
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: "50%"
+      - notExists:
+          path: spec.minAvailable
+
+  - it: treats 0 as set for minAvailable
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: 0
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 0
+      - notExists:
+          path: spec.maxUnavailable
+
+  - it: treats 0 as set for maxUnavailable
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.maxUnavailable: 0
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 0
+      - notExists:
+          path: spec.minAvailable
+
+  - it: accepts an integer from a values entry (float64)
+    template: pdb.yaml
+    values:
+      - values/pdb-integer.yaml
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: 1
+
+  - it: does not coerce digit-only strings
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: "1"
+    asserts:
+      - equal:
+          path: spec.minAvailable
+          value: "1"
+
+  - it: fails when both minAvailable and maxUnavailable are set
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: 1
+      podDisruptionBudget.maxUnavailable: 1
+    asserts:
+      - failedTemplate:
+          errorPattern: only one of them
+
+  - it: renders the expected kind, name, namespace and labels
+    template: pdb.yaml
+    release:
+      name: pdb-test
+      namespace: pdb-ns
+    set:
+      podDisruptionBudget.enabled: true
+    asserts:
+      - isKind:
+          of: PodDisruptionBudget
+      - equal:
+          path: apiVersion
+          value: policy/v1
+      - equal:
+          path: metadata.name
+          value: pdb-test-finops-agent
+      - equal:
+          path: metadata.namespace
+          value: pdb-ns
+      - equal:
+          path: metadata.labels["app.kubernetes.io/name"]
+          value: finops-agent
+      - equal:
+          path: metadata.labels["app.kubernetes.io/instance"]
+          value: pdb-test
+      - equal:
+          path: metadata.labels["app.kubernetes.io/part-of"]
+          value: finops-agent
+      - equal:
+          path: metadata.labels["app.kubernetes.io/component"]
+          value: agent
+      - notExists:
+          path: metadata.annotations
+
+  - it: carries through commonLabels, commonAnnotations and name overrides
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      commonLabels:
+        team: finops
+      commonAnnotations:
+        owner: platform
+      fullnameOverride: my-full
+      namespaceOverride: my-ns
+    asserts:
+      - equal:
+          path: metadata.name
+          value: my-full
+      - equal:
+          path: metadata.namespace
+          value: my-ns
+      - equal:
+          path: metadata.labels.team
+          value: finops
+      - equal:
+          path: metadata.annotations.owner
+          value: platform
+
+  # Selector parity. helm-unittest cannot compare two documents in one assertion, so the PDB and
+  # the Deployment are each checked against the same literal map, written from the known inputs
+  # (chart name, release name and the labels set below), not copied from the template output.
+  - it: PDB selector matches the expected labels (podLabels and commonLabels)
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podLabels:
+        pod-label: a
+        app.kubernetes.io/instance: custom-instance
+      commonLabels:
+        common-label: b
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value: &selectorLabels
+            app.kubernetes.io/name: finops-agent
+            app.kubernetes.io/instance: custom-instance
+            app.kubernetes.io/part-of: finops-agent
+            app.kubernetes.io/component: agent
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: finops-agent
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: custom-instance
+      # The selector helper only honours name and instance overrides, not arbitrary labels.
+      - notExists:
+          path: spec.selector.matchLabels["pod-label"]
+
+  - it: Deployment selector and pod labels match the same labels (podLabels and commonLabels)
+    template: deployment.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podLabels:
+        pod-label: a
+        app.kubernetes.io/instance: custom-instance
+      commonLabels:
+        common-label: b
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value: *selectorLabels
+      - isSubset:
+          path: spec.template.metadata.labels
+          content: *selectorLabels
+
+  - it: PDB selector matches the expected labels (nameOverride)
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      nameOverride: custom-name
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value: &selectorLabelsOverride
+            app.kubernetes.io/name: custom-name
+            app.kubernetes.io/instance: pdb-test
+            app.kubernetes.io/part-of: finops-agent
+            app.kubernetes.io/component: agent
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/name"]
+          value: custom-name
+      - equal:
+          path: spec.selector.matchLabels["app.kubernetes.io/instance"]
+          value: pdb-test
+      - equal:
+          path: metadata.name
+          value: pdb-test-custom-name
+
+  - it: Deployment selector and pod labels match the same labels (nameOverride)
+    template: deployment.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      nameOverride: custom-name
+    asserts:
+      - equal:
+          path: spec.selector.matchLabels
+          value: *selectorLabelsOverride
+      - isSubset:
+          path: spec.template.metadata.labels
+          content: *selectorLabelsOverride
+
+  - it: defaults to maxUnavailable 1 when both fields are null
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: null
+      podDisruptionBudget.maxUnavailable: null
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 1
+      - notExists:
+          path: spec.minAvailable
+
+  - it: does not count a null field as set in the mutual-exclusion check
+    template: pdb.yaml
+    set:
+      podDisruptionBudget.enabled: true
+      podDisruptionBudget.minAvailable: null
+      podDisruptionBudget.maxUnavailable: 2
+    asserts:
+      - equal:
+          path: spec.maxUnavailable
+          value: 2
+      - notExists:
+          path: spec.minAvailable

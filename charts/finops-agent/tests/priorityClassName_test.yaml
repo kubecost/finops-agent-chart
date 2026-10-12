@@ -1,0 +1,36 @@
+suite: priorityClassName
+# deployment.yaml computes checksum annotations by including the two secret templates, so all
+# three must be rendered together. Each test then narrows its assertions to the Deployment.
+templates:
+  - deployment.yaml
+  - metrics-configs-secret.yaml
+  - csp-api-key-secret.yaml
+set:
+  global.clusterId: ci
+tests:
+  - it: renders no priorityClassName when unset (the default)
+    template: deployment.yaml
+    asserts:
+      - notExists:
+          path: spec.template.spec.priorityClassName
+      - notMatchRegexRaw:
+          pattern: priorityClassName
+
+  - it: renders no priorityClassName when null
+    template: deployment.yaml
+    set:
+      priorityClassName: null
+    asserts:
+      - notExists:
+          path: spec.template.spec.priorityClassName
+      - notMatchRegexRaw:
+          pattern: priorityClassName
+
+  - it: renders priorityClassName in the pod spec when set
+    template: deployment.yaml
+    set:
+      priorityClassName: system-cluster-critical
+    asserts:
+      - equal:
+          path: spec.template.spec.priorityClassName
+          value: system-cluster-critical

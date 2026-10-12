@@ -515,7 +515,8 @@ updateStrategy:
   ## Can be set to RollingUpdate or Recreate
   ##
   type: Recreate
-## @param priorityClassName FinOps Agent pods' priorityClassName
+## @param priorityClassName Optional. Name of an existing PriorityClass for the FinOps Agent pod. Leave empty to omit the field.
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
 ##
 priorityClassName: ""
 ## @param revisionHistoryLimit FinOps Agent deployment revision history limit

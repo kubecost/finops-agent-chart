@@ -210,6 +210,16 @@ spec:
             - name: DIAGNOSTICS_EXPORT_INTERVAL
               value: {{ .Values.agent.exportIntervals.diagnostics | quote }}
             {{- end }}
+            {{- with .Values.agent.storageRetention }}
+            - name: HEARTBEAT_STORAGE_RETENTION
+              value: {{ .heartbeat | quote }}
+            - name: DIAGNOSTICS_STORAGE_RETENTION
+              value: {{ .diagnostics | quote }}
+            {{- end }}
+            {{- if .Values.agent.storageCleanupInterval }}
+            - name: STORAGE_CLEANUP_INTERVAL
+              value: {{ .Values.agent.storageCleanupInterval | quote }}
+            {{- end }}
 
             {{- if .Values.agent.cloudability.enabled }}
             - name: CLOUDABILITY_CLUSTER_NAME

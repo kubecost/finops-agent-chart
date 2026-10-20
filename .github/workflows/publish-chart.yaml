@@ -14,13 +14,13 @@ jobs:
     steps:
       - name: Generate app token
         id: generate-app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
+          client-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.KC_ACTIONS_BOT_APP_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           ref: "main"
@@ -31,7 +31,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v3.12.0
 
@@ -69,7 +69,7 @@ jobs:
           git push origin main
 
       - name: Checkout gh-pages
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: gh-pages
           path: gh-pages
@@ -120,7 +120,7 @@ jobs:
           fi
 
       - name: Notify Release
-        uses: slackapi/slack-github-action@v3
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
           webhook-type: webhook-trigger
           payload: |

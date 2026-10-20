@@ -1,0 +1,23 @@
+.github/workflows/helm-validation.yaml
+  s_17fdf0bfd274f4::t_fcc85e2a851b1d 98-100
+  s_17fdf0bfd274f4::t_85b9050c359e89 118-121,123-130
+  s_17fdf0bfd274f4::t_8d96968c0b2967 122
+.github/tests/ca-trust/run.sh
+  s_17fdf0bfd274f4::t_75545921cf4073 52-58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6acc79db0c0ee471e4c1efd9bb4531805e145bea",
+  "prompts": {},
+  "sessions": {
+    "s_17fdf0bfd274f4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c6c72278-0c3c-4fe0-901a-ca25f29368eb",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "jesse goodier <31039225+jessegoodier@users.noreply.github.com>"
+    }
+  }
+}

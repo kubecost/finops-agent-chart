@@ -1,0 +1,24 @@
+.github/workflows/publish-chart.yaml
+  s_a1064192d485a8::t_fe2bca7077aa53 19
+  s_a1064192d485a8::t_a249a0e43a380a 17,23,34,72,123
+.github/dependabot.yml
+  s_a1064192d485a8::t_9a335a9d1454a5 1-25
+.github/workflows/helm-validation.yaml
+  s_a1064192d485a8::t_88f16ae6966b58 19,24,28,34,54,78,81,102,105,113,129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7f2b36c8e2ce60de729c6fd9966ca4aaebee5de0",
+  "prompts": {},
+  "sessions": {
+    "s_a1064192d485a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d0b9c797-007c-4d06-bb5b-8229635b7a9f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "jesse goodier <31039225+jessegoodier@users.noreply.github.com>"
+    }
+  }
+}

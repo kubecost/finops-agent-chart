@@ -1,0 +1,19 @@
+.github/workflows/publish-chart.yaml
+  s_a1064192d485a8::t_1a27ae7269b2c1 133-402
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1b29d9c42ad79040c077154543627b5516673cfe",
+  "prompts": {},
+  "sessions": {
+    "s_a1064192d485a8": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d0b9c797-007c-4d06-bb5b-8229635b7a9f",
+        "model": "claude-sonnet-5-5"
+      },
+      "human_author": "jesse goodier <31039225+jessegoodier@users.noreply.github.com>"
+    }
+  }
+}

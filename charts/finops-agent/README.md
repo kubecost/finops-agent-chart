@@ -181,7 +181,7 @@ As an alternative, you can use of the preset configurations for pod affinity, po
 
 ## Persistence
 
-Local data can persisted using PVC(s), to survive restarts until uploaded to bucket storage. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
+Pending Cloudability uploads can be persisted using a PVC, so they survive restarts until uploaded. No Kubecost data is stored locally. It is not enabled by default. You can enable it by setting the `persistence.enabled` parameter to `true`.
 
 A default `StorageClass` is needed in the Kubernetes cluster to dynamically provision the volumes. Specify another StorageClass in the `persistence.storageClass` or set `persistence.existingClaim` if you have already existing persistent volumes to use.
 
@@ -265,8 +265,8 @@ The liveness probe (`livenessProbe.enabled`, on by default) calls the agent's `/
 | `agent.collectorDataSource.retention10m`             | The number of 10m samples to retain for querying. The default of 6 captures 1h of historical data at 10m resolution.                                                                       | `6`                                            |
 | `agent.collectorDataSource.retention1h`              | The number of 1h samples to retain for querying. The default of 3 captures 3h of historical data at 1h resolution.                                                                         | `3`                                            |
 | `agent.collectorDataSource.retention1d`              | The number of 1d samples to retain for querying. The default of 2 captures 2d of historical data at 1d resolution.                                                                         | `2`                                            |
-| `agent.collectorDataSource.emitPodAnnotations`       | Collect pod annotations. Every distinct annotation key becomes a label on the collected metric for every pod, so enabling this on a large cluster can significantly increase memory usage. | `false`                                        |
-| `agent.collectorDataSource.emitNamespaceAnnotations` | Collect namespace annotations.                                                                                                                                                             | `false`                                        |
+| `agent.collectorDataSource.collectPodAnnotations`    | Collect pod annotations. Every distinct annotation key becomes a label on the collected metric for every pod, so enabling this on a large cluster can significantly increase memory usage. | `false`                                        |
+| `agent.collectorDataSource.collectNamespaceAnnotations` | Collect namespace annotations.                                                                                                                                                             | `false`                                        |
 | `agent.exporter.emissionInterval`                    | A duration string of how often the core agent exporter will emit new data snapshots to the enabled emitters.                                                                               | `1m`                                           |
 | `agent.nodes.concurrentPollers`                      | The number of concurrent node pollers used when collecting node stats. When empty, the agent's built-in default is used.                                                                   | `""`                                           |
 | `command`                                            | Override default container command (useful when using custom images)                                                                                                                       | `[]`                                           |
@@ -399,7 +399,7 @@ The liveness probe (`livenessProbe.enabled`, on by default) calls the agent's `/
 
 | Name                                              | Description                                                                                                                                                                | Value               |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `persistence.enabled`                             | Enable FinOps Agent data persistence for WAL and other local data                                                                                                          | `false`              |
+| `persistence.enabled`                             | Enable FinOps Agent data persistence for pending Cloudability uploads                                                                                                      | `false`              |
 | `persistence.existingClaim`                       | A manually managed Persistent Volume and Claim                                                                                                                             | `""`                |
 | `persistence.storageClass`                        | PVC Storage Class for the FinOps Agent data volume                                                                                                                         | `""`                |
 | `persistence.accessModes`                         | Persistent Volume Access Modes                                                                                                                                             | `["ReadWriteOnce"]` |

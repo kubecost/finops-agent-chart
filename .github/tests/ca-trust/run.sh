@@ -49,6 +49,13 @@ kubectl create ns "$NS"
 # rejects pods until it does. The chart's deployment is retried; the bare MinIO pod is not.
 kubectl -n "$NS" wait --for=create serviceaccount/default --timeout=120s
 
+# Anonymous public.ecr.aws pulls hit rate limits in CI; CI passes a token to avoid that.
+if [ -n "${ECR_PUBLIC_PASSWORD:-}" ]; then
+  kubectl -n "$NS" create secret docker-registry ecr-public \
+    --docker-server=public.ecr.aws --docker-username=AWS --docker-password="$ECR_PUBLIC_PASSWORD"
+  kubectl -n "$NS" patch serviceaccount default -p '{"imagePullSecrets":[{"name":"ecr-public"}]}'
+fi
+
 kubectl -n "$NS" create secret generic ca-certs-secret --from-file=ci-test-ca.crt="$WORK/ca.crt"
 kubectl -n "$NS" create secret tls minio-tls --cert="$WORK/tls.crt" --key="$WORK/tls.key"
 kubectl -n "$NS" apply -f "$FIXTURE"

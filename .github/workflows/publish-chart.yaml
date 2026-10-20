@@ -14,13 +14,13 @@ jobs:
     steps:
       - name: Generate app token
         id: generate-app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
-          app-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
+          client-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
           private-key: ${{ secrets.KC_ACTIONS_BOT_APP_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           ref: "main"
@@ -31,7 +31,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
       - name: Install Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v3.12.0
 
@@ -69,7 +69,7 @@ jobs:
           git push origin main
 
       - name: Checkout gh-pages
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: gh-pages
           path: gh-pages
@@ -120,7 +120,7 @@ jobs:
           fi
 
       - name: Notify Release
-        uses: slackapi/slack-github-action@v3
+        uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
         with:
           webhook-type: webhook-trigger
           payload: |
@@ -130,3 +130,273 @@ jobs:
               "message": "Released version ${{ github.ref_name }} of the finops-agent-chart"
             }
           webhook: ${{ secrets.SLACK_WEBHOOK_FINOPS_CHART_RELEASE }}
+
+  # Opens a PR against kubecost/kubecost that bumps the finops-agent subchart to
+  # the version just published. Prerelease tags (v1.2.3-rc1) are skipped.
+  update-parent-chart:
+    needs: publish
+    if: ${{ !contains(github.ref_name, '-') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      PARENT_REPO: kubecost/kubecost
+      PARENT_BRANCH: develop
+      PARENT_CHART_DIR: kubecost
+      DEP_NAME: finops-agent
+      DEP_ALIAS: finopsagent
+      HELM_REPO_NAME: finops-agent-chart
+      HELM_REPO_URL: https://kubecost.github.io/finops-agent-chart
+    steps:
+      - name: Compute chart version
+        run: echo "CHART_VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
+      # The token from the publish job is scoped to this repo only.
+      - name: Generate app token scoped to the parent chart repo
+        id: parent-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.KC_ACTIONS_BOT_APP_CLIENT_ID }}
+          private-key: ${{ secrets.KC_ACTIONS_BOT_APP_PRIVATE_KEY }}
+          owner: kubecost
+          repositories: kubecost
+
+      - name: Check out the parent chart repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ env.PARENT_REPO }}
+          ref: ${{ env.PARENT_BRANCH }}
+          path: parent
+          token: ${{ steps.parent-token.outputs.token }}
+          persist-credentials: true
+
+      - name: Install Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+
+      # GitHub Pages deploys asynchronously after the publish job pushes
+      # index.yaml, so wait for the new version to resolve.
+      - name: Wait for the chart to appear in the Helm index
+        run: |
+          set -euo pipefail
+          helm repo add "$HELM_REPO_NAME" "$HELM_REPO_URL"
+          for attempt in $(seq 1 30); do
+            helm repo update "$HELM_REPO_NAME" > /dev/null 2>&1 || true
+            if helm search repo "${HELM_REPO_NAME}/${DEP_NAME}" \
+                 --version "$CHART_VERSION" --output json \
+               | jq -e --arg v "$CHART_VERSION" 'any(.[]; .version == $v)' > /dev/null; then
+              echo "${DEP_NAME} ${CHART_VERSION} is published in ${HELM_REPO_URL}."
+              exit 0
+            fi
+            echo "Attempt ${attempt}/30: ${DEP_NAME} ${CHART_VERSION} not in the index yet; retrying in 20s."
+            sleep 20
+          done
+          echo "::error::${DEP_NAME} ${CHART_VERSION} never appeared in ${HELM_REPO_URL} (waited 10 minutes)."
+          exit 1
+
+      - name: Pin the new subchart version and regenerate Chart.lock
+        id: bump
+        working-directory: parent
+        run: |
+          set -euo pipefail
+          CHART_FILE="${PARENT_CHART_DIR}/Chart.yaml"
+
+          CURRENT_RAW=$(yq -r \
+            ".dependencies[] | select(.name == \"${DEP_NAME}\") | .version // \"\"" \
+            "$CHART_FILE")
+          if [ -z "$CURRENT_RAW" ]; then
+            echo "::error::${PARENT_REPO} ${CHART_FILE} has no ${DEP_NAME} dependency to bump."
+            exit 1
+          fi
+
+          # The parent pins with a leading "v" (e.g. "v1.0.28"); the published
+          # chart version has none. Compare without it and keep the parent's style.
+          CURRENT="${CURRENT_RAW#v}"
+          PREFIX=""
+          if [ "$CURRENT" != "$CURRENT_RAW" ]; then PREFIX="v"; fi
+
+          echo "Current pinned version: ${CURRENT_RAW}"
+          echo "Released version:       ${CHART_VERSION}"
+
+          if [ "$CURRENT" = "$CHART_VERSION" ]; then
+            echo "Parent chart already pins ${CHART_VERSION}; nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "$(printf '%s\n%s\n' "$CURRENT" "$CHART_VERSION" | sort -V | tail -1)" = "$CURRENT" ]; then
+            echo "::notice::${PARENT_REPO}@${PARENT_BRANCH} pins ${CURRENT}, newer than ${CHART_VERSION}; not downgrading."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Rewrite only the version line of this dependency. `yq -i` would
+          # reformat the whole document, which fails the parent's yamllint.
+          awk -v dep="$DEP_NAME" -v newVersion="${PREFIX}${CHART_VERSION}" '
+            $0 ~ "^[[:space:]]*-[[:space:]]+name:[[:space:]]*" dep "[[:space:]]*$" { found = 1 }
+            found && $0 ~ /^[[:space:]]*version:/ {
+              match($0, /^[[:space:]]*/)
+              printf "%sversion: \"%s\"\n", substr($0, 1, RLENGTH), newVersion
+              found = 0
+              next
+            }
+            { print }
+          ' "$CHART_FILE" > "${CHART_FILE}.tmp"
+          mv "${CHART_FILE}.tmp" "$CHART_FILE"
+
+          APPLIED=$(yq -r \
+            ".dependencies[] | select(.name == \"${DEP_NAME}\") | .version // \"\"" \
+            "$CHART_FILE")
+          if [ "$APPLIED" != "${PREFIX}${CHART_VERSION}" ]; then
+            echo "::error::Failed to pin ${DEP_NAME} to ${PREFIX}${CHART_VERSION} (Chart.yaml still reads '${APPLIED}')."
+            exit 1
+          fi
+
+          NUMSTAT=$(git diff --numstat -- "$CHART_FILE" | awk '{print $1"/"$2}')
+          if [ "$NUMSTAT" != "1/1" ]; then
+            echo "::error::Expected exactly one changed line in ${CHART_FILE}, got added/removed = ${NUMSTAT}."
+            git diff -- "$CHART_FILE"
+            exit 1
+          fi
+
+          # Regenerate Chart.lock; every repo the parent declares must be added.
+          helm repo add mcp-kubecost https://kubecost.github.io/mcp-kubecost
+          helm repo update > /dev/null
+          helm dependency update "$PARENT_CHART_DIR"
+
+          # Only the bumped dependency (plus digest/generated) may change in the lock.
+          LOCK_CHANGED=$(git diff -U0 -- "${PARENT_CHART_DIR}/Chart.lock" \
+            | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
+            | grep -vE '^[+-](digest|generated):' || true)
+          EXPECTED=$(printf -- '-  version: %s\n+  version: %s' "$CURRENT" "$CHART_VERSION")
+          if [ "$LOCK_CHANGED" != "$EXPECTED" ]; then
+            echo "::error::Unexpected Chart.lock changes:"
+            git diff -- "${PARENT_CHART_DIR}/Chart.lock"
+            exit 1
+          fi
+
+          echo "previous=${CURRENT}" >> "$GITHUB_OUTPUT"
+          echo "changed=true"        >> "$GITHUB_OUTPUT"
+
+      # Never open a PR that would break the parent chart.
+      - name: Verify the parent chart still renders with the subchart enabled
+        if: steps.bump.outputs.changed == 'true'
+        working-directory: parent
+        run: |
+          set -euo pipefail
+          helm lint "$PARENT_CHART_DIR" --skip-schema-validation --set "${DEP_ALIAS}.enabled=true"
+          helm template kubecost "$PARENT_CHART_DIR" \
+            --skip-schema-validation \
+            --set "${DEP_ALIAS}.enabled=true" \
+            --set 'global.platforms.cicd.enabled=true' \
+            --set 'global.platforms.cicd.skipSanityChecks=true' \
+            > /tmp/parent-render.yaml
+          grep -q "helm.sh/chart: ${DEP_ALIAS}-${CHART_VERSION}" /tmp/parent-render.yaml
+          echo "Parent chart renders ${DEP_NAME} ${CHART_VERSION}."
+
+      - name: Diff values.yaml between versions
+        if: steps.bump.outputs.changed == 'true'
+        id: values-diff
+        env:
+          PREVIOUS_VERSION: ${{ steps.bump.outputs.previous }}
+        run: |
+          set -euo pipefail
+          DIR=/tmp/values-diff
+          mkdir -p "$DIR/prev" "$DIR/new"
+
+          for v in prev:"$PREVIOUS_VERSION" new:"$CHART_VERSION"; do
+            helm pull "${HELM_REPO_NAME}/${DEP_NAME}" --version "${v#*:}" \
+              --untar --untardir "$DIR/${v%%:*}"
+          done
+
+          DIFF=$(diff -u \
+            --label "values.yaml (${PREVIOUS_VERSION})" \
+            --label "values.yaml (${CHART_VERSION})" \
+            "$DIR/prev/${DEP_NAME}/values.yaml" \
+            "$DIR/new/${DEP_NAME}/values.yaml" || true)
+
+          {
+            echo "values_diff_body<<VALUES_DIFF_EOF"
+            if [ -z "$DIFF" ]; then
+              echo "No changes to \`values.yaml\` between \`${PREVIOUS_VERSION}\` and \`${CHART_VERSION}\`."
+            else
+              printf '```diff\n%s\n```\n' "$DIFF"
+            fi
+            echo "VALUES_DIFF_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Commit, push, and open the pull request
+        if: steps.bump.outputs.changed == 'true'
+        working-directory: parent
+        env:
+          GH_TOKEN: ${{ steps.parent-token.outputs.token }}
+          PREVIOUS_VERSION: ${{ steps.bump.outputs.previous }}
+          VALUES_DIFF_BODY: ${{ steps.values-diff.outputs.values_diff_body }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          BRANCH_PREFIX="automation/${DEP_NAME}-${CHART_VERSION}"
+
+          # An open PR for this version means the bump was already proposed.
+          EXISTING=$(gh pr list --state open --json number,headRefName \
+            --jq "[.[] | select(.headRefName | startswith(\"${BRANCH_PREFIX}\"))][0].number // \"\"")
+          if [ -n "$EXISTING" ]; then
+            echo "PR #${EXISTING} already proposes ${DEP_NAME} ${CHART_VERSION}; skipping."
+            exit 0
+          fi
+
+          BRANCH="$BRANCH_PREFIX"
+          if git ls-remote --exit-code --heads origin "$BRANCH" > /dev/null 2>&1; then
+            BRANCH="${BRANCH_PREFIX}-${GITHUB_RUN_ID}"
+            echo "${BRANCH_PREFIX} already exists on the remote; using ${BRANCH}."
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@noreply.example.com"
+
+          git switch -c "$BRANCH"
+          git add "${PARENT_CHART_DIR}/Chart.yaml" "${PARENT_CHART_DIR}/Chart.lock"
+          git commit -m "chore(deps): bump ${DEP_NAME} subchart to ${CHART_VERSION}"
+          git push --set-upstream origin "$BRANCH"
+
+          BODY_FILE="$(mktemp)"
+          cat > "$BODY_FILE" <<EOF
+          ## Summary
+
+          Bumps the \`${DEP_NAME}\` subchart dependency from \`${PREVIOUS_VERSION}\` to \`${CHART_VERSION}\`.
+
+          Opened automatically by the [finops-agent-chart release workflow](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}).
+
+          Please review the below finops-agent helm values.yaml changes and update the \`${DEP_ALIAS}:\` values of this chart as needed.
+          Note: not all keys from the subchart need to be included in this parent chart.
+
+          ## \`values.yaml\` diff (${PREVIOUS_VERSION} → ${CHART_VERSION})
+
+          ${VALUES_DIFF_BODY}
+
+          ## Changes
+
+          - \`${PARENT_CHART_DIR}/Chart.yaml\`: \`dependencies[${DEP_NAME}].version\` -> \`${CHART_VERSION}\`
+          - \`${PARENT_CHART_DIR}/Chart.lock\`: regenerated with \`helm dependency update\`
+
+          ## Validation performed by the release workflow
+
+          - \`helm dependency update ${PARENT_CHART_DIR}\`
+          - \`helm lint ${PARENT_CHART_DIR} --skip-schema-validation --set '${DEP_ALIAS}.enabled=true'\`
+          - \`helm template kubecost ${PARENT_CHART_DIR}\` with \`${DEP_ALIAS}.enabled=true\` renders chart \`${DEP_ALIAS}-${CHART_VERSION}\`
+
+          ## Notes
+
+          - Release notes: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${RELEASE_TAG}
+          EOF
+
+          gh pr create \
+            --base "$PARENT_BRANCH" \
+            --head "$BRANCH" \
+            --title "chore(deps): bump ${DEP_NAME} subchart to ${CHART_VERSION}" \
+            --body-file "$BODY_FILE" \
+            --label dependencies
+
+          {
+            echo "### Parent chart PR"
+            gh pr view "$BRANCH" --json url --jq .url
+          } >> "$GITHUB_STEP_SUMMARY"

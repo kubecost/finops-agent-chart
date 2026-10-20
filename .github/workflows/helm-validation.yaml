@@ -95,6 +95,9 @@ jobs:
   # The checks and their known limitation are documented in the script itself.
   ca-trust-e2e:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # OIDC for the ECR Public pull role
     env:
       NS: finops-ca-test
     steps:
@@ -111,6 +114,19 @@ jobs:
 
       - name: Create kind cluster
         uses: helm/kind-action@1544676c07bb3570fcb70166beaa07c4528fd4aa # v1.15.1
+
+      # Anonymous pulls from public.ecr.aws are rate limited and fail the MinIO fixture.
+      - name: Configure AWS credentials for ECR Public
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ECR_PUBLIC_ROLE }}
+          aws-region: us-east-1
+
+      - name: Get ECR Public token
+        run: |
+          token=$(aws ecr-public get-login-password --region us-east-1)
+          echo "::add-mask::$token"
+          echo "ECR_PUBLIC_PASSWORD=$token" >> "$GITHUB_ENV"
 
       - name: Verify custom CA trust end to end
         run: .github/tests/ca-trust/run.sh

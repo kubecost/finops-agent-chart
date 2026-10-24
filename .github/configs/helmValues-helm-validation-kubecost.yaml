@@ -41,7 +41,7 @@ extraObjects:
             value: "1"
           - name: RESOLUTION_1D_RETENTION
             value: "1"
-          image: gcr.io/kubecost1/cost-model-nightly:latest
+          image: icr.io/kubecost/cost-model-nightly:latest
           imagePullPolicy: Always
           ports:
           - containerPort: 9006

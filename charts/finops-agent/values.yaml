@@ -149,7 +149,7 @@ useHelmHooks: true
 image:
   registry: icr.io
   repository: ibm-finops/agent
-  tag: v1.0.30
+  tag: v1.0.33
   digest: ""
   pullPolicy: IfNotPresent
   ## Optionally specify an array of imagePullSecrets.

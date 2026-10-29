@@ -192,6 +192,7 @@ Without persistence, the agent keeps samples and pending uploads in an `emptyDir
 - the node is drained, upgraded, preempted or removed (for example spot or preemptible nodes, or cluster autoscaling);
 - the pod is evicted;
 - the chart is upgraded or the deployment is restarted.
+- an IAM user/secret is disabled and needs to be updated. In this case, all data since the last upload will be lost unless the pod is backed up prior to replacing the IAM key (and then restoring the backup).
 
 With persistence enabled, pending samples and uploads survive these events too. On startup the agent recovers them and sends them on the next upload cycle. Data older than the recovery period (48 hours by default) is discarded on startup. Agent versions up to and including v1.0.26 discard all pending uploads on startup, so persistence only preserves data with later versions.
 

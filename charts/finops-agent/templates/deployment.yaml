@@ -240,6 +240,10 @@ spec:
             - name: CLOUDABILITY_EMISSION_INTERVAL
               value: {{ .Values.agent.cloudability.emissionInterval | quote }}
             {{- end }}
+            {{- if .Values.agent.cloudability.uploadFrequency }}
+            - name: CLOUDABILITY_UPLOAD_FREQUENCY
+              value: {{ .Values.agent.cloudability.uploadFrequency | quote }}
+            {{- end }}
             {{- if .Values.agent.cloudability.outboundProxy }}
             - name: CLOUDABILITY_OUTBOUND_PROXY
               value: {{ .Values.agent.cloudability.outboundProxy | quote }}
